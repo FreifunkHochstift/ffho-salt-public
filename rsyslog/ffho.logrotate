@@ -1,0 +1,18 @@
+/var/log/bird.log
+/var/log/dhcp.log
+/var/log/fastd.log
+/var/log/named.log
+/var/log/net.log
+/var/log/openvpn.log
+{
+        rotate 7
+        daily
+        missingok
+        notifempty
+        delaycompress
+        compress
+        postrotate
+                invoke-rc.d rsyslog rotate > /dev/null
+        endscript
+}
+

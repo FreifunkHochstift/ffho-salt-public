@@ -1,0 +1,4 @@
+nagios  ALL=NOPASSWD:/usr/local/share/nagios/plugins/check_gw_mesh
+nagios  ALL=NOPASSWD:/usr/local/share/nagios/plugins/check_gw_mesh_comm
+nagios  ALL=NOPASSWD:/usr/local/share/nagios/plugins/check_bat0_health
+nagios  ALL=NOPASSWD:/usr/local/share/nagios/plugins/check_rouge_gw

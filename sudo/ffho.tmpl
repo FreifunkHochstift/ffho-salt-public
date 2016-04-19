@@ -1,0 +1,8 @@
+{%- import "globals.sls" as globals with context %}
+
+{% for role in globals.ROLES %}
+  {%- set file = "sudo/roles/" + role %}
+  {%- include file ignore missing %}
+{% endfor %}
+
+{%- include "sudo/hosts/" + grains['id'] ignore missing %}

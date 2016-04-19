@@ -1,0 +1,4 @@
+set nowrap
+set ai
+syn on
+color delek

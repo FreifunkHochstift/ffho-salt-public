@@ -1,0 +1,17 @@
+#
+# /root/.screenrc (Salt managed)
+#
+
+nethack			on
+autodetach		on
+crlf			off
+deflogin		off
+hardcopy_append		off
+startup_message		off
+vbell			off
+defscrollback		10000
+silencewait		15
+hardstatus		alwayslastline " %H (%l) | %d.%m %c | %w"
+sorendition		02 10
+
+bind P paste          .
