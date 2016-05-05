@@ -49,48 +49,7 @@ if [ "X${IFACE}" = "X" ]; then
 	echo noSuchName
 else
 	if_alias=""
-
-	# Try to figure out current Linux distribution to guess network configuration file
-	distro=""
-	if [ -x /usr/bin/distro ]; then
-		distro=$(distro | cut -d " " -f 1)
-	elif which lsb_release >/dev/null 2>/dev/null; then
-		distro="$(lsb_release -a 2>/dev/null | awk -F: '/^Distributor ID/ { print $2 }' | tr -d '[[:space:]]')"
-	fi
-
-	if [ "${distro}" ]; then
-		case "${distro}" in
-			Debian)
-				cnf="/etc/network/interfaces"
-				# TODO: Support /etc/network/interfaces.d/
-				;;
-
-			Gentoo)
-				cnf="/etc/conf.d/net"
-				;;
-
-			CentOS|RedHat|SuSE|Mandriva|Mandrake)
-				cnf="/etc/sysconfig/network-scripts/ifcfg-$IFACE"
-				;;
-
-			Archlinux)
-				cnf="/etc/conf.d/net-conf-$IFACE"
-				;;
-
-			*)
-				cnf=""
-				;;
-		esac
-	fi
-
-	if [ -n "$cnf" ]; then
-		if_alias=$(grep -i "^# $IFACE:" "${cnf}" | sed "s/^# $IFACE: //i")
-	fi
-
-	if [ ! "${if_alias}" -a -f "${ALIASES_FILE}" ]; then
-		if_alias=$(grep -i "^$IFACE:" "${ALIASES_FILE}" | sed -e "s/^$IFACE:[[:space:]]*//")
-	fi
-
+	# Generic magic removed.
 
 	# FFHO local
 	case "${IFACE}" in
