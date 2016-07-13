@@ -1,0 +1,1 @@
+3 */6 * * * root apt-get update > /dev/null 2>&1

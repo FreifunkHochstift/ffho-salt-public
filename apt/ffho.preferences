@@ -1,0 +1,3 @@
+Package: *
+Pin: origin repo.universe-factory.net
+Pin-Priority: 900
