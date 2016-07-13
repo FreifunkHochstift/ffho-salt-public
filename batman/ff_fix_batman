@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Thu 07 Jul 2016 03:28:44 PM CEST
+#
+# Make sure that the correct B.A.T.M.A.N version is installed on this machine,
+# reconfigure batman interfaces and restart services depending on batman (alfred
+# and fastd). Beware that this restarts ALL fastd instances. As we are only using
+# fastd for batman'ish things currently, that's fine.
+#
+
+batman_version_wanted="2013.4.0"
+
+# Bail on error
+set -e
+
+only_fix_module=false
+if [ "$1" = "--only-fix-module" ]; then
+	only_fix_module=true
+fi
+export only_fix_module
+
+batman_version_installed=$(modinfo batman-adv | awk -F: '/^version:/ { print $2 }' | tr -d '[:space:]')
+my_name="ff_fix_batman"
+logfile="/var/log/ff_fix_batman-$(date +%Y.%m.%d-%H:%M).log"
+
+if [ "${batman_version_wanted}" = "${batman_version_installed}" ]; then
+	msg="Version ${batman_version_wanted} of batman-adv already installed."
+	echo ${msg}
+	logger -t "${my_name}" "${msg}"
+	exit 0
+fi
+
+msg="Version ${batman_version_wanted} of batman-adv wanted, but ${batman_version_installed} found. Fixing, see ${logfile} for details."
+echo "${msg}"
+logger -t "${my_name}" "${msg}"
+
+(
+
+# Be safe and shutdown all batman interfaces before removing the module
+for iface in $(ip l | awk -F: '/^[0-9]/ { print $2 }' | tr -d ' ' | grep ^bat); do
+	ifdown "${iface}"
+done
+
+if lsmod | grep batman-adv; then
+	rmmod batman-adv
+fi
+
+dkms remove  "batman-adv/${batman_version_wanted}" --all || true
+dkms install "batman-adv/${batman_version_wanted}" --force
+
+# Load the newly compiled B.A.T.M.A.N. module
+modprobe batman-adv
+
+if [ ! "${only_fix_module}" ]; then
+	# Configure all B.A.T.M.A.N. broken before
+	ifup -a
+	
+	# Restart fastd, if installed
+	if dpkg -l fastd >/dev/null 2>/dev/null; then
+		service fastd restart
+	fi
+	
+	# Restart alfred, if installed
+	if dpkg -l alfred >/dev/null 2>/dev/null; then
+		service alfred restart
+	fi
+fi
+
+) >>"${logfile}" 2>>"${logfile}"

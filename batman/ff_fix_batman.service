@@ -1,0 +1,14 @@
+[Unit]
+Description=Fix B.A.T.M.A.N. Kernel module version
+ConditionFileIsExecutable=/usr/local/sbin/ff_fix_batman
+Before=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/sbin/ff_fix_batman --only-fix-module
+TimeoutSec=0
+RemainAfterExit=yes
+SysVStartPriority=99
+
+[Install]
+WantedBy=multi-user.target
