@@ -5,15 +5,15 @@
 include:
   - sysctl
 
-/etc/sysctl.d/21-ip_forward.conf:
-  file.managed:
-    - source: salt://sysctl/ip_forward.conf
-    - watch_in:
-      - cmd: reload-sysctl
-
 /etc/sysctl.d/20-arp_caches.conf:
   file.managed:
     - source: salt://sysctl/arp_caches.conf
+    - watch_in:
+      - cmd: reload-sysctl
+
+/etc/sysctl.d/21-ip_forward.conf:
+  file.managed:
+    - source: salt://sysctl/ip_forward.conf
     - watch_in:
       - cmd: reload-sysctl
 
