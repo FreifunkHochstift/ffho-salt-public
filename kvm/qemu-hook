@@ -1,0 +1,70 @@
+#!/bin/sh -e
+#
+# Libvirt qemu hook to magically connect VM bridge interfaces to desired untagged Vlan
+#
+#  IF
+#   * the VM interface if configured to be connected to a bridge,
+#   * the bridge is configured to be vlan aware (vlan_filtering = 1)
+#   * the VM interface name ends with _vXXXX with XXXX being a one to four
+#     digit number
+#  the interface will be configured as an untagged port connected to vlan XXXX.
+#
+#  See <man bridge> for more details about vlan aware bridges.
+#
+# Maximilian Wilhelm <max@sdn.clinic>
+#  -- Wed, 31 Aug 2016 20:48:02 +0200
+
+my_name="qemu-magic"
+
+# We only care for the "started" event.
+if [ "$2" != 'started' ]; then
+	exit 0
+fi
+
+if ! which xmlstarlet >/dev/null 2>/dev/null; then
+	logger -t "${my_name}" "ERROR: xmlstarlet not found. Dying of shame."
+	echo "${my_name}: ERROR: xmlstarlet not found. Dying of shame." >&2
+	exit 1
+fi
+
+xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", source/@bridge)'  --nl | while read iface bridge; do
+	if [ ! -d "/sys/class/net/${bridge}/bridge" ]; then
+		logger -t "${my_name}" "Bridge \"${bridge}\" for iface \"${iface}\" doesn't exist or isn't a bridge."
+		exit 2
+	fi
+
+	# If this kernel does not support vlan-aware bridges there's nothing to be done here.
+	if [ ! -f "/sys/class/net/${bridge}/bridge/vlan_filtering" ]; then
+		continue
+	fi
+
+	# If this bridge isn't configured to be vlan-aware, there's nothing to be done here either.
+	vlan_filtering=$(cat "/sys/class/net/${bridge}/bridge/vlan_filtering")
+	if [ "${vlan_filtering}" = 0 ]; then
+		continue
+	fi
+
+	# If the interface is named *_vXXXX, with X being a 1-4 digit number
+	# we assume that this is iface should be connected to Vlan XXXX with
+	# an untagged port.
+	vlan_id=$(echo ${iface} | grep -o '_v[0-9]\{1,4\}$' | cut -c3-)
+	if [ "${vlan_id}" ]; then
+		# Remove association with vlan 1 and add association with
+		# vlan $vlan_id with packages being sent out untagged and
+		# untagged ingress packets get tagged accordingly.
+		bridge vlan del vid 1 dev "${iface}"
+		bridge vlan add vid "${vlan_id}" dev "${iface}" pvid untagged
+		logger -t "${my_name}" "Configured untagged pvid ${vlan_id} for ${iface} in bridge ${bridge}."
+
+
+	# If the interface doesn't suggest an untagged Vlan association go
+	# for an /etc/network/interface entry which we try to get up and
+	# running with ifup. Proceed with fingers crossed.
+	else
+		if ifup $iface; then
+			logger -t qemu-magic "ifup'ed ${iface}."
+		else
+			logger -t qemu-magic "ifup ${iface} FAILED."
+		fi
+	fi
+done
