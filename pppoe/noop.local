@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# FFHO ip*.local replacement script (Salt managed)
+#
+# Using this NO-OP script intentionally PREVENTS ALL OTHER ip-$flavour.d/ scripts
+# from being called. We don't want that stuff.
+
+exit 0
