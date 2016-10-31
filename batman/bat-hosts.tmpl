@@ -1,0 +1,10 @@
+#
+# /etc/bat-hosts (Salt generated)
+#
+{%- set sites     = salt['pillar.get']('sites', {}) %}
+{%- set nodes     = salt['pillar.get']('nodes', {}) %}
+{%- set bat_hosts = salt['ffho_net.gen_bat_hosts'](nodes, sites) %}
+{%- for mac in bat_hosts|sort %}
+  {%- set entry_name = bat_hosts.get (mac) %}
+{{ mac }}	{{ entry_name }}
+{%- endfor %}

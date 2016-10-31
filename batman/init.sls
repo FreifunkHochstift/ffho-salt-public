@@ -21,6 +21,13 @@ batctl:
       - pkgrepo: apt-neoraider
 
 
+# Conveniance bat-hosts file for informative batctl output
+/etc/bat-hosts:
+  file.managed:
+    - source: salt://batman/bat-hosts.tmpl
+    - template: jinja
+
+
 # The ff_fix_batman script ensures that the preferred (currently older) version
 # of the batman_adv kernel module is compiled via DKMS and installed into the
 # system.
@@ -89,5 +96,8 @@ disable-ff-fix-batman-service:
   file.absent
 
 /etc/modules-load.d/batman-adv.conf:
+  file.absent
+
+/etc/bat-hosts:
   file.absent
 {% endif %}
