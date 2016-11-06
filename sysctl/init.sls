@@ -1,7 +1,7 @@
 #
 # sysctl
 #
-{%- set roles = salt['pillar.get']('roles', []) %}
+{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
 
 # Define command to reload sysctl settings here without dependencies
 # and define inverse dependencies where useful (see sysctl.conf)
@@ -25,10 +25,17 @@ reload-sysctl:
       - cmd: reload-sysctl
 
 
-{%- if router in roles %}
-/etc/sysctl.d/global.conf:
+{%- if 'router' in roles %}
+/etc/sysctl.d/router.conf:
   file.managed:
     - source: salt://sysctl/router.conf
     - watch_in:
       - cmd: reload-sysctl
 {%- endif %}
+
+
+{# Remove old files #}
+{% for file in ['20-arp_caches.conf', '21-ip_forward.conf', '22-kernel.conf', 'NAT.conf', 'nf-ignore-bridge.conf'] %}
+/etc/sysctl.d/{{ file }}:
+  file.absent
+{% endfor %}
