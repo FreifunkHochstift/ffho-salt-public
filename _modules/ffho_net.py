@@ -34,27 +34,32 @@ def _get_site_no (sites_config, site_name):
 #
 #  nn:nn	is the decimal representation of the network the interface is connected to, with
 #    00:00	being the dummy interface
-#    00:01	being an inter-gw-vpn interface
-#    00:04	being an nodes fastd tunnel interface of IPv4 transport
-#    00:06	being an nodes fastd tunnel interface of IPv6 transport
+#    00:0f	being the VEth internal side interface
+#    00:e0	being an external instance dummy interface
+#    00:e1	being an inter-gw-vpn interface
+#    00:e4	being an nodes fastd tunnel interface of IPv4 transport
+#    00:e6	being an nodes fastd tunnel interface of IPv6 transport
+#    00:ef	being an extenral instance VEth interface side
 #    02:xx	being a connection to local Vlan 2xx
-#    07:xx	being a VXLAN tunnel for site ss, with xx being a consecutive number
 #    1b:24	being the ibss 2.4GHz bssid
 #    1b:05	being the ibss 5GHz bssid
 #    ff:ff	being the gluon next-node interface
+#    xx:xx	being a VXLAN tunnel for site ss, with xx being a the underlay VLAN ID (1xyz, 2xyz)
 def gen_batman_iface_mac (site_no, device_no, network):
 	net_type_map = {
-		'dummy'   : 0,
-		'intergw' : 1,
-		'nodes4'  : 4,
-		'nodes6'  : 6,
+		'dummy'   : "00:00",
+		'int2ext' : "00:0f",
+		'dummy-e' : "00:e0",
+		'intergw' : "00:e1",
+		'nodes4'  : "00:e4",
+		'nodes6'  : "00:e6",
+		'ext2int' : "00:ef",
 	}
 
 	# Well-known network type?
 	if network in net_type_map:
-		network = net_type_map[network]
-
-	if type (network) == int:
+		last = net_type_map[network]
+	elif type (network) == int:
 		last = re.sub (r'(\d{2})(\d{2})', '\g<1>:\g<2>', "%04d" % network)
 	else:
 		last = "ee:ee"
@@ -209,31 +214,108 @@ def _update_vlan_config (config):
 # (list of) site(s) specified in the node config.
 def _generate_batman_interface_config (node_config, ifaces, sites_config):
 	# No role 'batman', nothing to do
-	if 'batman' not in node_config.get ('roles', []):
+	roles = node_config.get ('roles', [])
+	if 'batman' not in roles:
 		return
+
+	# Should there be a 2nd external BATMAN instance?
+	batman_ext = 'batman_ext' in roles or 'bras' in roles
 
 	device_no = node_config.get ('id', -1)
 
 	for site in node_config.get ('sites', []):
-		bat_site_if = "bat-%s" % site
-		dummy_site_if = "dummy-%s" % site
 		site_no = _get_site_no (sites_config, site)
 
-		# Create bat-<site> interface config
-		if bat_site_if not in ifaces:
-			ifaces[bat_site_if] = {
+		# Predefine interface names for regular/external BATMAN instance
+		# and possible VEth link pair for connecting both instances.
+		bat_site_if = "bat-%s" % site
+		dummy_site_if = "dummy-%s" % site
+		bat_site_if_ext = "bat-%s-ext" % site
+		dummy_site_if_ext = "dummy-%s-e" % site
+		int2ext_site_if = "i2e-%s" % site
+		ext2int_site_if = "e2i-%s" % site
+
+		site_ifaces = {
+			# Regular BATMAN interface, always present
+			bat_site_if : {
 				'type' : 'batman',
+				# int2ext_site_if will be added automagically if requred
 				'batman-ifaces' : [ dummy_site_if ],
 				'batman-ifaces-ignore-regex': '.*_.*',
-			}
+			},
 
-		# Create dummy-<site> interfaces config to ensure bat-<site> can
-		# be successfully configured (read: comes up)
-		if not dummy_site_if in ifaces:
-			ifaces[dummy_site_if] = {
+			# Dummy interface always present in regular BATMAN instance
+			dummy_site_if : {
 				'link-type' : 'dummy',
-				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'dummy')
-			}
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'dummy'),
+			},
+
+			# Optional 2nd "external" BATMAN instance
+			bat_site_if_ext : {
+				'type' : 'batman',
+				'batman-ifaces' : [ dummy_site_if_ext, ext2int_site_if ],
+				'batman-ifaces-ignore-regex': '.*_.*',
+				'ext_only' : True,
+			},
+
+			# Optional dummy interface always present in 2nd "external" BATMAN instance
+			dummy_site_if_ext : {
+				'link-type' : 'dummy',
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'dummy-e'),
+				'ext_only' : True,
+			},
+
+			# Optional VEth interface pair - internal side
+			int2ext_site_if : {
+				'link-type' : 'veth',
+				'veth-peer' : ext2int_site_if,
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'int2ext'),
+				'ext_only' : True,
+			},
+
+			# Optional VEth interface pair - "external" side
+			ext2int_site_if : {
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'ext2int'),
+				'ext_only' : True,
+			},
+		}
+
+
+		for iface, iface_config_tmpl in site_ifaces.items ():
+			# Ignore any interface only relevant when role batman_ext is set
+			# but it isn't
+			if not batman_ext and iface_config_tmpl.get ('ext_only', False):
+				continue
+
+			# Remove ext_only key so we don't leak it into ifaces dict
+			if 'ext_only' in iface_config_tmpl:
+				del iface_config_tmpl['ext_only']
+
+			# If there is no trace of the desired iface config yet...
+			if iface not in ifaces:
+				# ... just place our template there.
+				ifaces[iface] = iface_config_tmpl
+
+				# If there should be an 2nd external BATMAN instance make sure
+				# the internal side of the VEth iface pair is connected to the
+				# internal BATMAN instance.
+				if batman_ext and iface == bat_site_if:
+					iface_config_tmpl['batman-ifaces'].append (int2ext_site_if)
+
+			# If there already is an interface configuration try to enhance it with
+			# meaningful values from our template and force correct hwaddress to be
+			# used.
+			else:
+				iface_config = ifaces[iface]
+
+				# Force hwaddress to be what we expect.
+				if 'hwaddress' in iface_config_tmpl:
+					ifaces_config['hwaddress'] = iface_config_tmpl['hwaddress']
+
+				# Copy every attribute of the config template missing in iface config
+				for attr in iface_config_tmpl:
+					if attr not in iface_config:
+						iface_config[attr] = iface_config_tmpl[attr]
 
 
 	# Make sure there is a bridge present for every site where a mesh_breakout
@@ -533,8 +615,12 @@ def gen_bat_hosts (nodes_config, sites_config):
 				continue
 
 			entry_name = node_name
-			if not iface.startswith ('dummy-'):
-				entry_name += "/%s" % re.sub (r'^(vx_.*)_(.*)$', '\g<1>', iface)
+			match = re.search (r'^dummy-([^-]+)(-e)?$', iface)
+			if match and match.group (2):
+				entry_name += "-e"
+			else:
+				entry_name += "/%s" % re.sub (r'^(vx_.*|gw2e|e2gw)_(.*)$', '\g<1>', iface)
+
 
 			bat_hosts[hwaddress] = entry_name
 
