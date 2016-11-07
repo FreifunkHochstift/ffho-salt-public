@@ -464,9 +464,8 @@ def _generate_ffrl_gre_tunnels (ifaces):
 				pass
 
 
-def get_interface_config (nodes_config, node_id, sites_config):
+def get_interface_config (node_config, sites_config):
 	# Get config of this node and dict of all configured ifaces
-	node_config = nodes_config.get (node_id, {})
 	ifaces = node_config.get ('ifaces', {})
 
 	# Generate configuration entries for any batman related interfaces not
@@ -525,7 +524,7 @@ def gen_bat_hosts (nodes_config, sites_config):
 		node_config = nodes_config.get (node_id)
 		node_name = node_id.split ('.')[0]
 
-		ifaces = get_interface_config (nodes_config, node_id, sites_config)
+		ifaces = get_interface_config (node_config, sites_config)
 		for iface in sorted (ifaces):
 			iface_config = ifaces.get (iface)
 
