@@ -548,3 +548,45 @@ def gen_bat_hosts (nodes_config, sites_config):
 					bat_hosts[hwaddress] = "%s/%s" % (node_name, network)
 
 	return bat_hosts
+
+
+# Generate eBGP session parameters for FFRL Transit from nodes pillar information.
+def get_ffrl_bgp_config (ifaces, proto):
+	from ipcalc import IP
+
+	_generate_ffrl_gre_tunnels (ifaces)
+
+	sessions = {}
+
+	for iface in sorted (ifaces):
+		# We only care for GRE tunnels to the FFRL Backbone
+		if not iface.startswith ('gre_ffrl_'):
+			continue
+
+		iface_config = ifaces.get (iface)
+
+		# Search for IPv4/IPv6 prefix as defined by proto parameter
+		local = None
+		neighbor = None
+		for prefix in iface_config.get ('prefixes', []):
+			if (proto == 'v4' and '.' in prefix) or (proto == 'v6' and ':' in prefix):
+				local = prefix.split ('/')[0]
+
+				# Calculate neighbor IP as <local IP> - 1
+				if proto == 'v4':
+					neighbor = str (IP (int (IP (local)) - 1, version = 4))
+				else:
+					neighbor = str (IP (int (IP (local)) - 1, version = 6))
+
+				break
+
+		# Strip gre_ prefix iface name and use it as identifier for the eBGP session.
+		name = re.sub ('gre_ffrl_', 'ffrl_', iface)
+
+		sessions[name] = {
+			'local' : local,
+			'neighbor' : neighbor,
+			'bgp_local_pref' : iface_config.get ('bgp_local_pref', None),
+		}
+
+	return sessions
