@@ -25,13 +25,16 @@ reload-sysctl:
       - cmd: reload-sysctl
 
 
-{%- if 'router' in roles %}
+{% if 'router' in roles %}
 /etc/sysctl.d/router.conf:
   file.managed:
     - source: salt://sysctl/router.conf
     - watch_in:
       - cmd: reload-sysctl
-{%- endif %}
+{% else %}
+/etc/sysctl.d/router.conf:
+  file.absent
+{% endif %}
 
 
 {# Remove old files #}
