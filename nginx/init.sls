@@ -2,11 +2,11 @@
 # Nginx
 #
 
-{% set nginx-pkg = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:pkg', 'nginx') %}
+{% set nginx_pkg = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:pkg', 'nginx') %}
 
 nginx:
   pkg.installed:
-    - name: {{nginx-pkg}}
+    - name: {{nginx_pkg}}
 {% if grains['oscodename'] == 'jessie' %}
     - fromrepo: jessie-backports
 {% endif %}
