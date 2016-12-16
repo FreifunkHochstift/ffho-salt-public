@@ -701,3 +701,47 @@ def get_ffrl_bgp_config (ifaces, proto):
 		}
 
 	return sessions
+
+
+# Get list of IP address configured on given interface on given node.
+#
+# @param: node_config	Pillar node configuration (as dict)
+# @param: iface_name	Name of the interface defined in pillar node config
+# 			OR name of VRF ("vrf_<something>") whichs ifaces are
+#			to be examined.
+def get_node_iface_ips (node_config, iface_name):
+	ips = {
+		'v4' : [],
+		'v6' : [],
+	}
+
+
+	ifaces = node_config.get ('ifaces', {})
+	ifaces_names = [ iface_name ]
+
+	if iface_name.startswith ('vrf_'):
+		# Reset list of ifaces_names to consider
+		ifaces_names = []
+		vrf = iface_name
+
+		for iface, iface_config in ifaces.items ():
+			# Ignore any iface NOT in the given VRF
+			if iface_config.get ('vrf', None) != vrf:
+				continue
+
+			# Ignore any VEth pairs
+			if iface.startswith ('veth'):
+				continue
+
+			ifaces_names.append (iface)
+
+	try:
+		for iface in ifaces_names:
+			for prefix in ifaces[iface]['prefixes']:
+				ip_ver = 'v6' if ':' in prefix else 'v4'
+
+				ips[ip_ver].append (prefix.split ('/')[0])
+	except KeyError:
+		pass
+
+	return ips
