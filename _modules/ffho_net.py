@@ -271,13 +271,15 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 			# Optional VEth interface pair - internal side
 			int2ext_site_if : {
 				'link-type' : 'veth',
-				'veth-peer' : ext2int_site_if,
+				'veth-peer-name' : ext2int_site_if,
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'int2ext'),
 				'ext_only' : True,
 			},
 
 			# Optional VEth interface pair - "external" side
 			ext2int_site_if : {
+				'link-type' : 'veth',
+				'veth-peer-name' : int2ext_site_if,
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'ext2int'),
 				'ext_only' : True,
 			},
@@ -313,7 +315,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 
 				# Force hwaddress to be what we expect.
 				if 'hwaddress' in iface_config_tmpl:
-					ifaces_config['hwaddress'] = iface_config_tmpl['hwaddress']
+					iface_config['hwaddress'] = iface_config_tmpl['hwaddress']
 
 				# Copy every attribute of the config template missing in iface config
 				for attr in iface_config_tmpl:
@@ -638,10 +640,11 @@ def gen_bat_hosts (nodes_config, sites_config):
 
 			entry_name = node_name
 			match = re.search (r'^dummy-([^-]+)(-e)?$', iface)
-			if match and match.group (2):
-				entry_name += "-e"
+			if match:
+				if match.group (2):
+					entry_name += "-e"
 			else:
-				entry_name += "/%s" % re.sub (r'^(vx_.*|gw2e|e2gw)_(.*)$', '\g<1>', iface)
+				entry_name += "/%s" % re.sub (r'^(vx_.*|i2e|e2i)[_-](.*)$', '\g<1>', iface)
 
 
 			bat_hosts[hwaddress] = entry_name
