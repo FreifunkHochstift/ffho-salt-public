@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/bin/flock --exclusive --wait 30 /var/lock/ff_ifupdown2 /etc/openvpn/ifup_real "$@"

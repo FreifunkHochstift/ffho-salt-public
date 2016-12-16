@@ -1,0 +1,4 @@
+#!/bin/sh
+
+ifdown --force "$1" 2>/dev/null
+ifup "$1"
