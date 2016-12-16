@@ -4,8 +4,11 @@ import re
 
 mac_prefix = "f2"
 
-vrf_table_map = {
-	'vrf_external' : 1023,
+vrf_info = {
+	'vrf_external' : {
+		'table' : 1023,
+		'fwmark' : [ '0x1', '0x1023' ],
+	},
 }
 
 
@@ -512,9 +515,28 @@ def _generate_vrfs (ifaces):
 	for iface, iface_config in ifaces.items ():
 		vrf = iface_config.get ('vrf', None)
 		if vrf and vrf not in ifaces:
+			conf = vrf_info.get (vrf, {})
+			table = conf.get ('table', 1234)
+			fwmark = conf.get ('fwmark', None)
+
 			ifaces[vrf] = {
-				'vrf-table' : vrf_table_map.get (vrf, 1234)
+				'vrf-table' : table,
 			}
+
+			# Create ip rule's for any fwmarks defined
+			if fwmark:
+				up = []
+
+				# Make sure we are dealing with a list even if there is only one mark to be set up
+				if type (fwmark) in (str, int):
+					fwmark = [ fwmark ]
+
+				# Create ip rule entries for IPv4 and IPv6 for every fwmark
+				for mark in fwmark:
+					up.append ("ip    rule add fwmark %s table %s" % (mark, table))
+					up.append ("ip -6 rule add fwmark %s table %s" % (mark, table))
+
+				ifaces[vrf]['up'] = up
 
 
 GRE_FFRL_attrs = {
