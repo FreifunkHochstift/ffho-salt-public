@@ -639,12 +639,15 @@ def gen_bat_hosts (nodes_config, sites_config):
 				continue
 
 			entry_name = node_name
-			match = re.search (r'^dummy-([^-]+)(-e)?$', iface)
+			match = re.search (r'^dummy-(.+)(-e)?$', iface)
 			if match:
 				if match.group (2):
 					entry_name += "-e"
+
+				# Append site to make name unique
+				entry_name += "/%s" % match.group (1)
 			else:
-				entry_name += "/%s" % re.sub (r'^(vx_.*|i2e|e2i)[_-](.*)$', '\g<1>', iface)
+				entry_name += "/%s" % re.sub (r'^(vx_.*|i2e|e2i)[_-](.*)$', '\g<1>/\g<2>', iface)
 
 
 			bat_hosts[hwaddress] = entry_name
@@ -656,7 +659,7 @@ def gen_bat_hosts (nodes_config, sites_config):
 
 				for network in ('intergw', 'nodes4', 'nodes6'):
 					hwaddress = gen_batman_iface_mac (site_no, device_no, network)
-					bat_hosts[hwaddress] = "%s/%s" % (node_name, network)
+					bat_hosts[hwaddress] = "%s/%s/%s" % (node_name, network, site)
 
 	return bat_hosts
 
