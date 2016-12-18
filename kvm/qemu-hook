@@ -33,22 +33,20 @@ xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", 
 		exit 2
 	fi
 
-	# If this kernel does not support vlan-aware bridges there's nothing to be done here.
-	if [ ! -f "/sys/class/net/${bridge}/bridge/vlan_filtering" ]; then
-		continue
+	#
+	# Check if this kernel supports vlan-aware bridges and if ${bridge} is one
+	vlan_filtering=0
+	if [ -f "/sys/class/net/${bridge}/bridge/vlan_filtering" ]; then
+		vlan_filtering=$(cat "/sys/class/net/${bridge}/bridge/vlan_filtering")
 	fi
 
-	# If this bridge isn't configured to be vlan-aware, there's nothing to be done here either.
-	vlan_filtering=$(cat "/sys/class/net/${bridge}/bridge/vlan_filtering")
-	if [ "${vlan_filtering}" = 0 ]; then
-		continue
-	fi
-
-	# If the interface is named *_vXXXX, with X being a 1-4 digit number
-	# we assume that this is iface should be connected to Vlan XXXX with
+	# If the interface is named *_vXXXX, with XXXX being a 1-4 digit number
+	# we assume that this iface should be connected to Vlan XXXX with
 	# an untagged port.
 	vlan_id=$(echo ${iface} | grep -o '_v[0-9]\{1,4\}$' | cut -c3-)
-	if [ "${vlan_id}" ]; then
+
+	# If vlan filtering is activated and we found a vlan id, kindly do the needful.
+	if [ "${vlan_filtering}" -a "${vlan_id}" ]; then
 		# Remove association with vlan 1 and add association with
 		# vlan $vlan_id with packages being sent out untagged and
 		# untagged ingress packets get tagged accordingly.
@@ -56,15 +54,23 @@ xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", 
 		bridge vlan add vid "${vlan_id}" dev "${iface}" pvid untagged
 		logger -t "${my_name}" "Configured untagged pvid ${vlan_id} for ${iface} in bridge ${bridge}."
 
+	# If vlan filtering isn't activated or supported but we found a vlan id,
+	# this probably is an error!
+	elif [ ! "${vlan_filtering}" -a "${vlan_id}" ]; then
+		logger -t "${my_name}" -p user.error "ERROR: Should configure untagged pvid ${vlan_id} for ${iface} in bridge ${bridge}, but bridge does not support vlan filtering!"
+	fi
 
-	# If the interface doesn't suggest an untagged Vlan association go
-	# for an /etc/network/interface entry which we try to get up and
-	# running with ifup. Proceed with fingers crossed.
-	else
+	# We dont' care about "no vlan filtering AND no vlan id" as well as "vlan filtering AND no vlan id"
+
+
+	# If there is an configuration stanza in /etc/network/interfaces
+	# for this interfaces, we try to get it up and running. Proceed
+	# with fingers crossed.
+	if grep -q "^iface\s\+${iface}" /etc/network/interfaces; then
 		if ifup $iface; then
-			logger -t qemu-magic "ifup'ed ${iface}."
+			logger -t "${my_name}" "ifup'ed ${iface}."
 		else
-			logger -t qemu-magic "ifup ${iface} FAILED."
+			logger -t "${my_name}" -p user.error "ifup ${iface} FAILED."
 		fi
 	fi
 done
