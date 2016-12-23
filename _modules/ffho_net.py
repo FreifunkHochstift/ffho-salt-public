@@ -212,6 +212,25 @@ def _update_vlan_config (config):
 	config['vlan'] = vlan_config
 
 
+# Pimp Veth interfaces
+# * Add peer interface name IF not present
+# * Add link-type veth IF not present
+def _update_veth_config (interface, config):
+	veth_peer_name = {
+		'veth_ext2int' : 'veth_int2ext',
+		'veth_int2ext' : 'veth_ext2int'
+	}
+
+	if interface not in veth_peer_name:
+		return
+
+	if 'link-type' not in config:
+		config['link-type'] = 'veth'
+
+	if 'veth-peer-name' not in config:
+		config['veth-peer-name'] = veth_peer_name[interface]
+
+
 # Generate configuration entries for any batman related interfaces not
 # configured explicitly, but asked for implicitly by role batman and a
 # (list of) site(s) specified in the node config.
@@ -599,6 +618,10 @@ def get_interface_config (node_config, sites_config):
 
 		if 'vlan-raw-device' in config or 'vlan-id' in config:
 			_update_vlan_config (config)
+
+		# Pimp configuration for VEth link pairs
+		if interface.startswith ('veth_'):
+			_update_veth_config (interface, config)
 
 	# Auto generated VRF devices for any VRF found in ifaces and not already configured.
 	_generate_vrfs (ifaces)
