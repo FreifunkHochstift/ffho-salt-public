@@ -771,3 +771,113 @@ def get_node_iface_ips (node_config, iface_name):
 		pass
 
 	return ips
+
+
+# Compute minions OSPF interface configuration according to FFHO routing policy
+# See https://wiki.ffho.net/infrastruktur:vlans for information about Vlans
+def get_ospf_interface_config (node_config, grains_id):
+	ospf_node_config = node_config.get ('ospf', {})
+
+	ospf_interfaces = {}
+
+	for iface, iface_config in node_config.get ('ifaces', {}).items ():
+		# By default we don't speak OSPF on interfaces
+		ospf_on = False
+
+		# Defaults for OSPF interfaces
+		ospf_config = {
+			'stub' : True,			# Active/Passive interface
+			'cost' : 12345,
+			# 'type' 			# Area type
+		}
+
+		# OSPF configuration for interface given?
+		ospf_config_pillar = iface_config.get ('ospf', {})
+
+		# Local Gigabit Ethernet based connections (PTP or L2 subnets), cost 10
+		if re.search (r'^(br-?|br\d+\.|vlan)10\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 10
+			ospf_config['desc'] = "Wired Gigabit connection"
+
+		# AF-X based WBBL connection
+		elif re.search (r'^vlan20\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 100
+			ospf_config['desc'] = "AF-X based WBBL connection"
+
+		# Non-AF-X based WBBL connection
+		elif re.search (r'^vlan22\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 1000
+			ospf_config['desc'] = "Non-AF-X based WBBL connection"
+
+		# Management Vlans
+		elif re.search (r'^vlan30\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = True
+			ospf_config['cost'] = 10
+
+		# Active OSPF on OpenVPN tunnels, cost 10000
+		elif iface.startswith ('ovpn-'):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 10000
+
+			# Inter-Core links should have cost 5000
+			if iface.startswith ('ovpn-cr') and grains_id.startswith ('cr'):
+				ospf_config['cost'] = 5000
+
+			# OpenVPN tunnels to EdgeRouters
+			elif iface.startswith ('ovpn-er-'):
+				ospf_config['type'] = 'broadcast'
+
+		# Configure Out-of-band OpenVPN tunnels as stub interfaces,
+		# so recursive next-hop lookups for OOB-BGP-session will work.
+		elif iface.startswith ('oob-'):
+			ospf_on = True
+			ospf_config['stub'] = True
+			ospf_config['cost'] = 1000
+
+		# OSPF explicitly enabled for interface
+		elif 'ospf' in iface_config:
+			ospf_on = True
+			# iface ospf parameters will be applied later
+
+
+		# Go on if OSPF should not be actived
+		if not ospf_on:
+			continue
+
+		# Explicit OSPF interface configuration parameters take precendence over generated ones
+		for attr, val in ospf_config_pillar:
+			ospf_config[attr] = val
+
+		# Convert boolean values to 'yes' / 'no' string values
+		for attr, val in ospf_config.items ():
+			if type (val) == bool:
+				ospf_config[attr] = 'yes' if val else 'no'
+
+		# Store interface configuration
+		ospf_interfaces[iface] = ospf_config
+
+	return ospf_interfaces
+
+
+# Return (possibly empty) subset of Traffic Engineering entries from 'te' pillar entry
+# relevenant for this minion and protocol (IPv4 / IPv6)
+def get_te_prefixes (te_node_config, grains_id, proto):
+	te_config = {}
+
+	for prefix, prefix_config in te_node_config.get ('prefixes', {}).items ():
+		prefix_proto = 'v6' if ':' in prefix else 'v4'
+
+		# Should this TE policy be applied on this node and is the prefix
+		# of the proto we are looking for?
+		if grains_id in prefix_config.get ('nodes', []) and prefix_proto == proto:
+			te_config[prefix] = prefix_config
+
+	return te_config
