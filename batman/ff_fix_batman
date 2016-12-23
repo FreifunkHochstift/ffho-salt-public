@@ -39,7 +39,7 @@ logger -t "${my_name}" "${msg}"
 
 # Be safe and shutdown all batman interfaces before removing the module
 for iface in $(ip l | awk -F: '/^[0-9]/ { print $2 }' | tr -d ' ' | grep ^bat); do
-	ifdown "${iface}"
+	ifdown "${iface}" || true
 done
 
 if lsmod | grep batman-adv; then
