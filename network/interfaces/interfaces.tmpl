@@ -1,0 +1,100 @@
+#
+# /etc/network/interfaces (Salt managed)
+#
+
+{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
+{%- set node_id = grains['id'] %}
+{%- set sites_config = salt['pillar.get']('sites', {}) %}
+
+#source /etc/network/interfaces.d/*
+
+{#
+ # Configure any secondary IPs / router_id / infra-srv IPs on loopback, if present
+ #}
+{%- set lo_prefixes = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces:lo:prefixes', []) %}
+
+{#- Add user/infra-srv VPN IPs, too #}
+{%- for vpn in ['user-srv', 'infra-srv'] %}
+  {#- COMPATIBILITY GLUE #}
+  {%- for prefix in salt['pillar.get']("tinc:" ~ vpn ~ ":" ~ grains['nodename'] ~ ":subnet", []) %}
+    {%- do lo_prefixes.append (prefix) %}
+  {%- endfor %}
+  {%- for prefix in salt['pillar.get']("tinc:" ~ vpn ~ ":" ~ grains['id'] ~ ":subnet", []) %}
+    {%- do lo_prefixes.append (prefix) %}
+  {%- endfor %}
+{%- endfor %}
+# The loopback network interface
+auto lo
+iface lo
+{%- for prefix in lo_prefixes %}
+  {%- set mask = '128' if ':' in prefix else '32' %}
+  {%- set prefix = prefix if '/' in prefix else prefix ~ '/' ~ mask %}
+	address {{ prefix }}
+{%- endfor %}
+
+
+{#
+ # Special static config for this node?
+{%- set host_config_file = "network/interfaces/hosts/" ~ node_id ~ ".cfg" %}
+{%- include host_config_file ignore missing %}
+ #}
+
+
+{#
+ # Set up ifaces dict with configured and generated interfaces.
+ #}
+{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
+{%- for interface in ifaces|sort if interface not in ['lo'] %}
+  {%- set config = ifaces.get (interface) %}
+
+  {#- Let's go #}
+# {{ config.get ('desc', interface) }}
+  {%- if config.get ('auto', True) == True %}
+auto {{ interface }}
+  {%- endif %}
+  {%- if 'method' in config %}
+iface {{ interface }} inet {{ config.get ('method') }}
+  {%- else %}
+iface {{ interface }}
+  {%- endif %}
+  {#- Configure stuff for bonding, bridging, etc.? #}
+  {%- for feature in ['batman', 'bond', 'bridge', 'vlan', 'vxlan'] if feature in config %}
+    {%- set feature_config = config.get (feature) %}
+    {%- for opt in feature_config|sort %}
+	{{ opt }}	{{ feature_config.get (opt) }}
+    {%- endfor %}
+	#
+  {%- endfor %}
+
+  {#- Configure IP addresses #}
+  {%- for prefix in config.get ('prefixes', []) %}
+	address {{ prefix }}
+  {%- endfor %}
+
+  {#- Anything else... #}
+  {%- for keyword in config|sort %}
+    {%- set argument = config.get (keyword) %}
+    {%- if argument is none %}
+    {%- elif keyword.startswith ("_") %}
+    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'method', 'vlan', 'vxlan', 'desc', 'prefixes' ] %}
+    {%- elif argument is string or argument is number %}
+	{{ keyword }} {{ argument }}
+    {%- else %}
+      {%- for item in argument %}
+	{{ keyword }} {{ item }}
+      {%- endfor %}
+    {%- endif %}
+  {%- endfor %}
+{% endfor %}
+
+
+{#-
+ # OpenVPN VPNs (if any)
+ #}
+{%- include "network/interfaces/openvpn.tmpl" %}
+
+
+{#-
+ # Tinc VPNs (if any)
+ #}
+{#%- include "network/interfaces/tinc.tmpl" %#}
