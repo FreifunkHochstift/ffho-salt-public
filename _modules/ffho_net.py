@@ -589,7 +589,7 @@ def _generate_ffrl_gre_tunnels (ifaces):
 				pass
 
 
-def get_interface_config (node_config, sites_config):
+def get_interface_config (node_config, sites_config, node_id = ""):
 	# Get config of this node and dict of all configured ifaces
 	ifaces = node_config.get ('ifaces', {})
 
@@ -604,6 +604,9 @@ def get_interface_config (node_config, sites_config):
 	# Enhance ifaces configuration with some meaningful defaults for
 	# bonding, bridge and vlan interfaces, MAC address for batman ifaces, etc.
 	for interface, config in ifaces.items ():
+		if type (config) != dict:
+			raise Exception ("Configuration for interface %s on node %s seems broken!" % (interface, node_id))
+
 		iface_type = config.get ('type', 'inet')
 
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
@@ -653,7 +656,7 @@ def gen_bat_hosts (nodes_config, sites_config):
 		node_config = nodes_config.get (node_id)
 		node_name = node_id.split ('.')[0]
 
-		ifaces = get_interface_config (node_config, sites_config)
+		ifaces = get_interface_config (node_config, sites_config, node_id)
 		for iface in sorted (ifaces):
 			iface_config = ifaces.get (iface)
 
