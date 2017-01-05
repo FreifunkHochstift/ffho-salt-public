@@ -35,13 +35,6 @@ iface lo
 
 
 {#
- # Special static config for this node?
-{%- set host_config_file = "network/interfaces/hosts/" ~ node_id ~ ".cfg" %}
-{%- include host_config_file ignore missing %}
- #}
-
-
-{#
  # Set up ifaces dict with configured and generated interfaces.
  #}
 {%- for interface in ifaces|sort if interface not in ['lo'] %}
