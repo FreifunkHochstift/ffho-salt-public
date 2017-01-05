@@ -391,55 +391,6 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 					batman_ifaces += ' ' + iface
 
 
-## Generate VXLAN tunnels for every configured batman peer for every site
-## configured on this and the peer node.
-#def _generate_vxlan_interface_config_complex (node_config, ifaces, node_id, nodes_config):
-#	# No role 'batman', nothing to do
-#	if 'batman' not in node_config.get ('roles', []):
-#		return
-#
-#	# No batman peers configred, nothing to do
-#	try:
-#		peers = node_config['batman']['peers']
-#		if type (peers) != list:
-#			return
-#	except KeyError:
-#		return
-#
-#	# Sites configured on this node. Nothing to do, if none.
-#	my_sites = node_config.get ('sites', [])
-#	if len (my_sites) == 0:
-#		return
-#
-#	device_no = node_config.get ('id', -1)
-#
-#	# ...
-#	for peer in peers:
-#		try:
-#			# Try to get node config of peer
-#			peer_config = nodes_config.get (peer)
-#
-#			# Not a batman node?
-#			if not 'batman' in peer_config['roles']:
-#				continue
-#
-#			# Verify we are in peers list of peer
-#			peers_of_peer = peer_config['batman']['peers']
-#			if type (peers_of_peer) != list:
-#				continue
-#			if node_id not in peers_of_peer:
-#				continue
-#
-#			# Get sites configured on peers
-#			sites_of_peer = peer_config.get ('sites')
-#		except KeyError:
-#			continue
-#
-#		for site in my_sites:
-#			if site not in sites_of_peer:
-#				continue
-#
-#			# Build tunnel here
 
 def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 	# No role 'batman', nothing to do
