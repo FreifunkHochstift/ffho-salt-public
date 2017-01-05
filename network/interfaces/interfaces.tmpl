@@ -5,13 +5,14 @@
 {%- set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
 {%- set node_id = grains['id'] %}
 {%- set sites_config = salt['pillar.get']('sites', {}) %}
+{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
 
 #source /etc/network/interfaces.d/*
 
 {#
  # Configure any secondary IPs / router_id / infra-srv IPs on loopback, if present
  #}
-{%- set lo_prefixes = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces:lo:prefixes', []) %}
+{%- set lo_prefixes = ifaces['lo']['prefixes'] %}
 
 {#- Add user/infra-srv VPN IPs, too #}
 {%- for vpn in ['user-srv', 'infra-srv'] %}
@@ -43,7 +44,6 @@ iface lo
 {#
  # Set up ifaces dict with configured and generated interfaces.
  #}
-{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
 {%- for interface in ifaces|sort if interface not in ['lo'] %}
   {%- set config = ifaces.get (interface) %}
 

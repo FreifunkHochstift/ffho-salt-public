@@ -52,6 +52,13 @@ GRE_FFRL_attrs = {
 	'ttl'    : '64',
 }
 
+
+# The IPv4/IPv6 prefix use for Loopback IPs
+loopback_prefix = {
+	'v4' : '10.132.255.',
+	'v6' : '2a03:2260:2342:ffff::',
+}
+
 ################################################################################
 #                              Internal functions                              #
 #                                                                              #
@@ -560,6 +567,25 @@ def _generate_ffrl_gre_tunnels (ifaces):
 			except KeyError:
 				pass
 
+def _generate_loopback_ips (ifaces, node_config, node_id):
+	v4_ip = "%s/32"  % get_loopback_ip (node_config, node_id, 'v4')
+	v6_ip = "%s/128" % get_loopback_ip (node_config, node_id, 'v6')
+
+	# Interface lo already present?
+	if 'lo' not in ifaces:
+		ifaces['lo'] = { 'prefixes' : [] }
+
+	# Add 'prefixes' list if not present
+	if 'prefixes' not in ifaces['lo']:
+		ifaces['lo']['prefixes'] = []
+
+	prefixes = ifaces['lo']['prefixes']
+	if v4_ip not in prefixes:
+		prefixes.append (v4_ip)
+
+	if v6_ip not in prefixes:
+		prefixes.append (v6_ip)
+
 
 ################################################################################
 #                              Public functions                                #
@@ -573,6 +599,7 @@ def _generate_ffrl_gre_tunnels (ifaces):
 #   * VRFs
 #   * B.A.T.M.A.N. instances and interfaces
 #   * VXLAN interfaces to connect B.A.T.M.A.N. sites
+#   * Loopback IPs derived from numeric node ID
 #
 # @param: node_config	Pillar node configuration (as dict)
 # @param: sites_config	Pillar sites configuration (as dict)
@@ -613,6 +640,9 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		# Pimp configuration for VEth link pairs
 		if interface.startswith ('veth_'):
 			_update_veth_config (interface, config)
+
+	# Auto generate Loopback IPs IFF not present
+	_generate_loopback_ips (ifaces, node_config, node_id)
 
 	# Auto generated VRF devices for any VRF found in ifaces and not already configured.
 	_generate_vrfs (ifaces)
@@ -762,6 +792,32 @@ def get_node_iface_ips (node_config, iface_name):
 		pass
 
 	return ips
+
+
+#
+# Get the lookback IP of the given node for the given proto
+#
+# @param node_config:	Pillar node configuration (as dict)
+# @param node_id:	Minion name / Pillar node configuration key
+# @param proto:		{ 'v4', 'v6' }
+def get_loopback_ip (node_config, node_id, proto):
+	if proto not in [ 'v4', 'v6' ]:
+		raise Exception ("get_loopback_ip(): Invalid proto: \"%s\"." % proto)
+
+	if not proto in loopback_prefix:
+		raise Exception ("get_loopback_ip(): No loopback_prefix configured for IP%s in ffno_net module!" % proto)
+
+	if not 'id' in node_config:
+		raise Exception ("get_loopback_ip(): No 'id' configured in pillar for node \"%s\"!" % node_id)
+
+
+	return "%s%s" % (loopback_prefix.get (proto), node_config.get ('id'))
+
+#
+# Get the router id (read: IPv4 Lo-IP) out of the given node config.
+def get_router_id (node_config, node_id):
+	return get_loopback_ip (node_config, node_id, 'v4')
+
 
 
 # Compute minions OSPF interface configuration according to FFHO routing policy
