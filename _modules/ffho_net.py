@@ -4,6 +4,7 @@ import re
 
 mac_prefix = "f2"
 
+# VRF configuration map
 vrf_info = {
 	'vrf_external' : {
 		'table' : 1023,
@@ -11,6 +12,52 @@ vrf_info = {
 	},
 }
 
+#
+# Default parameters added to any given bonding interface,
+# if not specified at the interface configuration.
+default_bond_config = {
+	'bond-mode': '802.3ad',
+	'bond-min-links': '1',
+	'bond-xmit-hash-policy': 'layer3+4'
+}
+
+
+#
+# Default parameters added to any given bonding interface,
+# if not specified at the interface configuration.
+default_bridge_config = {
+	'bridge-fd' : '0',
+	'bridge-stp' : 'no'
+}
+
+
+#
+# Hop penalty to set if none is explicitly specified
+# Check if one of these roles is configured for any given node, use first match.
+default_hop_penalty_by_role = {
+	'bbr'       :  5,
+	'bras'      : 50,
+	'batman_gw' : 50,
+}
+batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
+
+
+#
+# Default interface attributes to be added to GRE interface to AS201701 when
+# not already present in pillar interface configuration.
+GRE_FFRL_attrs = {
+	'mode'   : 'gre',
+	'method' : 'tunnel',
+	'mtu'    : '1400',
+	'ttl'    : '64',
+}
+
+################################################################################
+#                              Internal functions                              #
+#                                                                              #
+#       Touching anything below will void any warranty you never had ;)        #
+#                                                                              #
+################################################################################
 
 sites = None
 
@@ -46,8 +93,8 @@ def _get_site_no (sites_config, site_name):
 #    02:xx	being a connection to local Vlan 2xx
 #    1b:24	being the ibss 2.4GHz bssid
 #    1b:05	being the ibss 5GHz bssid
-#    ff:ff	being the gluon next-node interface
 #    xx:xx	being a VXLAN tunnel for site ss, with xx being a the underlay VLAN ID (1xyz, 2xyz)
+#    ff:ff	being the gluon next-node interface
 def gen_batman_iface_mac (site_no, device_no, network):
 	net_type_map = {
 		'dummy'   : "00:00",
@@ -74,31 +121,6 @@ def gen_batman_iface_mac (site_no, device_no, network):
 
 	return "%s:%s:%s:%s" % (mac_prefix, device_no_hex, site_no_hex, last)
 
-
-#
-# Default parameters added to any given bonding/bridge interface,
-# if not specified at the interface configuration.
-default_bond_config = {
-	'bond-mode': '802.3ad',
-	'bond-min-links': '1',
-	'bond-xmit-hash-policy': 'layer3+4'
-}
-
-default_bridge_config = {
-	'bridge-fd' : '0',
-	'bridge-stp' : 'no'
-}
-
-
-#
-# Hop penalty to set if none is explicitly specified
-# Check if one of these roles is configured for any given node, use first match.
-default_hop_penalty_by_role = {
-	'bbr'       :  5,
-	'bras'      : 50,
-	'batman_gw' : 50,
-}
-batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
 
 # Gather B.A.T.M.A.N. related config options for real batman devices (e.g. bat0)
 # as well as for batman member interfaces (e.g. eth0.100, fastd ifaces etc.)
@@ -391,7 +413,11 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 					batman_ifaces += ' ' + iface
 
 
-
+#
+# Generate any implicitly defined VXLAN interfaces defined in the nodes iface
+# defined in pillar.
+# The keyword "batman_connect_sites" on an interface will trigger the
+# generation of a VXLAN overlay interfaces.
 def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 	# No role 'batman', nothing to do
 	if 'batman' not in node_config.get ('roles', []):
@@ -483,6 +509,9 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 					batman_ifaces += ' ' + vx_iface
 
 
+#
+# Generate implicitly defined VRFs according to the vrf_info dict at the top
+# of this file
 def _generate_vrfs (ifaces):
 	for iface, iface_config in ifaces.items ():
 		vrf = iface_config.get ('vrf', None)
@@ -511,14 +540,6 @@ def _generate_vrfs (ifaces):
 				ifaces[vrf]['up'] = up
 
 
-GRE_FFRL_attrs = {
-	'mode'   : 'gre',
-	'method' : 'tunnel',
-	'mtu'    : '1400',
-	'ttl'    : '64',
-}
-
-
 def _generate_ffrl_gre_tunnels (ifaces):
 	for iface, iface_config in ifaces.items ():
 		# We only care for GRE_FFRL type interfaces
@@ -540,6 +561,22 @@ def _generate_ffrl_gre_tunnels (ifaces):
 				pass
 
 
+################################################################################
+#                              Public functions                                #
+################################################################################
+
+# Generate network interface configuration for given node.
+#
+# This function will read the network configuration from pillar and will
+#  * enhance it with all default values configured at the top this file
+#  * auto generate any implicitly configured
+#   * VRFs
+#   * B.A.T.M.A.N. instances and interfaces
+#   * VXLAN interfaces to connect B.A.T.M.A.N. sites
+#
+# @param: node_config	Pillar node configuration (as dict)
+# @param: sites_config	Pillar sites configuration (as dict)
+# @param: node_id	Minion name / Pillar node configuration key
 def get_interface_config (node_config, sites_config, node_id = ""):
 	# Get config of this node and dict of all configured ifaces
 	ifaces = node_config.get ('ifaces', {})
