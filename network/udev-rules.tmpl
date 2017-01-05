@@ -1,10 +1,6 @@
 #
 # FFHO net rules (Salt managed)
 #
-
-{%- set host_config_file = "network/udev-rules/" + grains['nodename'] + ".rules" %}
-{% include host_config_file ignore missing %}
-
 {%- for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items () %}
   {%- if '_udev_mac' in iface_config %}
 # {{ iface_config.get ('desc', '') }}
