@@ -60,6 +60,20 @@ loopback_prefix = {
 	'v6' : '2a03:2260:2342:ffff::',
 }
 
+
+# The DNS zone base names used for generating zone files from IP address
+# configured on nodes interfaces.
+DNS_zone_names = {
+	'forward' : 'ffho.net',
+	'rev_v4'  : [
+		'132.10.in-addr.arpa',
+		'30.172.in-addr.arpa',
+		],
+	'rev_v6'  : [
+		'2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa',
+	]
+}
+
 ################################################################################
 #                              Internal functions                              #
 #                                                                              #
@@ -929,3 +943,87 @@ def get_te_prefixes (te_node_config, grains_id, proto):
 			te_config[prefix] = prefix_config
 
 	return te_config
+
+
+
+def generate_DNS_entries (nodes_config, sites_config):
+	import ipaddress
+
+	forward_zone_name = ""
+	forward_zone = []
+	zones = {
+		# <forward_zone_name>: [],
+		# <rev_zone1_name>: [],
+		# <rev_zone2_name>: [],
+		# ...
+	}
+
+	# Fill zones dict with zones configured in DNS_zone_names at the top of this file.
+	# Make sure the zone base names provided start with a leading . so the string
+	# operations later can be done easily and safely. Proceed with fingers crossed.
+	for entry, value in DNS_zone_names.items ():
+		if entry == "forward":
+			zone = value
+			if not zone.startswith ('.'):
+				zone = ".%s" % zone
+
+			zones[zone] = forward_zone
+			forward_zone_name = zone
+
+		if entry in [ 'rev_v4', 'rev_v6' ]:
+			for zone in value:
+				if not zone.startswith ('.'):
+					zone = ".%s" % zone
+
+				zones[zone] = []
+
+
+	# Process all interfaace of all nodes defined in pillar and generate forward
+	# and reverse entries for all zones defined in DNS_zone_names. Automagically
+	# put reverse entries into correct zone.
+	for node_id in sorted (nodes_config):
+		node_config = nodes_config.get (node_id)
+		ifaces = get_interface_config (node_config, sites_config, node_id)
+
+		for iface in sorted (ifaces):
+			iface_config = ifaces.get (iface)
+
+			# We only care for interfaces with IPs configured
+			prefixes = iface_config.get ("prefixes", None)
+			if prefixes == None:
+				continue
+
+			# Ignore any interface in $VRF
+			if iface_config.get ('vrf', "") in [ 'vrf_external' ]:
+				continue
+
+			for prefix in sorted (prefixes):
+				ip = ipaddress.ip_address (u'%s' % prefix.split ('/')[0])
+				proto = 'v%s' % ip.version
+
+				# The entry name is
+				#             <node_id>    when interface 'lo'
+				# <interface>.<node_id>    else
+				entry_name = node_id
+				if iface != "lo":
+					entry_name = "%s.%s" % (iface, node_id)
+
+				# Strip forward zone name from entry_name and store forward entry
+				# with correct entry type for found IP address.
+				forward_entry_name = re.sub (forward_zone_name, "", entry_name)
+				forward_entry_name = re.sub (forward_zone_name, "", entry_name)
+				forward_entry_typ = "A" if ip.version == 4 else "AAAA"
+				forward_zone.append		("%s		IN %s	%s" % (forward_entry_name, forward_entry_typ, ip))
+
+				# Find correct reverse zone, if configured and strip reverse zone name
+				# from calculated reverse pointer name. Store reverse entry if we found
+				# a zone for it. If no configured reverse zone did match, this reverse
+				# entry will be ignored.
+				for zone in zones:
+					if ip.reverse_pointer.find (zone) > 0:
+						PTR_entry = re.sub (zone, "", ip.reverse_pointer)
+						zones[zone].append ("%s		IN PTR	%s." % (PTR_entry, entry_name))
+
+						break
+
+	return zones
