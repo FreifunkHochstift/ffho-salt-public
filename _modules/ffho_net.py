@@ -1002,11 +1002,16 @@ def generate_DNS_entries (nodes_config, sites_config):
 				proto = 'v%s' % ip.version
 
 				# The entry name is
-				#             <node_id>    when interface 'lo'
-				# <interface>.<node_id>    else
+				#             <node_id>         when interface 'lo'
+				# <node_name>.srv.<residual>    when interface 'srv' (or magically detected internal srv record)
+				# <interface>.<node_id>         else
 				entry_name = node_id
 				if iface != "lo":
 					entry_name = "%s.%s" % (iface, node_id)
+
+				elif iface == 'srv' or re.search (r'^(10.132.251|2a03:2260:2342:f251:)', prefix):
+					entry_name = re.sub (r'^([^.]+)\.(.+)$', r'\g<1>.srv.\g<2>', entry_name)
+
 
 				# Strip forward zone name from entry_name and store forward entry
 				# with correct entry type for found IP address.
