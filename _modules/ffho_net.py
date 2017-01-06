@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import collections
 import re
 
 mac_prefix = "f2"
@@ -619,7 +620,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	# Enhance ifaces configuration with some meaningful defaults for
 	# bonding, bridge and vlan interfaces, MAC address for batman ifaces, etc.
 	for interface, config in ifaces.items ():
-		if type (config) != dict:
+		if type (config) not in [ dict, collections.OrderedDict ]:
 			raise Exception ("Configuration for interface %s on node %s seems broken!" % (interface, node_id))
 
 		iface_type = config.get ('type', 'inet')
