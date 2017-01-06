@@ -18,3 +18,6 @@
   file.managed:
     - source: salt://bash/bash_aliases.root
 {% endif %}
+
+
+# bashrc.user is used in state 'build' for the build user!
