@@ -6,7 +6,8 @@
 # Only set up batman and load batman_adv kernel module if the role »batman«
 # has been configured for this node.
 #
-{%- if 'batman' in salt['pillar.get']('nodes:' ~ grains['id']  ~ ':roles', ()) %}
+{%- set roles = salt['pillar.get']('nodes:' ~ grains['id']  ~ ':roles', []) %}
+{%- if 'batman' in roles %}
 include:
   - apt
 
@@ -74,6 +75,24 @@ enable-ff-fix-batman-service:
 
 
 #
+# Is this node a B.A.T.M.A.N. gateway?
+  {%- if 'batman_gw' in roles %}
+
+/etc/cron.d/ff_check_gateway:
+  file.managed:
+    - source: salt://batman/ff_check_gateway.cron
+    - template: jinja
+
+/usr/local/sbin/ff_check_gateway:
+  file.managed:
+    - source: salt://batman/ff_check_gateway
+    - mode: 755
+    - user: root
+    - group: root
+
+  {% endif %}
+
+#
 # If the role »batman» is NOT configured for this node, make sure to purge any
 # traces of a previous installation, if present.
 #
@@ -99,5 +118,11 @@ disable-ff-fix-batman-service:
   file.absent
 
 /etc/bat-hosts:
+  file.absent
+
+/etc/cron.d/ff_check_gateway:
+  file.absent
+
+/usr/local/sbin/ff_check_gateway:
   file.absent
 {% endif %}
