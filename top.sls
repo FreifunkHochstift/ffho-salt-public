@@ -56,3 +56,8 @@ base:
     - match: pillar
     - kvm
 
+  # Authoritive DNS server
+  nodes:{{ grains['id'] }}:roles:dns-auth:
+    - match: pillar
+    - dns-server.auth
+
