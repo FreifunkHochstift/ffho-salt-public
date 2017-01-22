@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Mon 31 Aug 2015 08:55:27 AM CEST
+#
+
+if [ $# != 1 ]; then
+	echo "Usage: $(basename $0) fastd_instance | -a" >&2
+	exit 1
+fi
+
+fastd_con () {
+	socket_path=$(grep "status socket" "/etc/fastd/${1}/fastd.conf" | grep -o '/[0-9a-z/_.-]\+')
+
+	echo -n "$1: "
+	socat - "UNIX-CONNECT:${socket_path}" | jq '.peers[] | select( .connection ) | .name' | wc -l
+}
+
+if [ "${1}" = '-a' ]; then
+	for fastd_instance in $(find /etc/fastd -mindepth 1 -maxdepth 1 -type d  -exec basename {} \;); do
+		fastd_con ${fastd_instance}
+	done
+else
+	if [ ! -d "/etc/fastd/${1}" ]; then
+		echo "Invalid fastd instance \"$1\"." >&2
+		exit 1
+	fi
+
+	fastd_con "${1}"
+fi

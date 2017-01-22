@@ -1,0 +1,11 @@
+[Unit]
+Description=Fast and Secure Tunnelling Daemon (connection %I)
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/fastd --syslog-level info --syslog-ident fastd@%i -c /etc/fastd/%i/fastd.conf
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
