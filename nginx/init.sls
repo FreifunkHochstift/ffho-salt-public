@@ -13,10 +13,6 @@ nginx:
   service.running:
     - enable: TRUE
     - reload: TRUE
-    - watch:
-      - file: /etc/nginx/sites-*
-  file.absent:
-    - name: /etc/nginx/sites-enabled/default
 
 {% if grains['saltversion'] >= '2014.7.0' %}
 nginx-dhparam:
@@ -27,6 +23,21 @@ nginx-dhparam:
       - serivce: nginx
 {% endif %}
 
+
+# Install meaningful main configuration (SSL tweaks 'n stuff)
+/etc/nginx/nginx.conf:
+  file.managed:
+    - source: salt://nginx/nginx.conf
+    - watch_in:
+      - service: nginx
+
+
+# Disable default configuration
+/etc/nginx/sites-enabled/default:
+  file.absent
+
+
+# Install website configuration files configured for this node
 {% for website in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:websites', []) %}
 /etc/nginx/sites-enabled/{{website}}:
   file.managed:
@@ -34,4 +45,6 @@ nginx-dhparam:
     - template: jinja
     - require:
       - pkg: nginx
+    - watch_in:
+      - service: nginx
 {% endfor %}
