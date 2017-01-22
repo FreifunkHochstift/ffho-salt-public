@@ -1,0 +1,3 @@
+{% include "ssh/authorized_keys_root.MASTER" %}
+# Special keys only allowed on this host
+{% include "ssh/authorized_keys_root.H_" ~ grains['id'] ignore missing %}
