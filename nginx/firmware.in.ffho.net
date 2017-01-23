@@ -1,0 +1,55 @@
+#
+# /etc/nginx/sites-enabled/firmware.in.ffho.net (Salt managed)
+#
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	root {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}};
+
+	server_name ~^firmware\.(srv\.)?in\.ffho\.net$;
+	fancyindex on;
+	fancyindex_exact_size off;
+	fancyindex_name_length 70;
+	fancyindex_header /header.html;
+	fancyindex_localtime on;
+	fancyindex_default_sort name;
+
+	location / {
+		try_files $uri $uri/ /index.html =404;
+		fancyindex_ignore header.html favicon.ico models-short.txt models.txt robots.txt scripts;
+	}
+
+	location ~ /\. {
+		deny all;
+	}
+
+	location /scripts {
+		deny all;
+	}
+
+	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(stable|testing|experimental)/sysupgrade/((?<branch>(stable|testing|experimental))\.manifest)$ {
+		try_files $uri /$branch/sysupgrade/$branch.$site_code.manifest /$branch/sysupgrade/$branch.manifest;
+	}
+
+	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(?<branch>(stable|testing|experimental))/sysupgrade/(?<file>.*) {
+		try_files $uri /$branch/sysupgrade/$file /stable/sysupgrade/$file /testing/sysupgrade/$file /experimental/sysupgrade/$file;
+	}
+
+	# opkg mirror
+	location ~^/openwrt/(?<file>.+)$ {
+		return 302 http://ftp.stw-bonn.de/pub/openwrt/$file;
+	}
+
+	# autoupdater legacy glue
+	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(?<branch>(stable|testing|experimental))/($branch\.manifest)$ {
+		try_files $uri /$branch/sysupgrade/$branch.$site_code.manifest /$branch/sysupgrade/$branch.manifest =404;
+	}
+	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(?<branch>(stable|testing|experimental))/(?<file>.*) {
+		try_files $uri /$branch/sysupgrade/$file =404;
+	}
+	location ~ ^/(?<branch>(stable|testing|experimental))/(?<file>.*)$ {
+		try_files $uri $uri/ /$branch/sysupgrade/$file =404;
+	}
+}

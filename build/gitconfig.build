@@ -1,0 +1,7 @@
+[user]
+	name = Freifunk Hochstift
+	email = kontakt@hochstift.freifunk.net
+[push]
+	default = simple
+[core]
+	editor = vim
