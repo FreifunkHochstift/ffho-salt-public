@@ -1,0 +1,4 @@
+{%- set ssh_config = salt['pillar.get']('ssh') -%}
+{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id']) -%}
+{%- set auth_keys = salt['ffho_auth.get_ssh_authkeys'](ssh_config, node_config, grains['id'], username) -%}
+{{ "\n".join (auth_keys) }}

@@ -36,8 +36,9 @@ ssh:
 # Create authorized_keys for root (MASTER + host specific)
 /root/.ssh/authorized_keys:
   file.managed:
-    - source: salt://ssh/authorized_keys_root
+    - source: salt://ssh/authorized_keys.tmpl
     - template: jinja
+      username: root
     - user: root
     - group: root
     - mode: 644
