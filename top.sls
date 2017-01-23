@@ -4,7 +4,7 @@ base:
     - ffinfo
     - apt
     - bash
-    - cert.x509
+    - cert
     - console-tools
     - kernel
     - locales
@@ -19,8 +19,6 @@ base:
     - vim
     - unattended-upgrades
 
-#    - ffpb
-#    - monitoring.node
 #    - tinc
 
 #
