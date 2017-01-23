@@ -32,7 +32,9 @@ postfix:
 # Send root mail to ops@ffho.net
 /etc/aliases:
   file.managed:
-    - source: salt://postfix/aliases
+    - source:
+      - salt://postfix/aliases.{{ grains['id'] }}
+      - salt://postfix/aliases
 
 newaliases:
   cmd.wait:
