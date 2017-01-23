@@ -42,7 +42,8 @@ newaliases:
       - file: /etc/aliases
 
 
-# Set mailname for xxx.paderborn.freifunk.net (FIXME)
+# Set mailname to node_id if not specified otherwise in node pillar.
+{% set mailname = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':mailname', grains['id']) %}
 /etc/mailname:
   file.managed:
-    - contents: "{{ grains.nodename }}.paderborn.freifunk.net"
+    - contents: "{{ mailname }}"
