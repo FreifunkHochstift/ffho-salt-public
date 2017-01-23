@@ -18,7 +18,7 @@ nginx:
 nginx-dhparam:
   cmd.run:
     - name: openssl dhparam -out /etc/ssl/dhparam.pem 4096
-    - creates: /etc/ssl/dhparam
+    - creates: /etc/ssl/dhparam.pem
     - require_in:
       - serivce: nginx
 {% endif %}
@@ -34,7 +34,9 @@ nginx-dhparam:
 
 # Disable default configuration
 /etc/nginx/sites-enabled/default:
-  file.absent
+  file.absent:
+    - watch_in:
+      - service: nginx
 
 
 # Install website configuration files configured for this node
