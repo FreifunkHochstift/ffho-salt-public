@@ -7,27 +7,28 @@
 # has been configured for this node.
 #
 {%- set roles = salt['pillar.get']('nodes:' ~ grains['id']  ~ ':roles', []) %}
-{%- if 'batman' in roles %}
 include:
   - apt
 
-batman-adv-dkms:
-  pkg.installed:
-    - require:
-      - pkgrepo: apt-neoraider
-
+{%- if 'batman' in roles %}
 batctl:
   pkg.installed:
     - require:
       - pkgrepo: apt-neoraider
 
 
-# Conveniance bat-hosts file for informative batctl output
+# Convenience bat-hosts file for informative batctl output
 /etc/bat-hosts:
   file.managed:
     - source: salt://batman/bat-hosts.tmpl
     - template: jinja
 
+
+  {% if salt['ffho.re_search'] ('-v14', grains['id']) %}
+batman-adv-dkms:
+  pkg.installed:
+    - require:
+      - pkgrepo: apt-neoraider
 
 # The ff_fix_batman script ensures that the preferred (currently older) version
 # of the batman_adv kernel module is compiled via DKMS and installed into the
@@ -67,6 +68,7 @@ enable-ff-fix-batman-service:
     - require:
       - file: /lib/systemd/system/ff-fix-batman.service
 
+  {% endif %}
 
 # Make sure the batman_adv module is loaded at boot time
 /etc/modules-load.d/batman-adv.conf:
