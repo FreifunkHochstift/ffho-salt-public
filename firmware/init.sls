@@ -63,7 +63,7 @@ git.c3pb.de:
 
 /home/firmware/.ssh/authorized_keys:
   file.managed:
-    - contents_pillar: nodes:masterbuilder.in.ffho.net:ssh:build:ssh_pubkey
+    - contents_pillar: nodes:masterbuilder.in.ffho.net:ssh:build:pubkey
     - user: firmware
     - group: firmware
     - mode: 644
@@ -72,7 +72,7 @@ git.c3pb.de:
 
 /home/firmware/.ssh/id_rsa:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:ssh:firmware:ssh_privkey
+    - contents_pillar: nodes:{{ grains['id'] }}:ssh:firmware:privkey
     - user: firmware
     - group: firmware
     - mode: 400

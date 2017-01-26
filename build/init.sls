@@ -95,7 +95,7 @@ firmware-git:
 
 /srv/build/opkg-keys/gluon-opkg-key:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:opkg_privkey
+    - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:privkey
     - user: build
     - group: build
     - mode: 400
@@ -140,7 +140,7 @@ firmware.in.ffho.net:
 
 /home/build/.ssh/id_rsa:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:ssh:build:ssh_privkey
+    - contents_pillar: nodes:{{ grains['id'] }}:ssh:build:privkey
     - user: build
     - group: build
     - mode: 400
