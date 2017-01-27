@@ -93,9 +93,18 @@ firmware-git:
     - require:
       - git: build-git
 
-/srv/build/opkg-keys/gluon-opkg-key:
+/srv/build/opkg-keys/key-build:
   file.managed:
     - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:privkey
+    - user: build
+    - group: build
+    - mode: 400
+    - require:
+      - file: /srv/build/opkg-keys
+
+/srv/build/opkg-keys/key-build.pub:
+  file.managed:
+    - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:pubkey
     - user: build
     - group: build
     - mode: 400
