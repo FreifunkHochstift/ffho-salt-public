@@ -825,8 +825,17 @@ def get_loopback_ip (node_config, node_id, proto):
 	if not 'id' in node_config:
 		raise Exception ("get_loopback_ip(): No 'id' configured in pillar for node \"%s\"!" % node_id)
 
+	# Every rule has an exception.
+	# If there is a loopback_overwrite configuration for this node, use this instead of
+	# the generated IPs.
+	if 'loopback_override' in node_config:
+		if proto not in node_config['loopback_override']:
+			raise Exception ("get_loopback_ip(): No loopback_prefix configured for IP%s in node config / loopback_override!" % proto)
+
+		return node_config['loopback_override'][proto]
 
 	return "%s%s" % (loopback_prefix.get (proto), node_config.get ('id'))
+
 
 #
 # Get the router id (read: IPv4 Lo-IP) out of the given node config.
