@@ -40,4 +40,9 @@ options {
 		{{ entry }};
 {%- endfor %}
 	};
+
+{%- if grains['id'] != 'dns01.in.ffho.net' %}
+	// Disable notifies on non-master DNS
+	notify no;
+{%- endif %}
 };
