@@ -2,8 +2,6 @@
 # Bash
 #
 
-{%- import "globals.sls" as globals with context %}
-
 #
 # .bashrc for root
 /root/.bashrc:
@@ -13,7 +11,7 @@
 
 #
 # Nifty aliases for gateway
-{% if 'gateway' in globals.ROLES %}
+{% if 'batman_gw' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
 /root/.bash_aliases:
   file.managed:
     - source: salt://bash/bash_aliases.root
