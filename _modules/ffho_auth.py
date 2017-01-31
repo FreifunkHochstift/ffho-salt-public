@@ -7,6 +7,9 @@
 import collections
 
 def _ssh_user_allowed (access_config, node_id, node_config, entry_name):
+	if type (node_config) not in [ dict, collections.OrderedDict ]:
+		raise Exception ("The pillar node config of node \"%s\" seem to be broken or missing!" % node_id)
+
 	roles = node_config.get ('roles', [])
 
 	# Access config for the given user is the string "global"
