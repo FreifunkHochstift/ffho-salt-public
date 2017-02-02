@@ -11,7 +11,7 @@ bsd-mailx:
 postfix:
   pkg.installed:
     - name: postfix
-    - requires:
+    - require:
       - file: /etc/mailname
   service.running:
     - enable: true
