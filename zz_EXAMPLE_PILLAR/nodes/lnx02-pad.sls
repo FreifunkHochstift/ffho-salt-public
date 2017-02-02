@@ -79,3 +79,13 @@ lnx02.pad.in.ffho.net:
     cr02_eth1:
       desc: "cr02 internal trunk"
       bridge-vids: "1013 2000 2004 2006 3002"
+
+  ssh:
+    root:
+{% if grains['id'] == 'lnx02.pad.in.ffho.net' %}
+      privkey: |
+        -----BEGIN RSA PRIVATE KEY-----
+        ...
+        -----END RSA PRIVATE KEY-----
+{% endif %}
+      pubkey: ssh-rsa ABCD... root@lnx02.pad.in.ffho.net

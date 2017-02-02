@@ -24,7 +24,7 @@ ssh:
       - service: ssh
 
 
-# Create .ssh dir for user root and install authkeys
+# Create .ssh dir for user root
 /root/.ssh:
   file.directory:
     - user: root
@@ -42,3 +42,26 @@ ssh:
     - user: root
     - group: root
     - mode: 644
+    - require:
+      - file: /root/.ssh
+
+# Add SSH-Keys
+{% if 'root' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ssh', []) %}
+/root/.ssh/id_rsa:
+  file.managed:
+    - contents_pillar: nodes:{{ grains['id'] }}:ssh:root:privkey
+    - user: root
+    - group: root
+    - mode: 600
+    - require:
+      - file: /root/.ssh
+
+/root/.ssh/id_rsa.pub:
+  file.managed:
+    - contents_pillar: nodes:{{ grains['id'] }}:ssh:root:pubkey
+    - user: root
+    - group: root
+    - mode: 644
+    - require:
+      - file: /root/.ssh
+{% endif %}
