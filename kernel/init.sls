@@ -15,7 +15,7 @@ linux-kernel:
 {#
  # Install kernel headers if we might need to compile a batman_adv module on this node.
  #}
-{% if 'batman' in node_config.get('roles', []) %}
+{% if 'batman' in node_config.get('roles', []) and 'v14' in grains['id'] %}
 linux-headers:
   pkg.installed:
     - name: linux-headers-{{ version }}
