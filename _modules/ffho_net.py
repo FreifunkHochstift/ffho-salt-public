@@ -699,10 +699,6 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		if interface.startswith ('veth_'):
 			_update_veth_config (interface, config)
 
-		# Set default MTU if not already set manually or by any earlier function
-		if interface != 'lo' and 'mtu' not in config:
-			config['mtu'] = MTU['default']
-
 	# Auto generate Loopback IPs IFF not present
 	_generate_loopback_ips (ifaces, node_config, node_id)
 
@@ -715,6 +711,10 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	# Drop any config parameters used in node interface configuration not
 	# relevant anymore for config file generation.
 	for interface, config in ifaces.items ():
+		# Set default MTU if not already set manually or by any earlier function
+		if interface != 'lo' and 'mtu' not in config:
+			config['mtu'] = MTU['default']
+
 		for key in [ 'batman_connect_sites', 'ospf', 'site', 'type' ]:
 			if key in config:
 				config.pop (key)
