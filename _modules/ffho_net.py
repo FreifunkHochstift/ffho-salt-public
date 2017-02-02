@@ -472,7 +472,7 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 				continue
 
 			# iface_name := vx_<last 5 chars of underlay iface>_<site> stripped to 15 chars
-			vx_iface = "vx_%s_%s" % (re.sub ('vlan', 'v', iface)[-5:], site)[:15]
+			vx_iface = ("vx_%s_%s" % (re.sub ('vlan', 'v', iface)[-5:], re.sub (r'[_-]', '', site)))[:15]
 			site_no = _get_site_no (sites_config, site)
 			vni = 100 + site_no
 			bat_iface = "bat-%s" % site
