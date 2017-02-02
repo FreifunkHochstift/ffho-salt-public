@@ -74,6 +74,30 @@ DNS_zone_names = {
 	]
 }
 
+# MTU configuration
+MTU = {
+	# The default MTU for any interface which does not have a MTU configured
+	# explicitly in the pillar node config or does not get a MTU configured
+	# by any means of this SDN stuff here.
+	'default' : 1500,
+
+	# A batman underlay device, probably a VXLAN or VLAN interface.
+	#
+	#   1500
+	# +   60	B.A.T.M.A.N. adv header + network coding (activated by default by Debian)
+	'batman_underlay_iface' : 1560,
+
+	# VXLAN underlay device, probably a VLAN with $POP or between two BBRs.
+	#
+	#   1560
+	# +   14	Inner Ethernet Frame
+	# +    8	VXLAN Header
+	# +    8	UDP Header
+	# +   20	IPv4 Header
+	'vxlan_underlay_iface'  : 1610,
+}
+
+
 ################################################################################
 #                              Internal functions                              #
 #                                                                              #
@@ -314,6 +338,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 			dummy_site_if : {
 				'link-type' : 'dummy',
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'dummy'),
+				'mtu'       : MTU['batman_underlay_iface'],
 			},
 
 			# Optional 2nd "external" BATMAN instance
@@ -329,6 +354,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				'link-type' : 'dummy',
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'dummy-e'),
 				'ext_only' : True,
+				'mtu'       : MTU['batman_underlay_iface'],
 			},
 
 			# Optional VEth interface pair - internal side
@@ -462,6 +488,22 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 		if type (batman_connect_sites) == str:
 			batman_connect_sites = [ batman_connect_sites ]
 
+		# If there the list of sites to connect is empty, there's nothing to do here.
+		if len (batman_connect_sites) == 0:
+			continue
+
+		# Set the MTU of this (probably) VLAN device to the MTU required for a VXLAN underlay
+		# device, where B.A.T.M.A.N. adv. is to be expected within the VXLAN overlay.
+		if 'mtu' not in iface_config:
+			iface_config['mtu'] = MTU['vxlan_underlay_iface']
+
+			# If this is a VLAN - which it probably is - fix the MTU of the underlying interface, too.
+			if 'vlan-raw-device' in iface_config:
+				vlan_raw_device = ifaces.get (iface_config['vlan-raw-device'])
+
+				if not 'mtu' in vlan_raw_device:
+					vlan_raw_device['mtu'] = MTU['vxlan_underlay_iface']
+
 		# If the string 'all' is part of the list, blindly use all sites configured for this node
 		if 'all' in batman_connect_sites:
 			batman_connect_sites = my_sites
@@ -511,7 +553,8 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 					'vxlan-svcnodeip' : mcast_ip,
 					'vxlan-physdev'   : iface,
 				},
-				'hwaddress'       : gen_batman_iface_mac (site_no, device_no, iface_id),
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, iface_id),
+				'mtu'       : MTU['batman_underlay_iface'],
 			}
 
 			# If the batman interface for this site doesn't have any interfaces
@@ -655,6 +698,10 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		# Pimp configuration for VEth link pairs
 		if interface.startswith ('veth_'):
 			_update_veth_config (interface, config)
+
+		# Set default MTU if not already set manually or by any earlier function
+		if interface != 'lo' and 'mtu' not in config:
+			config['mtu'] = MTU['default']
 
 	# Auto generate Loopback IPs IFF not present
 	_generate_loopback_ips (ifaces, node_config, node_id)
