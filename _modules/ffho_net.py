@@ -499,10 +499,18 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 
 			# If this is a VLAN - which it probably is - fix the MTU of the underlying interface, too.
 			if 'vlan-raw-device' in iface_config:
-				vlan_raw_device = ifaces.get (iface_config['vlan-raw-device'])
+				vlan_raw_device = iface_config['vlan-raw-device']
+				vlan_raw_device_config = ifaces.get (vlan_raw_device, None)
+
+				# vlan-raw-device might point to ethX which usually isn't configured explicitly
+				# as ifupdown2 simply will bring it up anyway by itself. To set the MTU of such
+				# an interface we have to add a configuration stanza for it here.
+				if vlan_raw_device_config == None:
+					vlan_raw_device_config = {}
+					ifaces[vlan_raw_device] = vlan_raw_device_config
 
 				if not 'mtu' in vlan_raw_device:
-					vlan_raw_device['mtu'] = MTU['vxlan_underlay_iface']
+					vlan_raw_device_config['mtu'] = MTU['vxlan_underlay_iface']
 
 		# If the string 'all' is part of the list, blindly use all sites configured for this node
 		if 'all' in batman_connect_sites:
