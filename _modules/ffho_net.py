@@ -720,7 +720,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	# relevant anymore for config file generation.
 	for interface, config in ifaces.items ():
 		# Set default MTU if not already set manually or by any earlier function
-		if interface != 'lo' and 'mtu' not in config:
+		if interface != 'lo' and ('mtu' not in config):
 			config['mtu'] = MTU['default']
 
 		for key in [ 'batman_connect_sites', 'ospf', 'site', 'type' ]:
