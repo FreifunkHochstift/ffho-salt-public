@@ -1096,3 +1096,10 @@ def generate_DNS_entries (nodes_config, sites_config):
 						break
 
 	return zones
+
+
+# Convert the CIDR network from the given prefix into a dotted netmask
+def cidr_to_dotted_mask (prefix):
+	from ipcalc import Network
+
+	return str (Network (prefix).netmask ())
