@@ -5,6 +5,10 @@
 ifupdown2:
   pkg.installed
 
+# Require for some functions of ffho_net module, so make sure they are present.
+# Used by functions for bird and dhcp-server for example.
+python-ipcalc:
+  pkg.installed
 
 # ifupdown2 configuration
 /etc/network/ifupdown2/ifupdown2.conf:
@@ -12,6 +16,7 @@ ifupdown2:
     - source: salt://network/ifupdown2.conf
     - require:
       - pkg: ifupdown2
+      - pkg: python-ipcalc
 
 
 # Write network configuration

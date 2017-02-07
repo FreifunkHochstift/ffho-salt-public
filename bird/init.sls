@@ -22,6 +22,7 @@ bird-pkg:
     - name: bird
     - require:
       - pkgrepo: bird-repo
+      - state: network.interfaces
 
 
 # Make sure both services are enabled
@@ -228,9 +229,6 @@ bird6-configure:
 # FFRL-exit
 #
 {% if 'ffrl-exit' in roles %}
-python-ipcalc:
-  pkg.installed
-
 /etc/bird/bird.d/ffrl.conf:
   file.managed:
     - source: salt://bird/ffrl.conf
@@ -240,7 +238,6 @@ python-ipcalc:
       - cmd: bird-configure
     - require:
       - file: /etc/bird/bird.d
-      - pkg: python-ipcalc
     - require_in:
       - service: bird
 
@@ -253,7 +250,6 @@ python-ipcalc:
       - cmd: bird6-configure
     - require:
       - file: /etc/bird/bird6.d
-      - pkg: python-ipcalc
     - require_in:
       - service: bird6
 
