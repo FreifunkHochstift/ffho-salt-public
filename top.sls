@@ -34,10 +34,15 @@ base:
     - match: pillar
     - bird
 
-  # Batman node?
+  # Batman node
   nodes:{{ grains['id'] }}:roles:batman:
     - match: pillar
     - batman
+
+  # Batman gateway
+  nodes:{{ grains['id'] }}:roles:batman_gw:
+    - match: pillar
+    - dhcp-server
 
   # BRAS / Fastd
   nodes:{{ grains['id'] }}:roles:fastd:
