@@ -96,7 +96,9 @@ openvpn@{{ netname }}:
     - reload: True
     - require:
       - file: /etc/systemd/system/openvpn@.service
+    {% if config.get ('mode', '') == "server" %}
       - file: Cleanup /etc/openvpn/{{ netname }}
+    {% endif %}
 
 
 /etc/openvpn/{{ netname }}.conf:
