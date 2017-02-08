@@ -509,7 +509,7 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 					vlan_raw_device_config = {}
 					ifaces[vlan_raw_device] = vlan_raw_device_config
 
-				if not 'mtu' in vlan_raw_device:
+				if not 'mtu' in vlan_raw_device_config:
 					vlan_raw_device_config['mtu'] = MTU['vxlan_underlay_iface']
 
 		# If the string 'all' is part of the list, blindly use all sites configured for this node
