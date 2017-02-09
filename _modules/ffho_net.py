@@ -362,6 +362,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				'link-type' : 'veth',
 				'veth-peer-name' : ext2int_site_if,
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'int2ext'),
+				'mtu' : MTU['batman_underlay_iface'],
 				'ext_only' : True,
 			},
 
@@ -370,6 +371,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				'link-type' : 'veth',
 				'veth-peer-name' : int2ext_site_if,
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'ext2int'),
+				'mtu' : MTU['batman_underlay_iface'],
 				'ext_only' : True,
 			},
 		}
