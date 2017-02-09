@@ -23,6 +23,11 @@ fi
 # any meshable interface.
 shopt -s nullglob
 for mesh_int in /sys/class/net/*/mesh; do
+	# Ignore any external BATMAN instance, if present
+	if echo "${mesh_int}" | grep -q '-ext$'; then
+		continue
+	fi
+
 	old_state="$(cat ${mesh_int}/gw_mode)"
 	[ "$old_state" == "$new_state" ] && continue
 
