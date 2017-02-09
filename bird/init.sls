@@ -291,3 +291,23 @@ bird6-configure:
 /etc/bird/bird6.d/bogon_unreach.conf:
   file.absent
 {% endif %}
+
+
+#
+# B.A.T.M.A.N. Gateway
+#
+{% if 'batman_gw' in roles %}
+/etc/bird/bird6.d/radv.conf:
+  file.managed:
+    - source: salt://bird/radv.conf
+    - template: jinja
+    - watch_in:
+      - cmd: bird6-configure
+    - require:
+      - file: /etc/bird/bird6.d
+    - require_in:
+      - service: bird6
+{% else %}
+/etc/bird/bird6.d/ravd.conf:
+  file.absent
+{% endif %}
