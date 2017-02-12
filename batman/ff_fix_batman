@@ -9,7 +9,7 @@
 # fastd for batman'ish things currently, that's fine.
 #
 
-batman_version_wanted="2016.3"
+batman_version_wanted="2013.4.0"
 
 # Bail on error
 set -e
