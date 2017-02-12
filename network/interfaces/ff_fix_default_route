@@ -1,0 +1,62 @@
+#!/usr/bin/perl -W
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Sat 11 Feb 2017 10:29:29 PM CET
+#
+
+use strict;
+
+# Search for interface entry for an external interface with an IPv4 default
+# route configured, like this:
+#
+#auto eth0
+#iface eth0
+#	address 5.196.106.54/32
+#	gateway 5.196.106.48
+#	mtu 1500
+#	pointopoint 5.196.106.48
+my $gateway = undef;
+open (ENI, "< /etc/network/interfaces")
+	or die "Failed to open '/etc/network/interfaces': $!\n";
+while (my $line = <ENI>) {
+	chomp $line;
+
+	# New interface stanza
+	if ($line =~ /^iface (.*)/) {
+		$gateway = undef;
+	}
+
+	# gateway set?
+	elsif ($line =~ m/gateway\s+([0-9.]+)/) {
+		$gateway = $1;
+	}
+
+	# Interface part of vrf_external
+	elsif ($line =~ m/vrf vrf_external/) {
+		last;
+	}
+}
+close (ENI);
+
+# If there's no gateway configured for vrf_external, nothing to do
+if (not defined $gateway) {
+	exit (0);
+}
+
+
+# Check for current default route in vrf_external
+my $default_route_active = undef;
+open (ROUTE, "ip route show table 1023 | grep ^default |")
+	or die "Failed to read default route from table 1023: $!\n";
+while (my $line = <ROUTE>) {
+	if ($line =~ m/^default via ([0-9.]+)/) {
+		$default_route_active = $1;
+	}
+}
+close (ROUTE);
+
+
+# If we didn't find an active default route, re-add it.
+if (not defined $default_route_active) {
+	system ("ip route add default via $gateway table 1023");
+}
