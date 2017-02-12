@@ -23,9 +23,15 @@ fi
 # any meshable interface.
 shopt -s nullglob
 for mesh_int in /sys/class/net/*/mesh; do
+	ifname=$(IFS="/";set -- ${mesh_int};printf "$5\n")
 	# Ignore any external BATMAN instance, if present
-	if echo "${mesh_int}" | grep -q '-ext$'; then
+	if echo "${ifname}" | grep -q '-ext$'; then
 		continue
+	fi
+
+	if [ "${new_state}" == "off" -a "$(tail -n 1 /sys/kernel/debug/batman_adv/${ifname}/gateways)" == "No gateways in range ..." ] ; then
+		logger "No other B.A.T.M.A.N. gateways present, forcing gateway mode to server on ${ifname}"
+		new_state="server"
 	fi
 
 	old_state="$(cat ${mesh_int}/gw_mode)"
@@ -33,5 +39,5 @@ for mesh_int in /sys/class/net/*/mesh; do
 
 	echo "${new_state}"  > "${mesh_int}/gw_mode"
 	echo "54MBit/54MBit" > "${mesh_int}/gw_bandwidth"
-	logger "B.A.T.M.A.N. gateway mode changed from ${old_state} to ${new_state} on ${mesh_int}"
+	logger "B.A.T.M.A.N. gateway mode changed from ${old_state} to ${new_state} on ${ifname}"
 done
