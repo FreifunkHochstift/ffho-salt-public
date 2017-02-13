@@ -307,7 +307,34 @@ bird6-configure:
       - file: /etc/bird/bird6.d
     - require_in:
       - service: bird6
+
+/etc/bird/bird.d/mesh_routes.conf:
+  file.managed:
+    - source: salt://bird/mesh_routes.conf
+    - template: jinja
+    - watch_in:
+      - cmd: bird-configure
+    - require:
+      - file: /etc/bird/bird.d
+    - require_in:
+      - service: bird
+
+/etc/bird/bird6.d/mesh_routes.conf:
+  file.managed:
+    - source: salt://bird/mesh_routes.conf
+    - template: jinja
+    - watch_in:
+      - cmd: bird6-configure
+    - require:
+      - file: /etc/bird/bird6.d
+    - require_in:
+      - service: bird6
+
 {% else %}
 /etc/bird/bird6.d/ravd.conf:
+  file.absent
+/etc/bird/bird.d/mesh_routes.conf:
+  file.absent
+/etc/bird/bird6.d/mesh_routes.conf:
   file.absent
 {% endif %}
