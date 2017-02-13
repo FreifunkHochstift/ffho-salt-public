@@ -44,11 +44,16 @@ ifreload:
 #
 # The fix script will be called every minute by cron and after ifreload
 # was called to try to minimize any downtime.
-{% set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
-{% set sites_config = salt['pillar.get']('sites', {}) %}
-{% set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
-{% if 'vrf_external' in ifaces %}
+{% set vrf = [False] %}
+{% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items() %}
+  {% if iface_config.get ('vrf', '') == 'vrf_external' %}
+    {% do vrf.append(True) %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
 /usr/local/sbin/ff_fix_default_route:
+{% if True in vrf %}
   file.managed:
     - source: salt://network/interfaces/ff_fix_default_route
     - mode: 755
@@ -57,15 +62,14 @@ ifreload:
       - cmd: ifreload
     - watch:
       - file: /etc/network/interfaces
+{% else %}
+  file.absent
+{% endif %}
 
 /etc/cron.d/ff_fix_default_route:
+{% if True in vrf %}
   file.managed:
     - source: salt://network/interfaces/ff_fix_default_route.cron
-
 {% else %}
-/usr/local/sbin/ff_fix_default_route:
-  file.absent
-
-/etc/cron.d/ff_fix_default_route:
   file.absent
 {% endif %}
