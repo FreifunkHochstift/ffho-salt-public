@@ -27,7 +27,7 @@ while (my $line = <ENI>) {
 	}
 
 	# gateway set?
-	elsif ($line =~ m/gateway\s+([0-9.]+)/) {
+	elsif ($line =~ m/gateway\s+([0-9.]+)$/) {
 		$gateway = $1;
 	}
 
@@ -46,7 +46,7 @@ if (not defined $gateway) {
 
 # Check for current default route in vrf_external
 my $default_route_active = undef;
-open (ROUTE, "ip route show table 1023 | grep ^default |")
+open (ROUTE, "ip -4 route show table 1023 | grep ^default |")
 	or die "Failed to read default route from table 1023: $!\n";
 while (my $line = <ROUTE>) {
 	if ($line =~ m/^default via ([0-9.]+)/) {
