@@ -684,16 +684,16 @@ def _update_interface_desc (node_config, sites_config):
 	if 'batman' not in node_config.get ('roles', []):
 		return
 
-	for iface, iface_config in node_config.get ('ifaces', {}):
+	for iface, iface_config in node_config.get ('ifaces', {}).items ():
 		if 'desc' in sites_config:
 			continue
 
 		# If the interface name looks like a bridge for a BATMAN instance
 		# try to get the name of the corresponding site
-		match = re.search (r'^br-([a-z-_]+)$', iface)
-		if match and match in sites:
+		match = re.search (r'^br-([a-z_-]+)$', iface)
+		if match and match.group (1) in sites_config:
 			try:
-				iface_config['desc'] = sites[match.group (1)]['name']
+				iface_config['desc'] = sites_config[match.group (1)]['name']
 			except KeyError:
 				pass
 

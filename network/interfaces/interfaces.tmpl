@@ -52,7 +52,7 @@ iface {{ interface }}
   {%- endif %}
   {#- Alias / Description set? #}
   {%- if 'alias' in config or 'desc' in config %}
-	alias {{ config.get ('alias', config.get ('desc')) }}
+	alias "{{ config.get ('alias', config.get ('desc')) }}"
 	#
   {%- endif %}
   {#- Configure stuff for bonding, bridging, etc.? #}
