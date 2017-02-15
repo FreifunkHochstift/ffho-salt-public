@@ -673,6 +673,30 @@ def _generate_loopback_ips (ifaces, node_config, node_id):
 	if v6_ip not in prefixes:
 		prefixes.append (v6_ip)
 
+# Generate interface descriptions / aliases for auto generated or manually
+# created interfaces. Currently this only is done for bridges associated
+# with BATMAN instanzes.
+#
+# @param node_config:	The configuration of the given node (as dict)
+# @param sites_config	Global sites configuration (as dict)
+def _update_interface_desc (node_config, sites_config):
+	# Currently we only care for nodes with batman role.
+	if 'batman' not in node_config.get ('roles', []):
+		return
+
+	for iface, iface_config in node_config.get ('ifaces', {}):
+		if 'desc' in sites_config:
+			continue
+
+		# If the interface name looks like a bridge for a BATMAN instance
+		# try to get the name of the corresponding site
+		match = re.search (r'^br-([a-z-_]+)$', iface)
+		if match and match in sites:
+			try:
+				iface_config['desc'] = sites[match.group (1)]['name']
+			except KeyError:
+				pass
+
 
 ################################################################################
 #                              Public functions                                #
@@ -750,6 +774,9 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	# This leaves 'auto', 'prefixes' and 'desc' as keys which should not be directly
 	# printed into the remaining configuration. These are handled within the jinja
 	# interface template.
+
+	# Generate meaningful interface descriptions / aliases where useful
+	_update_interface_desc (node_config, sites_config)
 
 	return ifaces
 
