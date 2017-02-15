@@ -50,6 +50,11 @@ iface {{ interface }} inet {{ config.get ('method') }}
   {%- else %}
 iface {{ interface }}
   {%- endif %}
+  {#- Alias / Description set? #}
+  {%- if 'alias' in config or 'desc' in config %}
+	alias {{ config.get ('alias', config.get ('desc')) }}
+	#
+  {%- endif %}
   {#- Configure stuff for bonding, bridging, etc.? #}
   {%- for feature in ['batman', 'bond', 'bridge', 'vlan', 'vxlan'] if feature in config %}
     {%- set feature_config = config.get (feature) %}
