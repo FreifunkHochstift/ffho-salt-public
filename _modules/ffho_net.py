@@ -1151,3 +1151,8 @@ def cidr_to_dotted_mask (prefix):
 	from ipcalc import Network
 
 	return str (Network (prefix).netmask ())
+
+def is_subprefix (prefix, subprefix):
+	from ipcalc import Network
+
+	return subprefix in Network(prefix)
