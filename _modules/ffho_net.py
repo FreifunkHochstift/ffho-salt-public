@@ -137,8 +137,6 @@ def _get_site_no (sites_config, site_name):
 #    00:e6	being an nodes fastd tunnel interface of IPv6 transport
 #    00:ef	being an extenral instance VEth interface side
 #    02:xx	being a connection to local Vlan 2xx
-#    1b:24	being the ibss 2.4GHz bssid
-#    1b:05	being the ibss 5GHz bssid
 #    xx:xx	being a VXLAN tunnel for site ss, with xx being a the underlay VLAN ID (1xyz, 2xyz)
 #    ff:ff	being the gluon next-node interface
 def gen_batman_iface_mac (site_no, device_no, network):
