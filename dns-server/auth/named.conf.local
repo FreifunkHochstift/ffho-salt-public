@@ -26,25 +26,25 @@ acl ffho-ops {
 
 zone "paderborn.freifunk.net" {
 	type master;
-	file "/etc/bind/zones/paderborn.freifunk.net.zone";
+	file "/etc/bind/zones/static/paderborn.freifunk.net.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
 zone "pb.freifunk.net" {
 	type master;
-	file "/etc/bind/zones/pb.freifunk.net.zone";
+	file "/etc/bind/zones/static/pb.freifunk.net.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
 zone "hochstift.freifunk.net" {
 	type master;
-	file "/etc/bind/zones/hochstift.freifunk.net.zone";
+	file "/etc/bind/zones/static/hochstift.freifunk.net.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
 zone "ffho.net" {
 	type master;
-	file "/etc/bind/zones/ffho.net.zone";
+	file "/etc/bind/zones/static/ffho.net.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
@@ -55,14 +55,14 @@ zone "ffho.net" {
 // 2a02:450:0:6::/64
 zone "6.0.0.0.0.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
 	type master;
-	file "/etc/bind/zones/2a02:450:0:6_64.ip6.arpa.zone";
+	file "/etc/bind/zones/static/2a02:450:0:6_64.ip6.arpa.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
 // 2a02:450:1::/60
 zone "0.0.0.1.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
 	type master;
-	file "/etc/bind/zones/2a02:450:1_60.ip6.arpa.zone";
+	file "/etc/bind/zones/static/2a02:450:1_60.ip6.arpa.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
@@ -74,7 +74,7 @@ zone "0.0.0.1.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
 // 2a03:2260:2342::/48
 zone "2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa" {
 	type master;
-	file "/etc/bind/zones/2a03:2260:2342::_48.ip6.arpa.zone";
+	file "/etc/bind/zones/static/2a03:2260:2342::_48.ip6.arpa.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
@@ -86,21 +86,21 @@ zone "2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa" {
 // 10.132.0.0/16 reverse
 zone "132.10.in-addr.arpa" {
 	type master;
-	file "/etc/bind/zones/132.10.in-addr.arpa.db";
+	file "/etc/bind/zones/static/132.10.in-addr.arpa.db";
 	allow-transfer { localhost; ffho-ops; };
 };
 
 // Management reverse
 zone "30.172.in-addr.arpa" {
 	type master;
-	file "/etc/bind/zones/30.172.in-addr.arpa.zone";
+	file "/etc/bind/zones/static/30.172.in-addr.arpa.zone";
 	allow-transfer { localhost; ffho-ops; };
 };
 
 // Legacy .ffpb
 zone "ffpb" {
 	type master;
-	file "/etc/bind/zones/ffpb.db";
+	file "/etc/bind/zones/static/ffpb.db";
 	allow-transfer { localhost; ffho-ops; };
 };
 
@@ -108,6 +108,6 @@ zone "ffpb" {
 // Legacy fdca:ffee:ff12::/48 reverse
 zone "2.1.f.f.e.e.f.f.a.c.d.f.ip6.arpa" {
 	type master;
-	file "/etc/bind/zones//fdca:ffce:ff12::_48.db";
+	file "/etc/bind/zones/static//fdca:ffce:ff12::_48.db";
 	allow-transfer { localhost; ffho-ops; };
 };

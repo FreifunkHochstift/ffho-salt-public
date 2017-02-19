@@ -10,17 +10,6 @@ bind9:
     - reload: True
 
 
-# Create zones directory
-/etc/bind/zones/:
-  file.directory:
-    - makedirs: true
-    - user: root
-    - group: root
-    - mode: 755
-    - require:
-      - pkg: bind9
-
-
 # Reload command
 rndc-reload:
   cmd.wait:
