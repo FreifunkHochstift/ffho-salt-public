@@ -31,6 +31,7 @@ function createChangelog {
 }
 
 [ -n "${FIRMWARE_DIR}" ] || FIRMWARE_DIR=${DEFAULT_DIR}
+[ -n "${FORCE}" ] || FORCE=0
 [ -n "${BRANCHES}" ] || BRANCHES=${DEFAULT_BRANCHES}
 [ -n "${VERBOSE}" ] || VERBOSE=0
 
