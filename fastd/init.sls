@@ -30,6 +30,8 @@ fastd:
     - require:
       - pkgrepo: fastd-repo
       - sls: network.interfaces
+  service.dead:
+    - enable: False
 
 /etc/systemd/system/fastd@.service:
   file.managed:
@@ -76,6 +78,11 @@ fastd:
       site: {{ site }}
       site_no: {{ site_no }}
       mac_address: {{ mac_address }}
+    {% if 'batman_ext' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+      bat_iface: bat-{{ site }}-ext
+    {% else %}
+      bat_iface: bat-{{ site }}
+    {% endif %}
       peer_limit: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':fastd:peer_limit', False) }}
     - require:
       - file: /etc/fastd/{{ instance_name }}
@@ -102,9 +109,15 @@ fastd@{{ instance_name }}:
       - file: /etc/systemd/system/fastd@.service
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
       - file: /etc/fastd/{{ instance_name }}/secret.conf
+      - service: fastd
     - watch:
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
       - file: /etc/fastd/{{ instance_name }}/secret.conf
+    {% if network in ['nodes4', 'nodes6'] %}
+      - git: peers-git
+    {% else %}
+      - file: /etc/fastd/{{ instance_name }}/gateways/*
+    {% endif %}
   {% endfor %} # // foreach network in $site
 
 
@@ -118,17 +131,10 @@ fastd@{{ instance_name }}:
       - file: /etc/fastd/{{ site }}_intergw
 
 #
-# Gather all nodes configured for this site
-  {% set nodes = [] %}
-  {% for node, node_config in salt['pillar.get']('nodes').items () %}
-    {% if site in node_config.get ('sites', {}) and 'fastd' in node_config %}
-      {% do nodes.append (node) %}
-    {% endif %}
-  {% endfor %} # // foreach node
-
 # Set up Inter-Gw-VPN link to all nodes of this site
-  {% for node in nodes|sort %}
+  {% for node, node_config in salt['pillar.get']('nodes').items ()|sort  %}
 /etc/fastd/{{ site }}_intergw/gateways/{{ node }}:
+    {% if site in node_config.get ('sites', {}) and 'fastd' in node_config %}
   file.managed:
     - source: salt://fastd/inter-gw.peer.tmpl
     - template: jinja
@@ -138,7 +144,10 @@ fastd@{{ instance_name }}:
       pubkey: {{ salt['pillar.get']('nodes:' ~ node ~ ':fastd:intergw_pubkey') }}
     - require:
       - file: /etc/fastd/{{ site }}_intergw/gateways
-  {% endfor %} # // foreach site peer
+    {% else %}
+  file.absent
+    {% endif %}
+  {% endfor %} # // foreach node
 {% endfor %} # // foreach site
 
 

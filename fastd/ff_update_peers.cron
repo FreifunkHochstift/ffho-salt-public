@@ -1,5 +1,0 @@
-# Update /etc/freifunk/peers repository
-
-MAILTO="{{ salt['pillar.get']('ffho:tech_c_mail') }}"
-
-*/5 * * * *     root    /usr/local/sbin/ff_update_peers 2>&1 | /usr/local/bin/ff_log_to_bot

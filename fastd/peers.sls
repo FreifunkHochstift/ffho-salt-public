@@ -28,7 +28,12 @@ peers-git:
     - mode: 744
 
 ## update cronjob
-#/etc/cron.d/ff_update_peers:
-#  file.managed:
-#    - source: salt://fastd/ff_update_peers.cron
-#
+fastd-update-peers:
+  cron.present:
+    - name: /usr/local/sbin/ff_update_peers 2>&1 | /usr/local/bin/ff_log_to_bot
+    - identifier: fastd-update-peers
+    - user: root
+    - minute: '*/5'
+    - require:
+      - file: /usr/local/sbin/ff_update_peers
+      - git: peers-git

@@ -1,15 +1,16 @@
 # Peer config for {{ node }} in site {{ site }} (Salt managed)
 {%- set node_config = salt['pillar.get']('nodes:' ~ node) %}
+{%- set no_peer = salt['pillar.get']('nodes:' ~ node ~ ':fastd:no_peer', False) %}
 {%- set ips = salt['ffho_net.get_node_iface_ips'](node_config, 'vrf_external') %}
 
-{# {%- if not no_peer %} #}
-{%- set port = 11000 + site_no|int %}
-{%- for ipv4 in ips['v4'] %}
+{%- if not no_peer %}
+  {%- set port = 11000 + site_no|int %}
+  {%- for ipv4 in ips['v4'] %}
 remote ipv4 "{{ ipv4 }}" port {{ port }};
-{%- endfor %}
-{%- for ipv6 in ips['v6'] %}
+  {%- endfor %}
+  {%- for ipv6 in ips['v6'] %}
 remote ipv6 "{{ ipv6 }}" port {{ port }};
-{%- endfor %}
-{# {%- endif %} #}
+  {%- endfor %}
+{%- endif %}
 
 key "{{ pubkey }}";
