@@ -4,7 +4,7 @@ base:
     - ffinfo
     - apt
     - bash
-    - cert
+    - certs
     - console-tools
     - kernel
     - locales

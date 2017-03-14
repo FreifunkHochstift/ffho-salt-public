@@ -16,7 +16,7 @@ c_rehash:
 # FFHO internal CA
 /etc/ssl/certs/ffho-cacert.pem:
   file.managed:
-    - source: salt://cert/ffho-cacert.pem
+    - source: salt://certs/ffho-cacert.pem
     - user: root
     - group: root
     - mode: 644
@@ -27,7 +27,7 @@ c_rehash:
 # StartSSL Class1intermediate CA certificate
 /etc/ssl/certs/StartSSL_Class1_CA.pem:
   file.managed:
-    - source: salt://cert/StartSSL_Class1_CA.pem
+    - source: salt://certs/StartSSL_Class1_CA.pem
     - user: root
     - group: root
     - mode: 644
@@ -38,7 +38,7 @@ c_rehash:
 # StartSSL Class2 intermediate CA certificate
 /etc/ssl/certs/StartSSL_Class2_CA.pem:
   file.managed:
-    - source: salt://cert/StartSSL_Class2_CA.pem
+    - source: salt://certs/StartSSL_Class2_CA.pem
     - user: root
     - group: root
     - mode: 644
