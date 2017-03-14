@@ -63,7 +63,11 @@ c_rehash:
   {% if pillar_name != None %}
 /etc/ssl/certs/{{ cn }}.cert.pem:
   file.managed:
+    {% if salt['pillar.get'](pillar_name ~ ':cert') == "file" %}
+    - source: salt://certs/certs/{{ cn }}.cert.pem
+    {% else %}
     - contents_pillar: {{ pillar_name }}:cert
+    {% endif %}
     - user: root
     - group: root
     - mode: 644
