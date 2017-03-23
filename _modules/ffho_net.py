@@ -38,7 +38,8 @@ default_bridge_config = {
 default_hop_penalty_by_role = {
 	'bbr'       :  5,
 	'bras'      : 50,
-	'batman_gw' : 50,
+	'batman_gw' : 5,
+	'batman_ext': 50,
 }
 batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
 
@@ -198,6 +199,9 @@ def _update_batman_config (node_config, iface, sites_config):
 				for role in batman_role_evaluation_order:
 					if role in node_roles:
 						batman_config['batman-hop-penalty'] = default_hop_penalty_by_role[role]
+
+				if 'batman_ext' in node_roles and iface.endswith('-ext'):
+					batman_config['batman-hop-penalty'] = default_hop_penalty_by_role['batman_ext']
 
 		# If batman ifaces were specified as a list - which they should -
 		# generate a sorted list of interface names as string representation
