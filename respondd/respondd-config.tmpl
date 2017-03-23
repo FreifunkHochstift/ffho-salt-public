@@ -1,0 +1,26 @@
+{
+  "batman": "{{ bat_iface }}",
+  "bridge": "{{ mcast_iface }}",
+  "mesh-vpn": ["{{ site }}_intergw", "{{ site }}_nodes4", "{{ site }}_nodes6"],
+  "nodeinfo": {
+    "hostname": "{{ hostname }}",
+{%- if location %}
+    "location": {
+      "latitude": {{ location.latitude }},
+      "longitude": {{ location.longitude }}
+    },
+{%- endif %}
+    "network": {
+      "mac": "{{ mac_address }}"
+    },
+    "software": {
+      "firmware": {
+        "release": "FFHO-1.0"
+      }
+    },
+    "system": {
+      "site_code": "{{ site_code }}"
+    },
+    "vpn": {{ fastd_peers }}
+  }
+}

@@ -38,6 +38,7 @@ base:
   nodes:{{ grains['id'] }}:roles:batman:
     - match: pillar
     - batman
+    - respondd
 
   # Batman gateway
   nodes:{{ grains['id'] }}:roles:batman_gw:
