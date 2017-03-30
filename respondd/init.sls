@@ -56,6 +56,11 @@ ffho-respondd:
     {% else %}
       mcast_iface: "bat-{{site}}"
     {% endif %}
+    {% if 'fastd' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+      mesh_vpn: [{{ site }}_intergw, {{ site }}_nodes4, {{ site }}_nodes6]
+    {% else %}
+      mesh_vpn: False
+    {% endif %}
       site: {{site}}
       site_code: "{{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':site_code', '')}}"
       location: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':location', {})}}

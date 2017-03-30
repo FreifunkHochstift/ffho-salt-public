@@ -1,7 +1,9 @@
 {
   "batman": "{{ bat_iface }}",
   "bridge": "{{ mcast_iface }}",
-  "mesh-vpn": ["{{ site }}_intergw", "{{ site }}_nodes4", "{{ site }}_nodes6"],
+{%- if mesh_vpn %}
+  "mesh-vpn": ["{{ ('", "').join(mesh_vpn) }}"],
+{%- endif %}
   "nodeinfo": {
     "hostname": "{{ hostname }}",
 {%- if location %}
