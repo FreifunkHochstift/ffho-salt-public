@@ -8,9 +8,11 @@
   {%- for ipv4 in ips['v4'] %}
 remote ipv4 "{{ ipv4 }}" port {{ port }};
   {%- endfor %}
-  {%- for ipv6 in ips['v6'] %}
+  {%- if has_ipv6 %}
+    {%- for ipv6 in ips['v6'] %}
 remote ipv6 "{{ ipv6 }}" port {{ port }};
-  {%- endfor %}
+    {%- endfor %}
+  {%- endif %}
 {%- endif %}
 
 key "{{ pubkey }}";

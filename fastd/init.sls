@@ -132,6 +132,11 @@ fastd@{{ instance_name }}:
 
 #
 # Set up Inter-Gw-VPN link to all nodes of this site
+  {% set has_ipv6 = False %}
+  {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+  {% if  salt['ffho_net.get_node_iface_ips'](node_config, 'vrf_external')['v6']|length %}
+    {% set has_ipv6 = True %}
+  {% endif %}
   {% for node, node_config in salt['pillar.get']('nodes').items ()|sort  %}
 /etc/fastd/{{ site }}_intergw/gateways/{{ node }}:
     {% if site in node_config.get ('sites', {}) and 'fastd' in node_config %}
@@ -140,6 +145,7 @@ fastd@{{ instance_name }}:
     - template: jinja
       site: {{ site }}
       site_no: {{ site_no }}
+      has_ipv6: {{ has_ipv6 }}
       node: {{ node }}
       pubkey: {{ salt['pillar.get']('nodes:' ~ node ~ ':fastd:intergw_pubkey') }}
     - require:
