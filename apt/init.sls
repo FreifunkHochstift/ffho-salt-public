@@ -56,6 +56,15 @@ apt-neoraider:
     - keyserver: pgpkeys.mit.edu
     - keyid: 16EF3F64CB201D9C
 
+apt-icinga2:
+  pkgrepo.managed:
+    - comments:
+      - "# Icinga2 repo"
+    - human_name: Icinga2 repo
+    - name: deb http://packages.icinga.org/debian icinga-jessie main
+    - file: /etc/apt/sources.list.d/icinga2.list
+    - key_url: http://packages.icinga.org/icinga.key
+
 
 # APT preferences - Pin neoraiders packages to prio 900
 /etc/apt/preferences.d/ffho:
