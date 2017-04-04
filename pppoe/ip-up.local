@@ -22,4 +22,34 @@
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin
 export PATH
 
-ip link set ${1}" master vrf_external
+cat << EOF > /usr/local/sbin/fix_ppp_vrf.gen
+#!/bin/sh
+
+while ! ip a s dev ppp0 | grep -q "inet "; do
+        sleep 1
+done
+
+ip link set ${1} master vrf_external
+ip link set ${1} up
+ip route add default via ${5} table 1023
+
+{%- if grains['id'] == 'bbr-kt.in.ffho.net' %}
+# Reload backbone GRE tunnels to rebind them to VRF master device
+for pop in ber dus fra; do
+	for x in a b; do
+		ifdown gre_ffrl_\${pop}_\${x}
+		ifup gre_ffrl_\${pop}_\${x}
+	done
+done
+{%- endif %}
+
+{%- if grains['id'] == 'bbr-wagsh.in.ffho.net' %}
+# Reload OpenVPN tunnels
+systemctl restart openvpn.service
+#systemctl restart fastd@hx-sued_intergw.service
+{%- endif %}
+EOF
+
+chmod 755 /usr/local/sbin/fix_ppp_vrf.gen
+
+at -f /usr/local/sbin/fix_ppp_vrf now
