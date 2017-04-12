@@ -46,11 +46,13 @@ c_rehash:
       - cmd: c_rehash
 
 
+{% set certs = {} %}
+
 # Are there any certificates defined or referenced in the node pillar?
-{% for cn in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':certs', {})|sort %}
+{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{% for cn, cert_config in node_config.get ('certs', {}).items () %}
   {% set pillar_name = None %}
 
-  {% set cert_config = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':certs:' ~ cn) %}
   {# "cert" and "privkey" provided in node config? #}
   {% if 'cert' in cert_config and 'privkey' in cert_config %}
     {% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ cn %}
@@ -61,6 +63,22 @@ c_rehash:
   {% endif %}
 
   {% if pillar_name != None %}
+    {% do certs.update ({ cn : pillar_name }) %}
+  {% endif %}
+{% endfor %}
+
+# Are there any cert defined or referenced for this node or roles of this node?
+{% set node_roles = node_config.get ('roles', []) %}
+{% for cn, cert_config in salt['pillar.get']('cert', {}).items () %}
+  {% for role in cert_config.get ('apply', {}).get ('roles', []) %}
+    {% if role in node_roles %}
+      {% do certs.update ({ cn : 'cert:' ~ cn }) %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+# Install found certificates
+{% for cn, pillar_name in certs.items () %}
 /etc/ssl/certs/{{ cn }}.cert.pem:
   file.managed:
     {% if salt['pillar.get'](pillar_name ~ ':cert') == "file" %}
@@ -78,5 +96,4 @@ c_rehash:
     - user: root
     - group: root
     - mode: 400
-  {% endif %}
 {% endfor %}
