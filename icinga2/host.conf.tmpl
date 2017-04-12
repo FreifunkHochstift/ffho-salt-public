@@ -1,0 +1,41 @@
+#
+# {{ node_id }}
+#
+{%- set roles = node_config.get ('roles', []) %}
+{%- set sites = node_config.get ('sites', []) %}
+{%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
+{%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
+
+{%- if 'icinga2server' not in roles %}
+object Endpoint "{{ node_id }}" {
+        host = "{{ node_id }}"
+}
+
+object Zone "{{ node_id }}" {
+	endpoints = [ "{{ node_id }}" ]
+	parent = "master"
+}
+{%- endif %}
+
+object Host "{{ node_id }}" {
+	import "generic-host"
+
+	display_name = "{{ node_id }}"
+
+	address = "{{ address }}"
+	address6 = "{{ address6 }}"
+
+	vars.os = "Linux"
+
+	vars.roles = [
+{%- for role in roles|sort %}
+		"{{ role }}",
+{%- endfor %}
+	]
+
+	vars.sites = [
+{%- for site in sites|sort %}
+		"{{ site }}",
+{%- endfor %}
+	]
+}									

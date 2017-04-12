@@ -1,0 +1,334 @@
+#!/usr/bin/perl
+#-------------------------------------------------------------------------------
+#
+#   Programm        : check_cpu_usage
+#
+#-------------------------------------------------------------------------------
+#
+#   Beschreibung    : Nagios check script to check the CPU Usage by monitoring
+#                     /proc/stat.
+#
+#   Author          : Marek Zavesicky
+#   Version         : $Revision: $
+#   Erstellt        : 2013/08/26
+#   Letztes Update  : $Date: $
+#
+#   $Id: $
+#   Change history  :
+#                     $Log: $
+#
+#   This program is free software; you can redistribute it and/or modify it
+#   under the terms of the GNU General Public License as published by the
+#   Free Software Foundation; either version 2 of the License, or (at your
+#   option) any later version.  See <http://www.fsf.org/copyleft/gpl.txt>.
+#
+#   This program is distributed in the hope that it will be useful, but
+#   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#   for more details.
+#
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+#                     Pragma
+#-------------------------------------------------------------------------------
+use strict;
+use warnings;
+
+#-------------------------------------------------------------------------------
+#                     Used Modules
+#-------------------------------------------------------------------------------
+# use lib "/usr/local/nrpe/perl/lib";
+use Nagios::Plugin;
+#use Monitoring::Plugin;
+use Data::Dumper;
+
+#-------------------------------------------------------------------------------
+#   Function        : readStatFile
+#-------------------------------------------------------------------------------
+#   Description     : Parses the stat file and extract the counters, then store
+#                     them in a hash
+#
+#   Input           : $np           Nagios::Plugins reference
+#                     $file         A file with status informations
+#                     $names        Array that has the order of the fields
+#   Output          : $stat         A hash object with the newdata stats
+#-------------------------------------------------------------------------------
+sub readStatFile
+{
+    my $np = shift;
+    my $file = shift;
+    my $names = shift;
+    my $stat = ();
+
+    open( FILE, "<", $file ) or $np->nagios_die( "cant open file $file" );
+
+    while ( <FILE> )
+    {
+        next unless ( $_ =~ /^cpu/ );
+
+        my ( $name, @cpudata ) = split( '\s+', $_ );
+        $stat->{ $name } = \@cpudata;
+    }
+    close( FILE );
+
+    return $stat;
+}
+
+#-------------------------------------------------------------------------------
+#   Function        : writeStatFile
+#-------------------------------------------------------------------------------
+#   Description     : Write the olddata object to the gapfile
+#
+#   Input           : $np           Nagios::Plugins reference
+#                     $objects      the data objects
+#                     $names        Array that has the order of the fields
+#   Output          : -
+#-------------------------------------------------------------------------------
+sub writeStatFile
+{
+    my $np = shift;
+    my $objects = shift;
+    my $names = shift;
+
+    open( FILE, ">", $np->opts->gapfile ) or $np->nagios_die( "cant open file $np->opts->gapfile" );
+    foreach ( keys %{ $objects->{ newdata } } )
+    {
+        my $string = $_ . " ";
+        $string .= join( " ", @{ $objects->{ newdata }->{ $_ } } );
+        print FILE $string . "\n";
+    }
+    close( FILE );
+}
+
+#-------------------------------------------------------------------------------
+#   Function        : calculateData
+#-------------------------------------------------------------------------------
+#   Description     : Calculate the diference between old and new data and store
+#                     the result in an array. Summarize all differences and
+#                     calculate the percentage of each value.
+#
+#   Input           : $np           Nagios::Plugins reference
+#                     $objects      the data objects
+#                     $names        Array that has the order of the fields
+#   Output          : -
+#-------------------------------------------------------------------------------
+sub calculateData
+{
+    my $name = shift;
+    my $objects = shift;
+    my $names = shift;
+    my @results;
+    my $sum = 0;
+    my $cpu = ();
+
+    for ( my $i = 0; $i < scalar @$names; $i++ )
+    {
+        if ( defined( $objects->{ olddata }->{ $name }->[ $i ] ) )
+        {
+            push( @results, $objects->{ newdata }->{ $name }->[ $i ] - $objects->{ olddata }->{ $name }->[ $i ] );
+            $sum += $results[ $i ];
+        }
+        else
+        {
+            push( @results, 0 );
+        }
+    }
+
+    for ( my $i = 0; $i < scalar @$names; $i++ )
+    {
+        $cpu->[ $i ] = $results[ $i ] * 100 / $sum;
+    }
+    return $cpu;
+}
+
+#-------------------------------------------------------------------------------
+#   Function        : processData
+#-------------------------------------------------------------------------------
+#   Description     : Process the hashes of cpu's.
+#
+#   Input           : $np           Nagios::Plugins reference
+#                     $objects      the data objects
+#                     $names        Array that has the order of the fields
+#   Output          : -
+#-------------------------------------------------------------------------------
+sub processData
+{
+    my $np = shift;
+    my $objects = shift;
+    my $names = shift;
+    my $percent = ();
+
+    $percent->{ cpu } = calculateData( "cpu", $objects, $names );
+
+    if ( $np->opts->details )
+    {
+        foreach ( sort keys %{ $objects->{ olddata } } )
+        {
+            next if ( $_ eq 'cpu' );
+
+            $percent->{ $_ } = calculateData( $_, $objects, $names );
+        }
+    }
+    return $percent;
+}
+
+#-------------------------------------------------------------------------------
+#   Function        : compareData
+#-------------------------------------------------------------------------------
+#   Description     : Compare data with threshold if needed and generate the
+#                     performance data string.
+#
+#   Input           : $np           Nagios::Plugins reference
+#                     $objects      the data objects
+#                     $names        Array that has the order of the fields
+#   Output          : -
+#-------------------------------------------------------------------------------
+sub compareData
+{
+    my $np          = shift;
+    my $objects     = shift;
+    my $names       = shift;
+    my $warnings    = [ split( ',', $np->opts->warning ) ];
+    my $criticals   = [ split( ',', $np->opts->critical ) ];
+    my $string      = "";
+    my $result      = 0;
+    my $res;
+
+    foreach ( sort keys %{ $objects->{ olddata } } )
+    {
+        # if details are not needed, grab the next line
+        unless ( $np->opts->details )
+        {
+            next unless ( $_ eq 'cpu' );
+        }
+
+        # compute all columns and check the thresholds
+        $string .= uc( $_ );
+        for ( my $i = 0; $i < scalar @$names; $i++ )
+        {
+            if ( defined( $$warnings[ $i ] ) and defined( $$criticals[ $i ] ) and ( $$warnings[ $i ] ne "none" ) and ( $$criticals[ $i ] ne "none" ) )
+            {
+                $res = $np->check_threshold( check      => $objects->{ percent }->{ $_ }->[ $i ],
+                                             warning    => $$warnings[ $i ],
+                                             critical   => $$criticals[ $i ] );
+                # Evaluate the new return code, do not overwrite higher severity by lower
+                $result = ( $res > $result ? $res : $result );
+                $np->add_perfdata(
+                    label       => $_ . "_" . $$names[ $i ],
+                    value       => $objects->{ percent }->{ $_ }->[ $i ],
+                    warning     => $$warnings[ $i ],
+                    critical    => $$criticals[ $i ],
+                    uom         => "%"
+                );
+            }
+            else
+            {
+                $np->add_perfdata(
+                    label       => $_ . "_" . $$names[ $i ],
+                    value       => $objects->{ percent }->{ $_ }->[ $i ],
+                    uom         => "%"
+                );
+            }
+            # create the message string
+            if ( $$names[ $i ] =~ /^user/ or $$names[ $i ] =~ /^system/  or $$names[ $i ] =~ /^idle/ or $$names[ $i ] =~ /^iowait/ or $$names[ $i ] =~ /^steal/ )
+            {
+                $string .= sprintf( " (%s=%3.2f)", $$names[ $i ], $objects->{ percent }->{ $_ }->[ $i ] );
+            }
+        }
+        $string .= ", ";
+    }
+
+    # strip the last two characters from string
+    return ( $result, substr( $string, 0, -2 ) );
+}
+
+#-------------------------------------------------------------------------------
+#   Main
+#-------------------------------------------------------------------------------
+my $objects = ();
+my $names = [];
+my $np = Nagios::Plugin->new(
+    shortname =>    "Linux CPU Usage",
+    usage =>        "Usage: %s < arguments > " .
+                    "arguments: \n" .
+                    "   [ -t|--timeout=<timeout> ]      timeout\n" .
+                    "   [ -c|--critical=<threshold> ]   critical threshold\n" .
+                    "   [ -w|--warning=<threshold> ]    warning threshold\n" .
+                    "   [ -s|--statfile=<file> ]        name of the stat file (default /proc/stat)\n" .
+                    "   [ -g|--gapfile=<file> ]         name of the gap file (default /tmp/check_cpu_usage.gap.tmp)\n" .
+                    "   [ -n|--names=<list> ]           comma separated list of names representing the column in the stats file\n" .
+                    "   [ -d|--details ]                show detailed information for each core\n",
+    plugin  =>      'check_cpu_usage'
+);
+
+$np->add_arg(
+    spec =>         'warning|w=s',
+    help =>         "--warning -w\n   a list of threshold for warning in the same order as names\n" .
+                    "   (default none,none,none,none,none,none,none,none,none,none,none,none,none,none)",
+    default =>      "none,none,none,none,none,none,none,none,none,none,none,none,none,none",
+    required =>     0
+);
+
+$np->add_arg(
+    spec =>         'critical|c=s',
+    help =>         "--critical -c\n   a list of threshold for critical in the same order as names\n" .
+                    "   (default none,none,none,none,none,none,none,none,none,none,none,none,none,none)",
+    default =>      "none,none,none,none,none,none,none,none,none,none,none,none,none,none",
+    required =>     0
+);
+
+$np->add_arg(
+    spec =>         'statfile|s=s',
+    help =>         "--statfile -s\n   name of the stat file (default /proc/stat)",
+    default =>      "/proc/stat",
+    required =>     0
+);
+
+$np->add_arg(
+    spec =>         'gapfile|g=s',
+    help =>         "--gapfile -g\n   name of the gap file (default /tmp/check_cpu_usage.gap.tmp)",
+    default =>      "/tmp/check_cpu_usage.gap.tmp",
+    required =>     0
+);
+
+$np->add_arg(
+    spec =>         'details|d',
+    help =>         "--details -d\n   show detailed information for each core",
+    required =>     0
+);
+
+
+$np->add_arg(
+    spec =>         'names|n=s',
+    help =>         "--names -n\n   a comma separated list of names representing the column in the stats file. See 'man proc' for details\n" .
+                    "   (default user,nice,system,idle,iowait,irq,softirq,steal,guest,guest_nice,nyd1,nyd2,nyd3)",
+    default =>      "user,nice,system,idle,iowait,irq,softirq,steal,guest,guest_nice,nyd1,nyd2,nyd3",
+    required =>     0
+);
+
+# read the cli options
+$np->getopts;
+
+# rearange scalar lists into arrays
+$names = [ split( ',', $np->opts->names ) ];
+
+# read data from stats and store it to a hash
+$objects->{ newdata } = readStatFile( $np, $np->opts->statfile, $names );
+
+if ( -e $np->opts->gapfile )
+{
+    # read data from stored file and store it to a hash
+    $objects->{ olddata } = readStatFile( $np, $np->opts->gapfile, $names );
+
+    # calculate difference and percent for the data
+    $objects->{ percent } = processData( $np, $objects, $names );
+}
+
+# write the new data to the gapfile
+writeStatFile( $np, $objects, $names );
+
+print Dumper( $names, $objects ) if ( $np->opts->verbose );
+
+# compare data with warning and critical threshold and exit
+$np->nagios_exit( compareData( $np, $objects, $names ) );

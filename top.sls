@@ -6,6 +6,7 @@ base:
     - bash
     - certs
     - console-tools
+    - icinga2
     - kernel
     - locales
     - mosh

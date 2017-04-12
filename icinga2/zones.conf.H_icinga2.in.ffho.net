@@ -1,0 +1,11 @@
+#
+# zones.conf (Salt managed)
+#
+
+object Endpoint NodeName {
+	host = NodeName
+}
+
+object Zone "master" {
+	endpoints = [ NodeName ]
+}
