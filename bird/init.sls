@@ -22,7 +22,6 @@ bird-pkg:
     - name: bird
     - require:
       - pkgrepo: bird-repo
-      - sls: network.interfaces
 
 
 # Make sure both services are enabled
