@@ -70,3 +70,8 @@ apt-icinga2:
 /etc/apt/preferences.d/ffho:
   file.managed:
     - source: salt://apt/ffho.preferences
+
+
+/etc/apt/apt.conf.d/ffho:
+  file.managed:
+    - source: salt://apt/ffho.apt.conf
