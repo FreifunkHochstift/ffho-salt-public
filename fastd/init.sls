@@ -7,28 +7,19 @@
 {% set device_no = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':id', -1) %}
 
 include:
+  - apt
   - network.interfaces
 {% if 'fastd_peers' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
   - fastd.peers
 {% endif %}
 
 
-fastd-repo:
-  pkgrepo.managed:
-    - human_name: Neoraiders fastd repository
-    - name: deb http://repo.universe-factory.net/debian/ sid main
-    - dist: sid
-    - file: /etc/apt/sources.list.d/fastd.list
-    - keyserver: keyserver.ubuntu.com
-    - keyid: CB201D9C
 
-
-# Install fastd (after fastd-repo and the network are configured)
+# Install fastd
 fastd:
   pkg.installed:
     - name: fastd
     - require:
-      - pkgrepo: fastd-repo
       - sls: network.interfaces
   service.dead:
     - enable: False
