@@ -70,3 +70,8 @@ base:
   nodes:{{ grains['id'] }}:roles:influxdb:
     - match: pillar
     - influxdb
+
+  # yanic
+  nodes:{{ grains['id'] }}:roles:yanic:
+    - match: pillar
+    - yanic

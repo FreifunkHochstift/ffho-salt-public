@@ -1,0 +1,68 @@
+#
+# yanic
+#
+
+# add yanic directory
+/srv/yanic/data:
+  file.directory:
+    - makedirs: True
+
+# copy yanic binary to destination
+# the binary needs to be provided by the salt-master
+yanic:
+  file.managed:
+   - name: /srv/yanic/yanic
+   - source: salt://yanic/yanic
+   - mode: 755
+   - require:
+     - file: /srv/yanic/data
+
+# copy systemd yanic@.service
+/etc/systemd/system/yanic@.service:
+  file.managed:
+    - source: salt://yanic/yanic@.service
+    - require:
+      - file: yanic
+
+# the internal webserver should be enabled
+{% set webserver = "true" %}
+
+# get loopback IPv6 for binding the webserver to it
+{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{% set bind_ip = salt['ffho_net.get_loopback_ip'](node_config, grains['id'], 'v6') %}
+
+# for each site
+{% for site in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) %}
+# add webserver directory
+/srv/yanic/data/{{site}}:
+  file.directory:
+    - require:
+      - file: /srv/yanic/data
+
+# add configuration file
+/srv/yanic/{{site}}.conf:
+  file.managed:
+    - source: salt://yanic/yanic.conf.tmpl
+    - template: jinja
+    - defaults:
+      iface: "br-{{site}}"
+      site: "{{site}}"
+      webserver: "{{webserver}}"
+      bind_ip: {{bind_ip}}
+  # the webserver should only be enabled once
+  {% set webserver = "false" %}
+    - require:
+      - file: /srv/yanic/data/{{site}}
+
+# enable the yanic service
+# and restart if configuration or binary has changed
+yanic@{{site}}:
+  service.running:
+    - enable: True
+    - require:
+      - file: /srv/yanic/{{site}}.conf
+      - file: /etc/systemd/system/yanic@.service
+    - watch:
+      - file: /srv/yanic/{{site}}.conf
+      - file: yanic
+{% endfor %}

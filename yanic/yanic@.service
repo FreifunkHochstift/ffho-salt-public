@@ -1,0 +1,9 @@
+[Unit]
+Description=yanic (Site %I)
+After=network.service
+
+[Service]
+ExecStart=/srv/yanic/yanic -config /srv/yanic/%i.conf
+
+[Install]
+WantedBy=multi-user.target
