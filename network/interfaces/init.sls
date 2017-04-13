@@ -60,6 +60,7 @@ ifreload:
   cmd.wait:
     - require:
       - cmd: ifreload
+      - file: /usr/local/sbin/ff_fix_default_route
     - watch:
       - file: /etc/network/interfaces
 {% else %}
