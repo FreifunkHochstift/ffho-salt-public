@@ -94,6 +94,6 @@ c_rehash:
   file.managed:
     - contents_pillar: {{ pillar_name }}:privkey
     - user: root
-    - group: root
-    - mode: 400
+    - group: ssl-cert
+    - mode: 440
 {% endfor %}
