@@ -2,6 +2,7 @@
 
 import collections
 import re
+from copy import deepcopy
 
 mac_prefix = "f2"
 
@@ -736,6 +737,12 @@ def _update_interface_desc (node_config, sites_config):
 # @param: sites_config	Pillar sites configuration (as dict)
 # @param: node_id	Minion name / Pillar node configuration key
 def get_interface_config (node_config, sites_config, node_id = ""):
+	# Make a copy of the node_config dictionary to suppress side-effects.
+	# This function deletes some keys from the node_config which will break
+	# any re-run of this function or other functions relying on the node_config
+	# to be complete.
+	node_config = deepcopy (node_config)
+
 	# Get config of this node and dict of all configured ifaces
 	ifaces = node_config.get ('ifaces', {})
 
