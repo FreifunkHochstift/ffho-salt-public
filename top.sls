@@ -66,3 +66,7 @@ base:
     - match: pillar
     - dns-server.auth
 
+  # InfluxDB
+  nodes:{{ grains['id'] }}:roles:influxdb:
+    - match: pillar
+    - influxdb
