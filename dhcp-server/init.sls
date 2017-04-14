@@ -43,18 +43,3 @@ isc-dhcp-server:
   file.managed:
     - source: salt://dhcp-server/dhcpd-pool.1.gz
     - makedirs: true
-
-#
-# TODO: Wait for Icinga2
-#
-## Install Nagios check while at it
-#/etc/nagios/nrpe.d/dhcpd-pool.cfg:
-#  file.managed:
-#    - source: salt://dhcp-server/dhcpd-pool.nrpe.cfg
-#
-## dhcpd-pool should be run as root to avoid file righs issues
-## when manually invoked by root
-#/etc/sudoers.d/dhcpd-pool:
-#  file.managed:
-#    - source: salt://dhcp-server/dhcpd-pool.sudoers
-#    - mode: 0440
