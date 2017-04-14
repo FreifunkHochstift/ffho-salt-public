@@ -66,6 +66,16 @@ base:
     - match: pillar
     - dns-server.auth
 
+  # Webfrontend
+  nodes:{{ grains['id'] }}:roles:frontend:
+    - match: pillar
+    - nginx
+
+  # DSL / PPPoE
+  nodes:{{ grains['id'] }}:roles:pppoe:
+    - match: pillar
+    - pppoe
+
   # InfluxDB
   nodes:{{ grains['id'] }}:roles:influxdb:
     - match: pillar
