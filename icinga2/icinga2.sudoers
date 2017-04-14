@@ -1,4 +1,4 @@
 #
 # sudoers file for Icinga2 monitoring commands (Salt managed)
 #
-nagios  ALL=NOPASSWD:/usr/local/sbin/dhcpd-pool, /usr/local/share/monitoring-plugins/check_bird_ospf, /usr/local/share/monitoring-plugins/check_bird_bgp
+nagios  ALL=NOPASSWD:/usr/local/sbin/dhcpd-pool, /usr/local/share/monitoring-plugins/check_bird_ospf, /usr/local/share/monitoring-plugins/check_bird_bgp, /usr/local/share/monitoring-plugins/check_ifupdown2

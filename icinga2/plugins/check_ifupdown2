@@ -1,0 +1,108 @@
+#!/usr/bin/python
+#
+# Check state of interfaces configured with ifupdown2
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Fri, 14 Apr 2017 20:05:45 +0200
+#
+
+import argparse
+import re
+import subprocess
+import sys
+
+parser = argparse.ArgumentParser (description = 'Check interface configuration.')
+parser.add_argument ("--ok_string", help = "Ifupdown success string", required = True)
+args = parser.parse_args ()
+
+cmd = [ "/usr/bin/sudo", "/sbin/ifquery", "-c", "-a" ]
+
+
+try:
+	ifquery = subprocess.Popen (cmd, bufsize = 4194304, stdout = subprocess.PIPE, stderr = subprocess.PIPE).stdout
+
+# cmd exited with non-zero code
+except subprocess.CalledProcessError as c:
+	print "Failed to run %s: %s" % (" ".join (cmd), c.output)
+	sys.exit (1)
+
+# This should not have happend.
+except Exception as e:
+	print "Unknown error while running %s: %s" % (" ".join (cmd), str (e))
+	sys.exit (3)
+
+################################################################################
+#          Parse all entries from ifquery output into interfaces dict          #
+################################################################################
+
+interfaces_ok = []
+interfaces_err = []
+
+interface_re = re.compile (r'^iface (\S+)\s+\[(.+)\]$')
+ignore_re = re.compile (r'^(auto .*)?$')
+line_re = re.compile (r'^\s+(\S+)\s+(.+)\s+\[(.+)\]$')
+
+# Parse session list
+interface = None
+interface_dict = None
+for line in ifquery.readlines ():
+	line = line.rstrip ()
+
+	# Preamble or empty string
+	if ignore_re.search (line):
+		if not interface_dict:
+			continue
+
+		if interface_dict['ok']:
+			interfaces_ok.append (interface)
+
+		else:
+			del interface_dict['ok']
+
+			errors = ",".join (sorted (interface_dict.keys ()))
+			if errors == "":
+				errors = "DOWN"
+
+			interfaces_err.append ("%s: %s" % (interface, errors))
+
+		interface = None
+		interface_dict = None
+		continue
+
+	# Start of a new interface
+	match = interface_re.search (line)
+	if match:
+		interface = match.group (1)
+		interface_dict = {
+			'ok' : True if match.group (2) == args.ok_string else False,
+		}
+
+		continue
+
+	# Ignore any non-BGP protocols, empty lines, etc.  XXX
+	if interface == None:
+		continue
+
+	# Parse and store any interesting lines / fields
+	match = line_re.search (line)
+	if not match:
+		continue
+
+	attr = match.group (1)
+	value = match.group (2)
+	status = match.group (3)
+
+	if status != args.ok_string:
+		interface_dict['ok'] = False
+		interface_dict[attr] = value
+
+
+ret_code = 0
+if len (interfaces_err) > 0:
+	print "ERR: %s" % "; ".join (interfaces_err)
+	ret_code = 2
+
+if len (interfaces_ok) > 0:
+	print "OK: %s" % ", ".join (interfaces_ok)
+
+sys.exit (ret_code)
