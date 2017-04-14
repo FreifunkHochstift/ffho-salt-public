@@ -1,0 +1,246 @@
+#!/usr/bin/python
+#
+# Check state of BGP sessions in Bird Internet Routing Daemon
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Thu 13 Apr 2017 12:04:13 PM CEST
+#
+
+import argparse
+import re
+import subprocess
+import sys
+
+parser = argparse.ArgumentParser (description = 'check bird iBGP sessions')
+
+parser.add_argument ('--proto', '-p', help = 'IP protocol version to check', default = '4', choices = ['4', '6'])
+parser.add_argument ('--asn', '-A', help = "Local AS number", required = True)
+parser.add_argument ('--ibgp', '-i', help = "Check iBGP sessions", action = 'store_true')
+parser.add_argument ('--ibgp_w', help = "Warning interval for down iBGP sessions", default = "1:1", metavar = "RANGE")
+parser.add_argument ('--ibgp_c', help = "Critical interval for down iBGP sessions", default = "2:", metavar = "RANGE")
+parser.add_argument ('--ebgp', '-e', help = "Check eBGP sessions", action = 'store_true')
+parser.add_argument ('--ebgp_w', help = "Warning interval for down eBGP sessions", default = "1:1", metavar = "RANGE")
+parser.add_argument ('--ebgp_c', help = "Critical interval for down eBGP sessions", default = "2:", metavar = "RANGE")
+parser.add_argument ('--disabled_ok', help = "Treat sessions disabled in bird as OK.", action = 'store_true')
+
+args = parser.parse_args ()
+
+if not args.ibgp and not args.ebgp:
+	print >> sys.stderr, "Error: You have to enable at least one of iBGP and eBGP checking.\n"
+	parser.print_help ()
+	sys.exit (3)
+
+session_down_codes = {
+	'w' : 1,
+	'c' : 2,
+}
+
+################################################################################
+#                         Query BGP protocols from bird                        #
+################################################################################
+cmds = {
+	'4' : '/usr/sbin/birdc',
+	'6' : '/usr/sbin/birdc6',
+}
+
+cmd = [ "/usr/bin/sudo", cmds[args.proto], "show protocols all" ]
+
+try:
+	protocols = subprocess.Popen (cmd, bufsize = 4194304, stdout = subprocess.PIPE).stdout
+
+# cmd exited with non-zero code
+except subprocess.CalledProcessError as c:
+	print "Failed to run %s: %s" % (" ".join (cmd), c.output)
+	sys.exit (1)
+
+# This should not have happend.
+except Exception as e:
+	print "Unknown error while running %s: %s" % (" ".join (cmd), str (e))
+	sys.exit (3)
+
+
+# cr03_in_ffho_net BGP      master   up     2017-04-06  Established   
+#   Preference:     100
+#   Input filter:   ibgp_in
+#   Output filter:  ibgp_out
+#   Routes:         38 imported, 3 exported, 1 preferred
+#   Route change stats:     received   rejected   filtered    ignored   accepted
+#     Import updates:          16779          0          0         72      16707
+#     Import withdraws:        18012          0        ---       1355      16657
+#     Export updates:          55104      18903      24743        ---      11458
+#     Export withdraws:         9789        ---        ---        ---      11455
+#   BGP state:          Established
+#     Neighbor address: 10.132.255.3
+#     Neighbor AS:      65132
+#     Neighbor ID:      10.132.255.3
+#     Neighbor caps:    refresh enhanced-refresh restart-able AS4
+#     Session:          internal multihop AS4
+#     Source address:   10.132.255.12
+#     Hold timer:       198/240
+#     Keepalive timer:  13/80
+
+################################################################################
+#           Parse all fields from bird output into bgp_sessions dict           #
+################################################################################
+
+bgp_sessions = {}
+
+# Simple fields with only one values
+simple_fields = [ 'Preference', 'Input filter', 'Output filter', 'BGP state', 'Neighbor address', 'Neighbor AS',
+                  'Neighbor ID', 'Source address', 'Hold timer', 'Keepalive timer', 'Last error' ]
+
+# More "complex" fields
+fields = {
+	'Routes' : {
+		're' : re.compile (r'Routes:\s+(\d+) imported, (\d+) exported, (\d+) preferred'),
+		'groups' : [ 1, 2, 3 ],
+		'mangle_dict' : {
+			'Routes imported' : 1,
+			'Routes exported' : 2,
+			'Routes preferred' : 3,
+		}
+	},
+
+	'Neighbor caps' : {
+		're' : re.compile (r'Neighbor caps:\s+(.+)$'),
+		'groups' : [ 1 ],
+		'list' : True,
+		'split' : lambda x: x.split (),
+	},
+
+	'Session' : {
+		're' : re.compile (r'Session:\s+(.+)$'),
+		'groups' : [ 1 ],
+		'list' : True,
+		'split' : lambda x: x.split (),
+	},
+}
+
+# Generate entries for simple fields
+for field in simple_fields:
+	fields[field] = {
+		're' : re.compile (r'^\s*%s:\s+(.+)$' % field),
+		'groups' : [ 1 ],
+	}
+
+
+proto_re = re.compile (r'^([0-9a-zA-Z_.-]+)\s+BGP\s+')	# XXX
+ignore_re = re.compile (r'^(BIRD [0-9.]+ ready.|name\s+proto\s+table\s+.*)?$')
+
+
+# Parse session list
+protocol = None
+proto_dict = None
+for line in protocols.readlines ():
+	line = line.strip ()
+
+	# Preamble or empty string
+	if ignore_re.search (line):
+		protocol = None
+		proto_dict = None
+		continue
+
+	# Start of a new protocol
+	match = proto_re.search (line)
+	if match:
+		protocol = match.group (1)
+		bgp_sessions[protocol] = {}
+		proto_dict = bgp_sessions[protocol]
+		continue
+
+	# Ignore any non-BGP protocols, empty lines, etc.
+	if protocol == None:
+		continue
+
+	# Parse and store any interesting lines / fields
+	for field, config in fields.items ():
+		match = config['re'].search (line)
+		if not match:
+			continue
+
+		# Get values from match
+		values = []
+		for group in config['groups']:
+			values.append (match.group (group))
+
+		# Store entries separately?
+		mangle_dict = config.get ('mangle_dict', None)
+		if mangle_dict:
+			for entry, group in mangle_dict.items ():
+				proto_dict[entry] = match.group (group)
+
+		# Store as list?
+		if config.get ('list', False) == True:
+			proto_dict[field] = config['split'] (match.group (1))
+
+		# Store as string
+		else:
+			proto_dict[field] = " ".join (values)
+
+
+################################################################################
+#                             Check the status quo                             #
+################################################################################
+
+up = []
+down = []
+ret_code = 0
+
+down_by_proto = {
+	'ibgp' : [],
+	'ebgp' : []
+}
+
+for protoname, config in sorted (bgp_sessions.items ()):
+	# Skip iBGP/eBGP sessions when not asked to check them
+	session_args = config.get ('Session', [])
+	if (args.ibgp != True and (('internal' in session_args) or (config['Neighbor AS'] == args.asn))) or \
+	   (args.ebgp != True and (('external' in session_args) or (config['Neighbor AS'] != args.asn))):
+		continue
+
+	session_type = "ibgp"
+	if ('external' in session_args) or (config['Neighbor AS'] != args.asn):
+		session_type = "ebgp"
+	remote_as = "I" if session_type == "ibgp" else config.get ('Neighbor AS')
+	session_desc = "%s/%s" % (protoname, remote_as)
+
+	bgp_state = config['BGP state']
+	if bgp_state == 'Established':
+		up.append (session_desc)
+
+	# Session disable and we don't care
+	elif bgp_state == 'Down' and args.disabled_ok:
+		up.append (session_desc + " (Disabled)")
+
+	# Something's broken
+	else:
+		last_error = 'Disabled' if bgp_state == 'Down' else config.get ('Last error', 'unkown')
+		session_desc += " (%s)" % last_error
+
+		down.append (session_desc)
+		down_by_proto[session_type].append (session_desc)
+
+
+for proto, sessions in down_by_proto.items ():
+	down_sessions = len (sessions)
+	if down_sessions == 0:
+		continue
+
+	for level in [ 'w', 'c' ]:
+		limits = getattr (args, "%s_%s" % (proto, level)).split (":")
+		code = session_down_codes[level]
+
+		# Check if
+		if (limits[0] == '' or down_sessions >= int (limits[0])) and \
+		   (limits[1] == '' or down_sessions <= int (limits[1])):
+			if ret_code < code:
+				ret_code = code
+
+
+if len (down) > 0:
+	print "DOWN: %s" % ", ".join (down)
+
+if len (up) > 0:
+	print "OK: %s" % ", ".join (up)
+
+sys.exit (ret_code)

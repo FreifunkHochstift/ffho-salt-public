@@ -15,7 +15,6 @@ icinga2:
     - enable: True
     - reload: True
 
-
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
   pkg.installed:
@@ -36,6 +35,15 @@ ffho-plugins:
     - dir_mode: 755
     - user: root
     - group: root
+
+# Install sudo
+sudo:
+  pkg.installed
+
+/etc/sudoers.d/icinga2:
+  file.managed:
+    - source: salt://icinga2/icinga2.sudoers
+    - mode: 0440
 
 
 # Icinga2 master config (for master and all nodes)
