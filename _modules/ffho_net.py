@@ -1056,7 +1056,7 @@ def get_ospf_interface_config (node_config, grains_id):
 			continue
 
 		# Explicit OSPF interface configuration parameters take precendence over generated ones
-		for attr, val in ospf_config_pillar:
+		for attr, val in ospf_config_pillar.items ():
 			ospf_config[attr] = val
 
 		# Convert boolean values to 'yes' / 'no' string values
