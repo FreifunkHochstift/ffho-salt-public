@@ -51,7 +51,7 @@ git.c3pb.de:
   ssh_known_hosts.present:
     - user: firmware
     - enc: ecdsa
-    - fingerprint: 60:97:30:24:0b:85:21:e4:c3:49:c2:f5:12:de:1c:da
+    - fingerprint: 51:2a:f4:f4:71:c8:69:8c:96:db:54:b7:f0:36:e5:60
 
 /home/firmware/.ssh:
   file.directory:
