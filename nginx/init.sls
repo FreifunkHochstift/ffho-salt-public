@@ -13,7 +13,13 @@ nginx:
   service.running:
     - enable: TRUE
     - reload: TRUE
+    - require:
+      - pkg: nginx
+      - file: nginx-cache
+    - watch:
+      - cmd: nginx-configtest
 
+# generate custom DH parameters
 {% if grains['saltversion'] >= '2014.7.0' %}
 nginx-dhparam:
   cmd.run:
@@ -23,21 +29,26 @@ nginx-dhparam:
       - serivce: nginx
 {% endif %}
 
+# Add cache directory
+nginx-cache:
+  file.directory:
+    - name: /srv/cache
+    - user: www-data
+    - group: www-data
 
 # Install meaningful main configuration (SSL tweaks 'n stuff)
 /etc/nginx/nginx.conf:
   file.managed:
     - source: salt://nginx/nginx.conf
     - watch_in:
-      - service: nginx
+      - cmd: nginx-configtest
 
 
 # Disable default configuration
 /etc/nginx/sites-enabled/default:
   file.absent:
     - watch_in:
-      - service: nginx
-
+      - cmd: nginx-configtest
 
 # Install website configuration files configured for this node
 {% for website in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:websites', []) %}
@@ -48,5 +59,10 @@ nginx-dhparam:
     - require:
       - pkg: nginx
     - watch_in:
-      - service: nginx
+      - cmd: nginx-configtest
 {% endfor %}
+
+# Test configuration before reload
+nginx-configtest:
+  cmd.wait:
+    - name: /usr/sbin/nginx -t
