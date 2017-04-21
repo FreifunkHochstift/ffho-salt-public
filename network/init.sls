@@ -14,7 +14,6 @@ network-pkg:
       - tcpdump
       - mtr-tiny
       - iperf
-      - vnstat
       - host
       - dnsutils
       - ipv6calc
@@ -25,6 +24,19 @@ network-pkg:
 
 iproute2:
   pkg.latest
+
+
+vnstat:
+  pkg.installed:
+    - name: vnstat
+  service.running:
+    - restart: True
+
+/etc/vnstat.conf:
+  file.managed:
+    - source: salt://network/vnstat.conf
+    - watch_in:
+      - service: vnstat
 
 # Udev rules
 /etc/udev/rules.d/42-ffho-net.rules:
