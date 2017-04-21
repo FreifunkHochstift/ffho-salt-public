@@ -13,6 +13,7 @@ base:
     - network
     - ntp
     - postfix
+    - rsyslog
     - screen
     - snmpd
     - ssh

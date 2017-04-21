@@ -2,13 +2,21 @@
 # Rsyslog configuration
 #
 
-{% set roles = pillar.get ('roles', []) %}
+{% set roles = salt['pillar.get'] ('nodes:' ~ grains['id'] ~ ':roles') %}
 
 rsyslog:
   pkg.installed:
     - name: rsyslog
   service.running:
     - enable: True
+
+
+/etc/rsyslog-early.d:
+  file.directory:
+    - user: root
+    - group: root
+    - mode: 0755
+
 
 /etc/rsyslog.conf:
   file.managed:
