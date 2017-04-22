@@ -65,10 +65,10 @@ delete_interval = "1d"
 #  model: store count of nodes tagged with hardware model
 [[database.connection.influxdb]]
 enable   = true
-address  = "https://db01.in.ffho.net:8086/"
-database = "mesh"
-username = "yanic"
-password = "p4KWLDs3hd%qVdVz"
+address  = "{{influxdb.address}}"
+database = "{{influxdb.database}}"
+username = "{{influxdb.username}}"
+password = "{{influxdb.password}}"
 # tag the data with an optional job tag
 job = "{{site}}"
 

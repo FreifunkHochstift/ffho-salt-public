@@ -49,6 +49,7 @@ yanic:
       site: "{{site}}"
       webserver: "{{webserver}}"
       bind_ip: {{bind_ip}}
+      influxdb: {{node_config.yanic.influxdb}}
   # the webserver should only be enabled once
   {% set webserver = "false" %}
     - require:
