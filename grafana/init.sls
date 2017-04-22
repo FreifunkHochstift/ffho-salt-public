@@ -2,6 +2,8 @@
 # grafana
 #
 
+{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+
 grafana:
 # add Grafana Repo
   pkgrepo.managed:
@@ -48,6 +50,7 @@ grafana-src:
   file.managed:
     - source: salt://grafana/grafana.ini.tmpl
     - template: jinja
+      config: {{node_config.grafana}}
     - require:
       - pkg: grafana
 
