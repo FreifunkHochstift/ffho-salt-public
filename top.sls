@@ -52,6 +52,11 @@ base:
     - match: pillar
     - fastd
 
+  # Grafana
+  nodes:{{ grains['id'] }}:roles:grafana:
+    - match: pillar
+    - grafana
+
   # Hardware nodes
   virtual:physical:
     - match: grain

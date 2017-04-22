@@ -1,0 +1,60 @@
+#
+# grafana
+#
+
+grafana:
+# add Grafana Repo
+  pkgrepo.managed:
+    - humanname: Grafana Repo
+    - name: deb https://packagecloud.io/grafana/stable/debian/ jessie main
+    - file: /etc/apt/sources.list.d/grafana.list
+    - key_url: https://packagecloud.io/grafana/stable/gpgkey
+# install grafana
+  pkg.installed:
+    - name: grafana
+    - require:
+      - pkgrepo: grafana
+      - pkgrepo: grafana-src
+  service.running:
+    - name: grafana-server
+    - enable: True
+    - require:
+      - pkg: grafana
+      - file: /etc/grafana/grafana.ini
+      - file: /etc/grafana/ldap.toml
+      - user: grafana
+    - watch:
+      - file: /etc/grafana/grafana.ini
+      - file: /etc/grafana/ldap.toml
+# add user 'grafana' to group 'ssl-cert' to access ssl-key file
+  user.present:
+    - name: grafana
+    - system: True
+    - groups:
+      - ssl-cert
+    - require:
+      - pkg: grafana
+
+# add Grafana src-Repo
+grafana-src:
+  pkgrepo.managed:
+    - humanname: Grafana Repo
+    - name: deb-src https://packagecloud.io/grafana/stable/debian/ jessie main
+    - file: /etc/apt/sources.list.d/grafana.list
+    - key_url: https://packagecloud.io/grafana/stable/gpgkey
+
+# copy custom config
+/etc/grafana/grafana.ini:
+  file.managed:
+    - source: salt://grafana/grafana.ini.tmpl
+    - template: jinja
+    - require:
+      - pkg: grafana
+
+# copy LDAP config
+/etc/grafana/ldap.toml:
+  file.managed:
+    - source: salt://grafana/ldap.toml
+    - template: jinja
+    - require:
+      - pkg: grafana
