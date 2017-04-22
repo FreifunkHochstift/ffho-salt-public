@@ -61,3 +61,14 @@ grafana-src:
     - template: jinja
     - require:
       - pkg: grafana
+
+#
+# Plugins
+
+# Grafana-Piechart-Panel
+grafana-piechart:
+  cmd.run:
+    - name: grafana-cli plugins install grafana-piechart-panel
+    - creates: /var/lib/grafana/plugins/grafana-piechart-panel
+    - watch_in:
+      - service: grafana
