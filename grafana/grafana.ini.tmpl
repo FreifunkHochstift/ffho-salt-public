@@ -1,4 +1,7 @@
-##################### Grafana Configuration Example #####################
+#
+# /etc/grafana/grafana.ini (salt managed)
+#
+
 #
 # Everything has defaults so you only need to uncomment things you want to
 # change
@@ -267,9 +270,13 @@ org_role = Viewer
 
 #################################### Auth LDAP ##########################
 [auth.ldap]
+{%- if 'ldap' in config %}
 enabled = true
+{%- else %}
+enabled = false
+{%- endif %}
 config_file = /etc/grafana/ldap.toml
-allow_sign_up = false
+allow_sign_up = true
 
 #################################### SMTP / Emailing ##########################
 [smtp]
@@ -352,7 +359,7 @@ allow_sign_up = false
 ;rabbitmq_url = amqp://localhost/
 ;exchange = grafana_events
 
-;#################################### Dashboard JSON files ##########################
+#################################### Dashboard JSON files ##########################
 [dashboards.json]
 ;enabled = false
 ;path = /var/lib/grafana/dashboards

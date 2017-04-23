@@ -56,9 +56,14 @@ grafana-src:
 
 # copy LDAP config
 /etc/grafana/ldap.toml:
+{% if 'ldap' in node_config.grafana %}
   file.managed:
-    - source: salt://grafana/ldap.toml
+    - source: salt://grafana/ldap.toml.tmpl
     - template: jinja
+      config: {{node_config.grafana.ldap}}
+{% else %}
+  file.absent:
+{% endif %}
     - require:
       - pkg: grafana
 
