@@ -136,11 +136,6 @@ sudo:
       - service: icinga2
    
 
-################################################################################
-#                               Icinga2 Server                                 #
-################################################################################
-{% if 'icinga2server' in roles %}
-
 # Create directory for ffho specific configs
 /etc/icinga2/ffho-conf.d:
   file.directory:
@@ -148,6 +143,11 @@ sudo:
     - require:
       - pkg: icinga2
 
+
+################################################################################
+#                               Icinga2 Server                                 #
+################################################################################
+{% if 'icinga2server' in roles %}
 
 # Install command definitions
 /etc/icinga2/ffho-conf.d/services:
@@ -205,15 +205,22 @@ sudo:
     - watch_in:
       - service: icinga2
 
-
-/etc/icinga2/ffho-conf.d/:
-  file.absent:
-    - watch_in:
-      - service: icinga2
-
 /etc/icinga2/check-commands.conf:
   file.absent:
     - watch_in:
       - service: icinga2
 {% endif %}
+
+
+
+
+################################################################################
+#                              Check related stuff                             #
+################################################################################
+/etc/icinga2/ffho-conf.d/bird_ospf_interfaces_down_ok.txt:
+  file.managed:
+    - source: salt://icinga2/bird_ospf_interfaces_down_ok.txt.tmpl
+    - template: jinja
+    - require:
+      - file: /etc/icinga2/ffho-conf.d
 

@@ -1,131 +1,192 @@
-#!/usr/bin/perl -W
+#!/usr/bin/python
+#
+# Check state of OSPF sessions in Bird Internet Routing Daemon
 #
 # Maximilian Wilhelm <max@rfc2324.org>
-#  --  Tue 04 Apr 2017 07:00:50 PM CEST
+#  --  Wed 26 Apr 2017 07:26:48 PM CEST
 #
 
-use strict;
+import argparse
+import os.path
+import re
+import subprocess
+import sys
 
-# Should we check the OSPF process for IPv4 or IPv6?
-my $cmds = {
-	"-4" => "birdc",
-	"-6" => "birdc6",
-};
 
-# Default to Legacy IP
-my $cmd = $cmds->{"-4"};
+def read_interfaces_from_file (file_path, missing_ok):
+	interfaces = []
 
-if ($ARGV[0]) {
-	unless (defined $cmds->{$ARGV[0]}) {
-		print STDERR "Usage: $0 [ -4 | -6 ]\n";
-		exit (1);
-	}
+	# If we shouldn't care, we won't care if it's not there.
+	if not os.path.isfile (file_path) and missing_ok:
+		return interfaces
 
-	$cmd = $cmds->{$ARGV[0]};
+	try:
+		with open (args.interfaces_down_ok_file, 'r') as ido_fh:
+			for iface in ido_fh.readlines ():
+				if not iface.startswith ('#'):
+					interfaces.append (iface.strip ())
+
+	except IOError as (errno, strerror):
+		print "Failed to read interfaces_down_ok from '%s': %s" % (args.interfaces_down_ok_file, strerror)
+		sys.exit (1)
+
+	return interfaces
+
+
+parser = argparse.ArgumentParser (description = 'check bird OSPF sessions')
+
+parser.add_argument ('--proto', '-p', help = 'IP protocol version to check', default = '4', choices = ['4', '6'])
+parser.add_argument ('--protocol', '-P', help = 'Bird OSPF protocol instance name to check', default = "")
+parser.add_argument ('--interfaces_down_ok', metavar = "LIST", help = "List of interfaces which are OK to have no OSPF neighbor. Provide a space separated list.")
+parser.add_argument ('--interfaces_down_ok_file', metavar = "FILENAME", help = "List of interfaces which are OK to have no OSPF neighbor. Provide one interfaces per line.")
+parser.add_argument ('--ignore_missing_file', help = "Ignore a possible non-existent file given as --interfaces_down_ok_file", action = 'store_true')
+
+args = parser.parse_args ()
+
+
+# Are some interfaces ok being down?
+interfaces_down_ok = []
+if args.interfaces_down_ok:
+	interfaces_down_ok = args.interfaces_down_ok.split ()
+
+if args.interfaces_down_ok_file:
+	interfaces_down_ok.extend (read_interfaces_from_file (args.interfaces_down_ok_file, args.ignore_missing_file))
+
+
+################################################################################
+#                   Query OSPF protocl information from bird                   #
+################################################################################
+cmds = {
+	'4' : '/usr/sbin/birdc',
+	'6' : '/usr/sbin/birdc6',
 }
 
-my $code = 0;
-my $msg = "";
+cmd_interfaces = [ "/usr/bin/sudo", cmds[args.proto], "show ospf interface %s" % args.protocol ]
+cmd_neighbors  = [ "/usr/bin/sudo", cmds[args.proto], "show ospf neighbors %s" % args.protocol ]
 
-if (not open (INTERFACES, "$cmd show ospf interface |")) {
-	print "Failed to read OSPFv4 interfaces: $!\n";
-	exit (2);
-}
+try:
+	interfaces_fh = subprocess.Popen (cmd_interfaces, bufsize = 4194304, stdout = subprocess.PIPE)
+	if interfaces_fh.returncode:
+		print "Failed to get OSPF interfaces from bird: %s" % str (" ".join ([line.strip () for line in interfaces_fh.stdout.readlines ()]))
+		sys.exit (1)
 
-if (not open (NEIGHBORS, "$cmd show ospf neighbors |")) {
-	print "Failed to read OSPFv4 neighbors: $!\n";
-	exit (2);
-}
+	neighbors_fh  = subprocess.Popen (cmd_neighbors,  bufsize = 4194304, stdout = subprocess.PIPE)
+	if neighbors_fh.returncode:
+		print "Failed to get OSPF neighbors from bird: %s" % str (" ".join ([line.strip () for line in neighbors_fh.stdout.readlines ()]))
+		sys.exit (1)
 
-# Store any configured OSPF interfaces
-my $interfaces = {};
-my $interface = undef;
-while (my $line = <INTERFACES>) {
-	chomp ($line);
+# cmd exited with non-zero code
+except subprocess.CalledProcessError as c:
+	print "Failed to get OSPF information from bird: %s" % c.output
+	sys.exit (1)
 
-	# Create entry in interface hash
-	if ($line =~ /^Interface (.+) \(/) {
-		$interface = $1;
-		$interfaces->{$interface} = {};
-	}
-	
+# This should not have happend.
+except Exception as e:
+	print "Unknown error while getting OSPF information from bird: %s" % str (e)
+	sys.exit (3)
+
+
+################################################################################
+#                        Parse interfaces and neighbors                        #
+################################################################################
+
+interfaces = {}
+
+interface_re = re.compile (r'^Interface (.+) \(')
+state_re = re.compile (r'(Type|State): (.+)$')
+stub_re = re.compile (r'\(stub\)')
+
+# Parse interfaces
+interface = None
+for line in interfaces_fh.stdout.readlines ():
+	line = line.strip ()
+
+	# Create empty interface hash
+	match = interface_re.search (line)
+	if match:
+		interface = match.group (1)
+		interfaces[interface] = {}
+		continue
+
 	# Store Type and State attributes
-	elsif ($line =~ m/(Type|State): (.+)$/) {
-		$interfaces->{$interface}->{$1} = $2;
-	}
-}
-
-close (INTERFACES);
+	match = state_re.search (line)
+	if match:
+		interfaces[interface][match.group (1)] = match.group (2)
 
 
 # Delete any stub interfaces from our list
-for my $iface (keys %{$interfaces}) {
-	if ($interfaces->{$iface}->{State} =~ m/\(stub\)/) {
-		delete $interfaces->{$iface};
-	}
-}
+for iface in interfaces.keys ():
+	if stub_re.search (interfaces[iface]['State']):
+		del interfaces[iface]
 
 
-my @ok = ();
-my @broken = ();
-my @down = ();
+ok = []
+broken = []
+down = []
 
-# Check all neighor states
-while (my $line = <NEIGHBORS>) {
-	chomp ($line);
+neighbor_re = re.compile (r'^([0-9a-fA-F.:]+)\s+(\d+)\s+([\w/-]+)\s+([0-9:]+)\s+([\w.-]+)\s+([\w.:]+)')
 
-	if ($line =~ m@^([[:xdigit:].:]+)\s+(\d+)\s+([[:alnum:]/-]+)\s+([0-9:]+)\s+([[:alnum:]_.-]+)\s+([[:xdigit:].:]+)@) {
-		my ($peer, $state, $ifname) = ($1, $3, $5);
-		my $interface = $interfaces->{$ifname};
+# Read and check all neighbor states
+for line in neighbors_fh.stdout.readlines ():
+	line = line.strip ()
+
+	match = neighbor_re.search (line)
+	if match:
+		peer = match.group (1)
+		state = match.group (3)
+		ifname = match.group (5)
+
+		interface = interfaces[ifname]
 
 		# Mark interfaces as "up" in bird
-		$interface->{up} = 1;
+		interface['up'] = 1
 
 		# State FULL is awesome.
-		if ($state =~ m@Full@) {
-			push @ok, "$ifname/$peer";
-		}
+		if 'Full' in state:
+			ok.append ("%s/%s" % (ifname, peer))
 
-		# In broadcast areas there are only two FULL sessions (to the DR and BDR),
+		# In broadcast areas there are only two FULL sessions (to the DR and BDR)
 		# all other sessions will be 2-Way/Other which is perfectly fine.
-		elsif ($state eq "2-Way/Other" and $interface->{Type} eq "broadcast") {
-			push @ok, "$ifname/$peer";
-		}
+		elif state == "2-Way/Other" and interface['Type'] == "broadcast":
+			ok.append ("%s/%s" % (ifname, peer))
 
 		# Everything else is considered broken.
 		# Likely some ExStart/* etc. pointing to possible MTU troubles.
-		else {
-			push @broken, "$ifname/$peer:$state";
-		}
-	}
-}
-
-close (NEIGHBORS);
+		else:
+			broken.append ("%s/%s:%s" % (ifname, peer, state))
 
 
 # Check for any interfaces which should have (at least) an OSPF peer
 # but don't appear in the neighbors list
-for my $iface (keys %{$interfaces}) {
-	if (not defined $interfaces->{$iface}->{up}) {
-		push @down, $iface;
-	}
-}
+for iface in interfaces.keys ():
+	if iface in interfaces_down_ok:
+		ok.append ("%s (Down/OK)" % iface)
 
+	elif "up" not in interfaces[iface]:
+		down.append (iface)
+
+
+################################################################################
+#                                Prepare output                                #
+################################################################################
+
+ret_code = 0
 
 # Any down interfaces?
-if (@down) {
-	$code = 2;
-	$msg .= "DOWN: " . join (', ', @down) . " ";
-}
+if len (down) > 0:
+	ret_code = 2
+	print "DOWN: %s" % ", ".join (sorted (down))
 
 # Any broken sessions?
-if (@broken) {
+if len (broken) > 0:
 	# Issue a warning when there are issues..
-	if ($code < 2) {
-		$code = 1
-	}
-	$msg .= "BROKEN: " . join (', ', @broken) . " ";
-}
+	if ret_code < 2:
+		ret_code = 1
 
-print $msg . "OK: " . join (', ', @ok) . "\n";
-exit ($code);
+	print "BROKEN: %s" % ", ".join (sorted (broken))
+
+# And the good ones
+if len (ok) > 0:
+	print "OK: %s" % ", ".join (sorted (ok))
+
+sys.exit (ret_code)
