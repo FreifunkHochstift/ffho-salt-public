@@ -40,6 +40,7 @@ nginx-cache:
 /etc/nginx/nginx.conf:
   file.managed:
     - source: salt://nginx/nginx.conf
+    - template: jinja
     - watch_in:
       - cmd: nginx-configtest
 
