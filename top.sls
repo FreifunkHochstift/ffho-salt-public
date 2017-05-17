@@ -57,6 +57,11 @@ base:
     - match: pillar
     - grafana
 
+  # gogs
+  nodes:{{ grains['id'] }}:roles:gogs:
+    - match: pillar
+    - gogs
+
   # Hardware nodes
   virtual:physical:
     - match: grain
