@@ -17,20 +17,9 @@ python-apt:
   pkg.installed
 
 ffpb-repo:
-  pkgrepo.managed:
-    - comments:
-      - "# FFPB APT repo"
-    - human_name: FFPB repository
-    - name: deb http://apt.paderborn.freifunk.net/ wheezy main contrib non-free
-    - dist: wheezy
-    - file: /etc/apt/sources.list.d/freifunk.list
-    - keyserver: keys.gnupg.net
-    - keyid: 40FC1CE2
-    - require:
-      - pkg: python-apt
+  file.absent:
+    - name: /etc/apt/sources.list.d/freifunk.list
 
-
-{% if grains['oscodename'] == 'jessie' %}
 ffho-repo-jessie:
   pkgrepo.managed:
     - comments:
@@ -43,7 +32,6 @@ ffho-repo-jessie:
     - keyid: 40FC1CE2
     - require:
       - pkg: python-apt
-{% endif %}
 
 apt-neoraider:
   pkgrepo.managed:
