@@ -1024,6 +1024,12 @@ def get_ospf_interface_config (node_config, grains_id):
 			ospf_config['stub'] = True
 			ospf_config['cost'] = 10
 
+		# OPS Vlans
+		elif re.search (r'^vlan39\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = True
+			ospf_config['cost'] = 10
+
 		# Active OSPF on OpenVPN tunnels, cost 10000
 		elif iface.startswith ('ovpn-'):
 			ospf_on = True
