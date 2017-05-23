@@ -165,7 +165,7 @@ sudo:
 
 
 # Create client node/zone objects
-/etc/icinga2/ffho-conf.d/hosts/:
+/etc/icinga2/ffho-conf.d/hosts/generated/:
   file.directory:
     - makedirs: true
     - require:
@@ -174,7 +174,7 @@ sudo:
   # Generate config file for every client known to pillar
   {% for node_id, node_config in salt['pillar.get']('nodes', {}).items () %}
     {% if node_config.get ('icinga2', "") != 'ignore' %}
-/etc/icinga2/ffho-conf.d/hosts/{{ node_id }}.conf:
+/etc/icinga2/ffho-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
     - template: jinja
@@ -182,7 +182,7 @@ sudo:
       node_id: {{ node_id }}
       node_config: {{ node_config }}
     - require:
-      - file: /etc/icinga2/ffho-conf.d/hosts/
+      - file: /etc/icinga2/ffho-conf.d/hosts/generated/
     - watch_in:
       - service: icinga2
     {% endif %}
