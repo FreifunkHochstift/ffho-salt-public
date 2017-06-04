@@ -1195,3 +1195,15 @@ def is_subprefix (prefix, subprefix):
 	from ipcalc import Network
 
 	return subprefix in Network(prefix)
+
+# Return the network address of the given prefix
+def get_network_address (prefix, with_prefixlen = False):
+	from ipaddress import ip_network
+
+	net_h = ip_network (u'%s' % prefix, strict = False)
+	network = str (net_h.network_address)
+
+	if with_prefixlen:
+		network += "/%s" % net_h.prefixlen
+
+	return network
