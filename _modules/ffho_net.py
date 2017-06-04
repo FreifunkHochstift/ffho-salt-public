@@ -39,7 +39,7 @@ default_bridge_config = {
 default_hop_penalty_by_role = {
 	'bbr'       :  5,
 	'bras'      : 50,
-	'batman_gw' : 5,
+	'batman_gw' :  5,
 	'batman_ext': 50,
 }
 batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
@@ -56,7 +56,7 @@ GRE_FFRL_attrs = {
 }
 
 
-# The IPv4/IPv6 prefix use for Loopback IPs
+# The IPv4/IPv6 prefix used for Loopback IPs
 loopback_prefix = {
 	'v4' : '10.132.255.',
 	'v6' : '2a03:2260:2342:ffff::',
@@ -89,7 +89,7 @@ MTU = {
 	# +   60	B.A.T.M.A.N. adv header + network coding (activated by default by Debian)
 	'batman_underlay_iface' : 1560,
 
-	# VXLAN underlay device, probably a VLAN with $POP or between two BBRs.
+	# VXLAN underlay device, probably a VLAN within $POP or between two BBRs.
 	#
 	#   1560
 	# +   14	Inner Ethernet Frame
@@ -101,6 +101,7 @@ MTU = {
 
 
 ################################################################################
+#                                                                              #
 #                              Internal functions                              #
 #                                                                              #
 #       Touching anything below will void any warranty you never had ;)        #
@@ -139,7 +140,7 @@ def _get_site_no (sites_config, site_name):
 #    00:e6	being an nodes fastd tunnel interface of IPv6 transport
 #    00:ef	being an extenral instance VEth interface side
 #    02:xx	being a connection to local Vlan 2xx
-#    xx:xx	being a VXLAN tunnel for site ss, with xx being a the underlay VLAN ID (1xyz, 2xyz)
+#    xx:xx	being a VXLAN tunnel for site ss, with xx being the underlay VLAN ID (1xyz, 2xyz)
 #    ff:ff	being the gluon next-node interface
 def gen_batman_iface_mac (site_no, device_no, network):
 	net_type_map = {
