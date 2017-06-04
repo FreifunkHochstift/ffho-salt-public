@@ -904,7 +904,8 @@ def get_ffrl_bgp_config (ifaces, proto):
 # @param: iface_name	Name of the interface defined in pillar node config
 # 			OR name of VRF ("vrf_<something>") whichs ifaces are
 #			to be examined.
-def get_node_iface_ips (node_config, iface_name):
+# @param: with_mask	Don't strip the netmask from the prefix. (Default false)
+def get_node_iface_ips (node_config, iface_name, with_mask = False):
 	ips = {
 		'v4' : [],
 		'v6' : [],
@@ -935,7 +936,9 @@ def get_node_iface_ips (node_config, iface_name):
 			for prefix in ifaces[iface]['prefixes']:
 				ip_ver = 'v6' if ':' in prefix else 'v4'
 
-				ips[ip_ver].append (prefix.split ('/')[0])
+				if not with_mask:
+					prefix = prefix.split ('/')[0]
+				ips[ip_ver].append (prefix)
 	except KeyError:
 		pass
 
