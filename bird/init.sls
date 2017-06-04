@@ -296,17 +296,6 @@ bird6-configure:
 # B.A.T.M.A.N. Gateway
 #
 {% if 'batman_gw' in roles %}
-/etc/bird/bird6.d/radv.conf:
-  file.managed:
-    - source: salt://bird/radv.conf
-    - template: jinja
-    - watch_in:
-      - cmd: bird6-configure
-    - require:
-      - file: /etc/bird/bird6.d
-    - require_in:
-      - service: bird6
-
 /etc/bird/bird.d/mesh_routes.conf:
   file.managed:
     - source: salt://bird/mesh_routes.conf
@@ -330,10 +319,50 @@ bird6-configure:
       - service: bird6
 
 {% else %}
-/etc/bird/bird6.d/ravd.conf:
-  file.absent
 /etc/bird/bird.d/mesh_routes.conf:
   file.absent
 /etc/bird/bird6.d/mesh_routes.conf:
+  file.absent
+{% endif %}
+
+
+#
+# L3 Access
+#
+{% if 'l3_access' in roles %}
+/etc/bird/bird.d/l3-access.conf:
+  file.managed:
+    - source: salt://bird/l3-access.conf
+    - template: jinja
+
+/etc/bird/bird6.d/l3-access.conf:
+  file.managed:
+    - source: salt://bird/l3-access.conf
+    - template: jinja
+
+{% else %}
+/etc/bird/bird.d/l3-access.conf:
+  file.absent
+/etc/bird/bird6.d/l3-access.conf:
+  file.absent
+{% endif %}
+
+
+#
+# RAdvd (for B.A.T.M.A.N. Gateways / L3-Access)
+#
+{% if 'batman_gw' in roles or "l3_access" in roles %}
+/etc/bird/bird6.d/radv.conf:
+  file.managed:
+    - source: salt://bird/radv.conf
+    - template: jinja
+    - watch_in:
+      - cmd: bird6-configure
+    - require:
+      - file: /etc/bird/bird6.d
+    - require_in:
+      - service: bird6
+{% else %}
+/etc/bird/bird6.d/ravd.conf:
   file.absent
 {% endif %}
