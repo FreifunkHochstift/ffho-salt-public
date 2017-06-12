@@ -7,9 +7,31 @@
 #
 
 import argparse
+import os
 import re
 import subprocess
 import sys
+
+
+def read_sessions_from_file (file_path, missing_ok):
+	sessions = []
+
+	# If we shouldn't care, we won't care if it's not there.
+	if not os.path.isfile (file_path) and missing_ok:
+		return sessions
+
+	try:
+		with open (args.sessions_down_ok_file, 'r') as ido_fh:
+			for session in ido_fh.readlines ():
+				if not session.startswith ('#'):
+					sessions.append (session.strip ())
+
+	except IOError as (errno, strerror):
+		print "Failed to read sessions_down_ok from '%s': %s" % (args.sessions_down_ok_file, strerror)
+		sys.exit (1)
+
+	return sessions
+
 
 parser = argparse.ArgumentParser (description = 'check bird iBGP sessions')
 
@@ -22,6 +44,10 @@ parser.add_argument ('--ebgp', '-e', help = "Check eBGP sessions", action = 'sto
 parser.add_argument ('--ebgp_w', help = "Warning interval for down eBGP sessions", default = "1:1", metavar = "RANGE")
 parser.add_argument ('--ebgp_c', help = "Critical interval for down eBGP sessions", default = "2:", metavar = "RANGE")
 parser.add_argument ('--disabled_ok', help = "Treat sessions disabled in bird as OK.", action = 'store_true')
+parser.add_argument ('--sessions_down_ok', metavar = "LIST", help = "List of sessions which are OK to be down. Provide a space separated list.")
+parser.add_argument ('--sessions_down_ok_file', metavar = "FILENAME", help = "List of sessions which are OK to be down. Provide one interfaces per line.")
+parser.add_argument ('--ignore_missing_file', help = "Ignore a possible non-existent file given as --interfaces_down_ok_file", action = 'store_true')
+
 
 args = parser.parse_args ()
 
@@ -34,6 +60,14 @@ session_down_codes = {
 	'w' : 1,
 	'c' : 2,
 }
+
+# Are some sessions ok being down?
+sessions_down_ok = []
+if args.sessions_down_ok:
+	sessions_down_ok = args.sessions_down_ok.split ()
+
+if args.sessions_down_ok_file:
+	sessions_down_ok.extend (read_sessions_from_file (args.sessions_down_ok_file, args.ignore_missing_file))
 
 ################################################################################
 #                         Query BGP protocols from bird                        #
@@ -211,6 +245,10 @@ for protoname, config in sorted (bgp_sessions.items ()):
 	# Session disable and we don't care
 	elif bgp_state == 'Down' and args.disabled_ok:
 		up.append (session_desc + " (Disabled)")
+
+	# Session down but in session_down_ok* list
+	elif protoname in sessions_down_ok:
+		up.append (session_desc + " (Down/OK)")
 
 	# Something's broken
 	else:
