@@ -1,0 +1,24 @@
+#
+# {{ link_id }}
+#
+{%- set devices = link_config.get ('devices', {}) %}
+
+{% for device, device_config in devices.items () %}
+  {%- set fqdn = device ~ '.' ~ link_id %}
+  {%- set addresses = [] %}
+  {%- for iface, iface_config in device_config.get ('ifaces', {}).items () %}
+    {%- for ip in iface_config.get ('prefixes', []) %}
+      {%- do addresses.append (ip.split ('/')[0]) %}
+    {%- endfor %}
+  {%- endfor %}
+object Host "{{ fqdn }}" {
+	import "generic-host"
+
+	display_name = "{{ fqdn }}"
+
+	address = "{{ addresses[0] }}"
+
+	vars.os = "AirOS"
+}
+
+{%- endfor %}

@@ -189,6 +189,27 @@ sudo:
   {% endfor %}
 
 
+# Create configuration for network devices
+/etc/icinga2/ffho-conf.d/net/wbbl/:
+  file.directory:
+    - makedirs: true
+    - require:
+      - pkg: icinga2
+
+  # Generate config files for every WBBL device known to pillar
+  {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
+/etc/icinga2/ffho-conf.d/net/wbbl/{{ link_id }}.conf:
+  file.managed:
+    - source: salt://icinga2/wbbl.conf.tmpl
+    - template: jinja
+    - context:
+      link_id: {{ link_id }}
+      link_config: {{ link_config }}
+    - require:
+      - file: /etc/icinga2/ffho-conf.d/net/wbbl/
+    - watch_in:
+      - service: icinga2
+  {% endfor %}
 
 
 ################################################################################
