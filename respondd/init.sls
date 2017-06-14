@@ -1,3 +1,10 @@
+#
+# respondd
+#
+
+{% set sites_all = pillar.get ('sites') %}
+{% set sites_node = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) %}
+
 /srv/ffho-respondd:
   file.directory
 
@@ -21,12 +28,12 @@ ffho-respondd:
     - require:
       - git: ffho-respondd
 
-{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
-{%- set sites_config = salt['pillar.get']('sites', {}) %}
+{% set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
+{% set sites_config = salt['pillar.get']('sites', {}) %}
 
-{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
+{% set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
 {% set device_no = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':id', -1) %}
-{% for site in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) %}
+{% for site in sites_node %}
   {% set site_no = salt['pillar.get']('sites:' ~ site ~ ':site_no') %}
   {% set mac_address = salt['ffho_net.gen_batman_iface_mac'](site_no, device_no, 'dummy') %}
 
@@ -76,4 +83,20 @@ respondd@{{site}}:
     - watch:
       - file: /srv/ffho-respondd/{{site}}.conf
       - git: ffho-respondd
+{% endfor %}
+
+#
+# Cleanup configurations for previosly configured instances.
+{% for site in sites_all if site not in sites_node %}
+Cleanup /srv/ffho-respondd/{{site}}.conf:
+  file.absent:
+    - name: /srv/ffho-respondd/{{site}}.conf
+
+# stop respondd service
+Stop respondd@{{site}}:
+  service.dead:
+    - name: respondd@{{site}}
+    - enable: False
+    - prereq:
+      - file: Cleanup /srv/ffho-respondd/{{site}}.conf
 {% endfor %}
