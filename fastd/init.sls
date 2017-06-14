@@ -158,11 +158,11 @@ Cleanup /etc/fastd/{{ instance_name }}:
   file.absent:
     - name: /etc/fastd/{{ instance_name }}
 
-# Create systemd start link
+# stop fastd service
 Stop fastd@{{ instance_name }}:
-  service.running:
+  service.dead:
+    - name: fastd@{{ instance_name }}
     - enable: False
-    - reload: False
     - prereq:
       - file: Cleanup /etc/fastd/{{ instance_name }}
   {% endfor %}
