@@ -10,6 +10,7 @@ base:
     - kernel
     - locales
     - mosh
+    - motd
     - network
     - ntp
     - postfix
