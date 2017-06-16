@@ -7,43 +7,47 @@ openssl:
     - name: openssl
 
 
-c_rehash:
+update_ca_certificates:
   cmd.wait:
-    - name: /usr/bin/c_rehash >/dev/null 2>/dev/null
+    - name: /usr/sbin/update-ca-certificates
     - watch: []
 
 
-# FFHO internal CA
-/etc/ssl/certs/ffho-cacert.pem:
+# Install FFHO internal CA into Debian CA certificate mangling mechanism so
+# libraries (read: openssl) can use the CA cert when validating internal
+# service certificates. By installing the cert into the local ca-certificates
+# directory and calling update-ca-certificates two symlinks will be installed
+# into /etc/ssl/certs which will both point to the crt file:
+#  * ffho-cacert.pem
+#  * <cn-hash>.pem
+# The latter is use by openssl for validation.
+/usr/local/share/ca-certificates/ffho-cacert.crt:
   file.managed:
     - source: salt://certs/ffho-cacert.pem
     - user: root
     - group: root
     - mode: 644
     - watch_in:
-      - cmd: c_rehash
+      - cmd: update_ca_certificates
 
 
-# StartSSL Class1intermediate CA certificate
-/etc/ssl/certs/StartSSL_Class1_CA.pem:
+/usr/local/share/ca-certificates/StartSSL_Class1_CA.crt:
   file.managed:
     - source: salt://certs/StartSSL_Class1_CA.pem
     - user: root
     - group: root
     - mode: 644
     - watch_in:
-      - cmd: c_rehash
+      - cmd: update_ca_certificates
 
-
-# StartSSL Class2 intermediate CA certificate
-/etc/ssl/certs/StartSSL_Class2_CA.pem:
+/usr/local/share/ca-certificates/StartSSL_Class2_CA.crt:
   file.managed:
     - source: salt://certs/StartSSL_Class2_CA.pem
     - user: root
     - group: root
     - mode: 644
     - watch_in:
-      - cmd: c_rehash
+      - cmd: update_ca_certificates
 
 
 {% set certs = {} %}
