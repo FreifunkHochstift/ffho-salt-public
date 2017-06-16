@@ -1,4 +1,5 @@
-#  /etc/rsyslog.conf	Configuration file for rsyslog.
+#
+#  /etc/rsyslog.conf	Configuration file for rsyslog. (Salt managed)
 #
 #			For more information see
 #			/usr/share/doc/rsyslog-doc/html/rsyslog_conf.html
@@ -44,6 +45,11 @@ $Umask 0022
 # Where to place spool and state files
 #
 $WorkDirectory /var/spool/rsyslog
+
+#
+# Include all config files in /etc/rsyslog-early.d/
+#
+$IncludeConfig /etc/rsyslog-early.d/*.conf
 
 #
 # Include all config files in /etc/rsyslog.d/
@@ -109,7 +115,7 @@ $IncludeConfig /etc/rsyslog.d/*.conf
 
 # The named pipe /dev/xconsole is for the `xconsole' utility.  To use it,
 # you must invoke `xconsole' with the `-file' option:
-# 
+#
 #    $ xconsole -file /dev/xconsole [...]
 #
 # NOTE: adjust the list below, or you'll go crazy if you have a reasonably
