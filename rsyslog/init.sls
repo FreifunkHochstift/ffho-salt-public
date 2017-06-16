@@ -28,10 +28,18 @@ rsyslog:
     - source: salt://rsyslog/rsyslog.conf
 {% endif %}
 
-{% if 'logserver' in roles %}
+#
+# Install filter rules everywhere so we have the same log layout everywhere
+# and avoid logging stuff (kernel log, dhcpd, ...) multiple times (daemon.log,
+# message, syslog) on every node.
+#
 /etc/rsyslog.d/ffho.conf:
   file.managed:
     - source: salt://rsyslog/ffho.conf
+    - watch_in:
+      - service: rsyslog
+    - require:
+      - file: /etc/rsyslog.d/ffho
 
 /etc/rsyslog.d/ffho:
   file.recurse:
@@ -48,4 +56,11 @@ rsyslog:
   file.managed:
     - source: salt://rsyslog/ffho.logrotate
 
+
+{% if 'logserver' in roles %}
+/etc/rsyslog.d/99-debug.conf:
+  file.managed:
+    - source: salt://rsyslog/99-debug.conf
+    - watch_in:
+      - service: rsyslog
 {% endif %}
