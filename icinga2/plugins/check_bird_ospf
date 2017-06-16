@@ -33,6 +33,15 @@ def read_interfaces_from_file (file_path, missing_ok):
 	return interfaces
 
 
+def format_peer (ifname, iface_config, peer):
+	global args
+
+	if args.no_ptp_ip and iface_config['Type'] == 'ptp':
+		return ifname
+
+	return "%s/%s" % (ifname, peer)
+
+
 parser = argparse.ArgumentParser (description = 'check bird OSPF sessions')
 
 parser.add_argument ('--proto', '-p', help = 'IP protocol version to check', default = '4', choices = ['4', '6'])
@@ -40,6 +49,7 @@ parser.add_argument ('--protocol', '-P', help = 'Bird OSPF protocol instance nam
 parser.add_argument ('--interfaces_down_ok', metavar = "LIST", help = "List of interfaces which are OK to have no OSPF neighbor. Provide a space separated list.")
 parser.add_argument ('--interfaces_down_ok_file', metavar = "FILENAME", help = "List of interfaces which are OK to have no OSPF neighbor. Provide one interfaces per line.")
 parser.add_argument ('--ignore_missing_file', help = "Ignore a possible non-existent file given as --interfaces_down_ok_file", action = 'store_true')
+parser.add_argument ('--no_ptp_ip', help = "Do not print router ID/IP on ptp interfaces", action = 'store_true')
 
 args = parser.parse_args ()
 
@@ -143,17 +153,17 @@ for line in neighbors_fh.stdout.readlines ():
 
 		# State FULL is awesome.
 		if 'Full' in state:
-			ok.append ("%s/%s" % (ifname, peer))
+			ok.append (format_peer (ifname, interface, peer))
 
 		# In broadcast areas there are only two FULL sessions (to the DR and BDR)
 		# all other sessions will be 2-Way/Other which is perfectly fine.
 		elif state == "2-Way/Other" and interface['Type'] == "broadcast":
-			ok.append ("%s/%s" % (ifname, peer))
+			ok.append (format_peer (ifname, interface, peer))
 
 		# Everything else is considered broken.
 		# Likely some ExStart/* etc. pointing to possible MTU troubles.
 		else:
-			broken.append ("%s/%s:%s" % (ifname, peer, state))
+			broken.append ("%s:%s" % (format_peer (ifname, interface, peer), state))
 
 
 # Check for any interfaces which should have (at least) an OSPF peer
