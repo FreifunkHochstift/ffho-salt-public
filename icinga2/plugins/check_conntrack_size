@@ -31,7 +31,7 @@ ret_map = {
 def read_int (path):
 	try:
 		with open (path, 'r') as fh:
-			return int (fh.read ())
+			return float (fh.read ())
 	except ValueError as v:
 		return -1
 	except IOError as i:
