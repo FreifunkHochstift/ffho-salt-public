@@ -58,14 +58,13 @@ build-git:
     - require:
       - user: build
   git.latest:
-    - name: git@git.c3pb.de:freifunk-pb/firmware.git
+    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-build.git
     - target: /srv/build
     - user: build
     - update_head: False
     - require:
       - pkg: build
       - user: build
-      - ssh_known_hosts: git.c3pb.de
       - file: /home/build/.ssh/id_rsa
       - file: build-git
 
@@ -77,7 +76,7 @@ firmware-git:
     - require:
       - git: build-git
   git.latest:
-    - name: git@git.c3pb.de:freifunk-pb/firmware-website.git
+    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-website.git
     - target: /srv/build/output
     - branch: signing
     - user: build
@@ -110,14 +109,6 @@ firmware-git:
     - mode: 400
     - require:
       - file: /srv/build/opkg-keys
-
-git.c3pb.de:
-  ssh_known_hosts.present:
-    - user: build
-    - enc: ecdsa
-    - fingerprint: 51:2a:f4:f4:71:c8:69:8c:96:db:54:b7:f0:36:e5:60
-    - require:
-      - user: build
 
 firmware.in.ffho.net:
   ssh_known_hosts.present:

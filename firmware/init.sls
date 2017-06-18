@@ -23,7 +23,7 @@ firmware-git:
     - require:
       - user: firmware
   git.latest:
-    - name: git@git.c3pb.de:freifunk-pb/firmware-website.git
+    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-website.git
     - target: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}
     - user: firmware
     - update_head: False
@@ -32,7 +32,6 @@ firmware-git:
       - user: firmware
       - file: firmware-git
       - file: /home/firmware/.ssh/id_rsa
-      - ssh_known_hosts: git.c3pb.de
 
 firmware-changelog:
   cmd.run:
@@ -45,13 +44,6 @@ firmware-changelog:
     - require:
       - user: firmware
       - file: /usr/local/sbin/update-firmware
-
-# SSH fingerprint of gitlab
-git.c3pb.de:
-  ssh_known_hosts.present:
-    - user: firmware
-    - enc: ecdsa
-    - fingerprint: 51:2a:f4:f4:71:c8:69:8c:96:db:54:b7:f0:36:e5:60
 
 /home/firmware/.ssh:
   file.directory:
