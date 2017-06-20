@@ -8,11 +8,11 @@ Unattended-Upgrade::Origins-Pattern {
         // Note that this will silently match a different release after
         // migration to the specified archive (e.g. testing becomes the
         // new stable).
-        "o=Debian,n=jessie";\n'
+        "o=Debian,n=jessie";
         "o=Debian,n=jessie,a=stable-updates";
         "o=Debian,n=jessie,a=proposed-updates";
-        "o=Debian,n=jessie,l=Debian-Security";\n'
-        "o=Debian Backports,n=jessie-backports,l=Debian Backports";\n'
+        "o=Debian,n=jessie,l=Debian-Security";
+        "o=Debian Backports,n=jessie-backports,l=Debian Backports";
         "origin=Debian,archive=stable,label=Debian-Security";
         "origin=Debian,archive=oldstable,label=Debian-Security";
 };
