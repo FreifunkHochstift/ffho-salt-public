@@ -1,0 +1,42 @@
+#!/usr/bin/python
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Tue 20 Jun 2017 06:40:18 PM CEST
+#
+
+import argparse
+import json
+import os
+import sys
+
+parser = argparse.ArgumentParser (description = 'Merge nodes.json files')
+parser.add_argument ('files', help = 'Path for nodes.json file(s)', nargs = '+')
+parser.add_argument ('--pretty-print', help = 'Pretty-print JSON output', action = 'store_true')
+args = parser.parse_args ()
+
+all_nodes = {}
+uberdict = {}
+
+# Read all nodes lists into all_nodes dict, thereby dropping any duplicate nodes.
+for file_path in args.files:
+	try:
+		with open (file_path, 'rb') as fh:
+			nodes = json.load (fh)
+	except IOError as (errno, strerror):
+		print "Error while reading file '%s': %s" % (file_path, strerror)
+		sys.exit (1)
+
+	for node in nodes['nodes']:
+		all_nodes[node['nodeinfo']['node_id']] = node
+
+	for key in nodes.keys ():
+		if key != 'nodes':
+			uberdict[key] = nodes[key]
+
+uberdict['nodes'] = all_nodes.values ()
+
+# Print merged nodes.json's to stdout
+if args.pretty_print:
+	print (json.dumps (uberdict, sort_keys = True, indent = 4, separators = (',', ': ')))
+else:
+	print (json.dumps (uberdict))

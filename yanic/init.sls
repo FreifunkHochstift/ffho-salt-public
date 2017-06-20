@@ -67,3 +67,13 @@ yanic@{{site}}:
       - file: /srv/yanic/{{site}}.conf
       - file: yanic
 {% endfor %}
+
+
+/usr/local/bin/ff_merge_nodes_json:
+  file.managed:
+    - source: salt://yanic/ff_merge_nodes_json
+    - mode: 755
+
+/etc/cron.d/ff_merge_nodes_json:
+  file.managed:
+    - source: salt://yanic/ff_merge_nodes_json.cron

@@ -1,0 +1,5 @@
+#
+# Merge all nodes.json into one ubernodes.json
+#
+
+*/5 *   * * *	root	/usr/local/bin/ff_merge_nodes_json /srv/yanic/data/*/nodes.json > /srv/yanic/data/nodes.json
