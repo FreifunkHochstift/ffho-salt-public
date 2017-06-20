@@ -89,3 +89,39 @@ ssh-{{ user }}:
       - file: {{ path }}/.ssh
   {% endif %}
 {% endfor %}
+
+# Manage host keys
+{% for key in node_config.get('ssh', {}).get('host', {}) if key in ['dsa', 'ecdsa', 'ed25519', 'rsa'] %}
+/etc/ssh/ssh_host_{{ key }}_key:
+  file.managed:
+    - contents_pillar: nodes:{{ grains.id }}:ssh:host:{{ key }}:privkey
+    - mode: 600
+    - watch_in:
+      - service: ssh
+
+/etc/ssh/ssh_host_{{ key }}_key.pub:
+  file.managed:
+    - contents_pillar: nodes:{{ grains.id }}:ssh:host:{{ key }}:pubkey
+    - mode: 644
+    - watch_in:
+      - service: ssh
+{% endfor %}
+
+# Manage known-hosts
+{% set type = 'ed25519' %}
+{% for host_name, host_config in salt['pillar.get']('nodes').items() if host_config.get('ssh', {}).get('host', {}).get(type, False) %}
+  {% set hosts = [ host_name ] + host_config.ssh.host.get('aliases', []) %}
+  {% set host_external = host_name|replace('.in.','.') %}
+  {% for iface, iface_config in host_config.get('ifaces', {}).items() if iface_config.get('vrf', 'none') == 'vrf_external' and host_external not in hosts %}
+    {% do hosts.append(host_external) %}
+  {% endfor %}
+  {% for host in hosts %}
+{{ host }}-{{ type }}:
+  ssh_known_hosts.present:
+    - name: {{ host }}
+    - key: {{ host_config.ssh.host.get(type, {}).pubkey.split(' ')[1] }}
+    - enc: {{ type }}
+    - require:
+      - pkg: ssh
+  {% endfor %}
+{% endfor %}
