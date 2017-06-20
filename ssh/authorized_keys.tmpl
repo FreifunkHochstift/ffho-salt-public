@@ -1,4 +1,15 @@
-{%- set ssh_config = salt['pillar.get']('ssh') -%}
+{%- set ssh_config = salt['pillar.get']('ssh') %}
+{%- for entry_name, entry in ssh_config.get('keys',{}).items() if entry.get('pillar', False) %}
+  {%- set entry_split = entry_name.split('@') %}
+  {%- if entry_split|length() == 2 %}
+    {%- set user = entry_split[0] %}
+    {%- set host = entry_split[1] %}
+  {%- else %}
+    {%- set user = 'root' %}
+    {%- set host = entry_split[0] %}
+  {%- endif %}
+  {%- do entry.update({ 'pubkeys': [salt['pillar.get']('nodes:' + host + ':ssh:' + user + ':pubkey')]}) %}
+{%- endfor %}
 {%- set node_config = salt['pillar.get']('nodes:' ~ grains['id']) -%}
 {%- set auth_keys = salt['ffho_auth.get_ssh_authkeys'](ssh_config, node_config, grains['id'], username) -%}
 {{ "\n".join (auth_keys) }}

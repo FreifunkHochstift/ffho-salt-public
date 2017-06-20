@@ -2,6 +2,8 @@
 # SSH configuration
 #
 
+{% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
+
 # Install ssh server
 ssh:
   pkg.installed:
@@ -23,45 +25,67 @@ ssh:
     - watch_in:
       - service: ssh
 
+{% set users = ['root'] %}
+{% for user, user_config in node_config.get('ssh', {}).items() if user not in ['host'] and user not in users %}
+  {% do users.append(user) %}
+{% endfor %}
 
-# Create .ssh dir for user root
-/root/.ssh:
+{% for user in users %}
+  {% set path = '/' + user %}
+  {% if user not in ['root'] %}
+    {% set path = '/home' + path %}
+  {% endif %}
+
+{# Create user if not present#}
+ssh-{{ user }}:
+  user.present:
+    - name: {{ user }}
+    - shell: /bin/bash
+    - home: {{ path }}
+    - createhome: True
+    - gid_from_name: True
+    - system: False
+
+{# Create .ssh dir #}
+{{ path }}/.ssh:
   file.directory:
-    - user: root
-    - group: root
+    - user: {{ user }}
+    - group: {{ user }}
     - mode: 700
-    - makedirs: True
+    - require:
+      - user: ssh-{{ user }}
 
-
-# Create authorized_keys for root (MASTER + host specific)
-/root/.ssh/authorized_keys:
+{# Create authorized_keys for user (MASTER + host specific) #}
+{{ path }}/.ssh/authorized_keys:
   file.managed:
     - source: salt://ssh/authorized_keys.tmpl
     - template: jinja
-      username: root
-    - user: root
-    - group: root
+      username: {{ user }}
+    - user: {{ user }}
+    - group: {{ user }}
     - mode: 644
     - require:
-      - file: /root/.ssh
+      - file: {{ path }}/.ssh
 
-# Add SSH-Keys
-{% if 'root' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ssh', []) %}
-/root/.ssh/id_rsa:
+  {% if user in node_config.get('ssh', {}) %}
+    {% set user_config = node_config.get('ssh:' + user, {}) %}
+{# Add SSH-Keys for user #}
+{{ path }}/.ssh/id_rsa:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:ssh:root:privkey
-    - user: root
-    - group: root
+    - contents_pillar: nodes:{{ grains.id }}:ssh:{{ user }}:privkey
+    - user: {{ user }}
+    - group: {{ user }}
     - mode: 600
     - require:
-      - file: /root/.ssh
+      - file: {{ path }}/.ssh
 
-/root/.ssh/id_rsa.pub:
+{{ path }}/.ssh/id_rsa.pub:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:ssh:root:pubkey
-    - user: root
-    - group: root
+    - contents_pillar: nodes:{{ grains.id }}:ssh:{{ user }}:pubkey
+    - user: {{ user }}
+    - group: {{ user }}
     - mode: 644
     - require:
-      - file: /root/.ssh
-{% endif %}
+      - file: {{ path }}/.ssh
+  {% endif %}
+{% endfor %}

@@ -31,7 +31,6 @@ firmware-git:
       - pkg: firmware-pkgs
       - user: firmware
       - file: firmware-git
-      - file: /home/firmware/.ssh/id_rsa
 
 firmware-changelog:
   cmd.run:
@@ -44,32 +43,6 @@ firmware-changelog:
     - require:
       - user: firmware
       - file: /usr/local/sbin/update-firmware
-
-/home/firmware/.ssh:
-  file.directory:
-    - user: firmware
-    - group: firmware
-    - mode: 700
-    - require:
-      - user: firmware
-
-/home/firmware/.ssh/authorized_keys:
-  file.managed:
-    - contents_pillar: nodes:masterbuilder.in.ffho.net:ssh:build:pubkey
-    - user: firmware
-    - group: firmware
-    - mode: 644
-    - require:
-      - file: /home/firmware/.ssh
-
-/home/firmware/.ssh/id_rsa:
-  file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:ssh:firmware:privkey
-    - user: firmware
-    - group: firmware
-    - mode: 400
-    - require:
-      - file: /home/firmware/.ssh
 
 firmware-cron:
   cron.present:
