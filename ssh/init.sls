@@ -110,10 +110,13 @@ ssh-{{ user }}:
 # Manage known-hosts
 {% set type = 'ed25519' %}
 {% for host_name, host_config in salt['pillar.get']('nodes').items() if host_config.get('ssh', {}).get('host', {}).get(type, False) %}
-  {% set hosts = [ host_name ] + host_config.ssh.host.get('aliases', []) %}
+  {% set hosts = [ host_name, host_name|replace('.in.ffho.net',''), salt['ffho_net.get_loopback_ip'](host_config, host_config.id, 'v4'), salt['ffho_net.get_loopback_ip'](host_config, host_config.id, 'v6') ] + host_config.ssh.host.get('aliases', []) %}
   {% set host_external = host_name|replace('.in.','.') %}
   {% for iface, iface_config in host_config.get('ifaces', {}).items() if iface_config.get('vrf', 'none') == 'vrf_external' and host_external not in hosts %}
     {% do hosts.append(host_external) %}
+    {% for ip in iface_config.get('prefixes', []) if not ip.startswith('192.168.') %}
+      {% do hosts.append(ip.split('/')[0]) %}
+    {% endfor %}
   {% endfor %}
   {% for host in hosts %}
 {{ host }}-{{ type }}:
