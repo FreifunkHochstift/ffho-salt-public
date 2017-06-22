@@ -24,7 +24,6 @@ postfix:
     - source:
       - salt://postfix/master.cf.{{ grains['id'] }}
       - salt://postfix/master.cf.{{ grains.oscodename }}
-      - salt://postfix/master.cf
     - watch_in:
       - service: postfix
 
