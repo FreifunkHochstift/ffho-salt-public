@@ -1,6 +1,8 @@
 # Send respondd request to update information
 [respondd]
 enable           = true
+# Delay startup until a multiple of the period since zero time
+synchronize      = "1m"
 # how oftern request per multicast
 collect_interval = "1m"
 # on which interface
@@ -69,9 +71,16 @@ address  = "{{influxdb.address}}"
 database = "{{influxdb.database}}"
 username = "{{influxdb.username}}"
 password = "{{influxdb.password}}"
-# tag the data with an optional job tag
+# tagging of the data are optional
+# be carefull tags by system would overright config
+[database.connection.influxdb.tags]
 job = "{{site}}"
 
 [[database.connection.logging]]
 enable   = false
 path     = "/var/log/yanic.log"
+
+[[database.connection.graphite]]
+enable   = false
+address  = "localhost:2003"
+prefix   = "freifunk"
