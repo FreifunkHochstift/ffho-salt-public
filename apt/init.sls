@@ -49,7 +49,7 @@ apt-icinga2:
     - comments:
       - "# Icinga2 repo"
     - human_name: Icinga2 repo
-    - name: deb http://packages.icinga.org/debian icinga-jessie main
+    - name: deb http://packages.icinga.org/debian icinga-{{ grains.oscodename }} main
     - file: /etc/apt/sources.list.d/icinga2.list
     - key_url: http://packages.icinga.org/icinga.key
 

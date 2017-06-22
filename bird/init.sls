@@ -8,6 +8,7 @@ include:
   - network.interfaces
 
 bird-repo:
+{% if grains.oscodename in ['jessie', 'wheezy'] %}
   pkgrepo.managed:
     - comments: "# Official bird repo"
     - human_name: Official bird repository
@@ -15,14 +16,18 @@ bird-repo:
     - dist: {{ grains['oscodename'] }}
     - file: /etc/apt/sources.list.d/bird.list
     - key_url: salt://bird/bird_apt.key
-
+{% else %}
+  file.absent:
+    - name: /etc/apt/sources.list.d/bird.list
+{% endif %}
 
 bird-pkg:
   pkg.installed:
     - name: bird
+{% if grains.oscodename in ['jessie', 'wheezy'] %}
     - require:
       - pkgrepo: bird-repo
-
+{% endif %}
 
 # Make sure both services are enabled
 bird:

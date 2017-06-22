@@ -7,8 +7,8 @@
 nginx:
   pkg.installed:
     - name: {{nginx_pkg}}
-{% if grains['oscodename'] == 'jessie' %}
-    - fromrepo: jessie-backports
+{% if grains.oscodename in ['jessie'] %}
+    - fromrepo: {{ grains.oscodename }}-backports
 {% endif %}
   service.running:
     - enable: TRUE
