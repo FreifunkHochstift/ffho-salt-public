@@ -6,6 +6,8 @@ openssl:
   pkg.installed:
     - name: openssl
 
+ssl-cert:
+  pkg.installed
 
 update_ca_certificates:
   cmd.wait:
@@ -100,4 +102,6 @@ update_ca_certificates:
     - user: root
     - group: ssl-cert
     - mode: 440
+    - require:
+      - pkg: ssl-cert
 {% endfor %}
