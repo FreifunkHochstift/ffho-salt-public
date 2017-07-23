@@ -17,7 +17,7 @@ ffho-respondd:
       - python3
       - python3-netifaces
   git.latest:
-   - name: https://github.com/FreifunkHochstift/ffho-respondd.git
+   - name: https://git.ffho.net/FreifunkHochstift/ffho-respondd.git
    - target: /srv/ffho-respondd
    - require:
      - file: /srv/ffho-respondd
