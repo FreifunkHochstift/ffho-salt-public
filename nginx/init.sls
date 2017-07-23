@@ -15,7 +15,6 @@ nginx:
     - reload: TRUE
     - require:
       - pkg: nginx
-      - file: nginx-cache
     - watch:
       - cmd: nginx-configtest
 
@@ -35,6 +34,10 @@ nginx-cache:
     - name: /srv/cache
     - user: www-data
     - group: www-data
+    - require:
+      - pkg: nginx
+    - require_in:
+      - cmd: nginx-configtest
 
 # Install meaningful main configuration (SSL tweaks 'n stuff)
 /etc/nginx/nginx.conf:
@@ -43,7 +46,6 @@ nginx-cache:
     - template: jinja
     - watch_in:
       - cmd: nginx-configtest
-
 
 # Disable default configuration
 /etc/nginx/sites-enabled/default:
