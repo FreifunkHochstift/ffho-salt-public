@@ -63,6 +63,30 @@ nginx-cache:
       - cmd: nginx-configtest
 {% endfor %}
 
+{% if 'frontend' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+  {% for domain, config in pillar.get('frontend', {}).items()|sort %}
+    {% if 'file' in config %}
+/etc/nginx/sites-enabled/{{domain}}:
+  file.managed:
+    - source: salt://nginx/{{config.file}}
+    - template: jinja
+    - require:
+      - pkg: nginx
+    - watch_in:
+      - cmd: nginx-configtest
+    {% endif %}
+  {% endfor %}
+
+/etc/nginx/sites-enabled/ff-frontend.conf:
+  file.managed:
+    - source: salt://nginx/ff-frontend.conf
+    - template: jinja
+    - require:
+      - pkg: nginx
+    - watch_in:
+      - cmd: nginx-configtest
+{% endif %}
+
 # Test configuration before reload
 nginx-configtest:
   cmd.wait:
