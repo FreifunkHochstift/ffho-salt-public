@@ -105,3 +105,11 @@ update_ca_certificates:
     - require:
       - pkg: ssl-cert
 {% endfor %}
+
+{% if 'frontend' in node_config.roles or 'nginx' in node_config %}
+certs-nginx-reload:
+  cmd.wait:
+    - name: service nginx reload
+    - watch:
+      - file: /etc/ssl/certs/*
+{% endif %}
