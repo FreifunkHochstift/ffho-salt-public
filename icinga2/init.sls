@@ -22,7 +22,11 @@ monitoring-plugin-pkgs:
       - monitoring-plugins
       - nagios-plugins-contrib
       - libyaml-syck-perl
+{% if grains['oscodename'] == 'jessie' %}
       - libnagios-plugin-perl
+{% else %}
+      - libmonitoring-plugin-perl
+{% endif %}
       - lsof
     - watch_in:
       - service: icinga2
