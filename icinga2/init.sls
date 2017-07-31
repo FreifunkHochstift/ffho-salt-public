@@ -180,6 +180,8 @@ Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
   file.directory:
     - name: /etc/icinga2/ffho-conf.d/hosts/generated/
     - clean: true
+    - watch_in:
+      - service: icinga2
 
   # Generate config file for every client known to pillar
   {% for node_id, node_config in salt['pillar.get']('nodes', {}).items () %}
@@ -202,11 +204,21 @@ Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
 
 
 # Create configuration for network devices
-/etc/icinga2/ffho-conf.d/net/wbbl/:
+Create /etc/icinga2/ffho-conf.d/net/wbbl/:
   file.directory:
+    - name: /etc/icinga2/ffho-conf.d/net/wbbl/
     - makedirs: true
     - require:
       - pkg: icinga2
+
+Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
+  file.directory:
+    - name: /etc/icinga2/ffho-conf.d/net/wbbl/
+    - makedirs: true
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
 
   # Generate config files for every WBBL device known to pillar
   {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
@@ -218,7 +230,9 @@ Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
       link_id: {{ link_id }}
       link_config: {{ link_config }}
     - require:
-      - file: /etc/icinga2/ffho-conf.d/net/wbbl/
+      - file: Create /etc/icinga2/ffho-conf.d/net/wbbl/
+    - require_in:
+      - file: Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/
     - watch_in:
       - service: icinga2
   {% endfor %}
