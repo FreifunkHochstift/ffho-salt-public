@@ -33,11 +33,7 @@ save_interval = "1m"
 offline_after = "10m"
 
 # Prune offline nodes after a time of inactivity
-{%- if site == 'legacy' %}
-prune_after = "14d"
-{%- else %}
 prune_after = "30d"
-{%- endif %}
 
 [meshviewer]
 # structur of nodes.json, which to support
