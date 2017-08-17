@@ -30,12 +30,6 @@ zone "paderborn.freifunk.net" {
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
-zone "pb.freifunk.net" {
-	type master;
-	file "/etc/bind/zones/static/pb.freifunk.net.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
-};
-
 zone "hochstift.freifunk.net" {
 	type master;
 	file "/etc/bind/zones/static/hochstift.freifunk.net.zone";
@@ -96,14 +90,6 @@ zone "30.172.in-addr.arpa" {
 	file "/etc/bind/zones/static/30.172.in-addr.arpa.zone";
 	allow-transfer { localhost; ffho-ops; };
 };
-
-// Legacy .ffpb
-zone "ffpb" {
-	type master;
-	file "/etc/bind/zones/static/ffpb.db";
-	allow-transfer { localhost; ffho-ops; };
-};
-
 
 // Legacy fdca:ffee:ff12::/48 reverse
 zone "2.1.f.f.e.e.f.f.a.c.d.f.ip6.arpa" {
