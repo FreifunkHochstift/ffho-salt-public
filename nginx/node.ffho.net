@@ -2,9 +2,6 @@ geo $url {
 	# default
 	default hochstift.freifunk.net;
 
-	# Legacy (ULA)
-	fdca:ffee:ff12:132::/64 node.legacy.ffho.net;
-
 {%- set sites = salt['pillar.get']('sites') %}
 {% for site_name, site in sites.items()|sort %}
 	# {{ site.name}}

@@ -57,15 +57,4 @@ server {
 	location ~^/lede/(?<file>.+)$ {
 		return 302 http://downloads.lede-project.org/releases/$file;
 	}
-
-	# autoupdater legacy glue
-	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(?<branch>(stable|testing|experimental))/($branch\.manifest)$ {
-		try_files $uri /$branch/sysupgrade/$branch.$site_code.manifest /$branch/sysupgrade/$branch.manifest =404;
-	}
-	location ~ ^/(?<site_code>(ffho(_(\w\w\w))?(_(cty|uml))?))/(?<branch>(stable|testing|experimental))/(?<file>.*) {
-		try_files $uri /$branch/sysupgrade/$file =404;
-	}
-	location ~ ^/(?<branch>(stable|testing|experimental))/(?<file>.*)$ {
-		try_files $uri $uri/ /$branch/sysupgrade/$file =404;
-	}
 }
