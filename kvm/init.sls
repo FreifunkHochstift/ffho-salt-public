@@ -8,6 +8,7 @@ virt-pkgs:
       - qemu-kvm
       - libvirt-bin
       - xmlstarlet
+      - netcat-openbsd
 
 /etc/libvirt/hooks/qemu:
   file.managed:
