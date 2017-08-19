@@ -12,9 +12,7 @@ include:
 
 {%- if 'batman' in roles %}
 batctl:
-  pkg.installed:
-    - require:
-      - pkgrepo: apt-neoraider
+  pkg.installed
 
 
 # Convenience bat-hosts file for informative batctl output

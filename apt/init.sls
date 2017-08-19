@@ -33,6 +33,7 @@ ffho-repo-jessie:
     - require:
       - pkg: python-apt
 
+{% if grains.oscodename in [ "jessie" ] %}
 apt-neoraider:
   pkgrepo.managed:
     - comments:
@@ -43,6 +44,10 @@ apt-neoraider:
     - file: /etc/apt/sources.list.d/universe-factory.list
     - keyserver: pgpkeys.mit.edu
     - keyid: 16EF3F64CB201D9C
+{% else %}
+/etc/apt/sources.list.d/universe-factory.list:
+  file.absent
+{% endif %}
 
 apt-icinga2:
   pkgrepo.managed:
