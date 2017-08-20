@@ -55,11 +55,12 @@ nginx-cache:
       - cmd: nginx-configtest
 
 # Install website configuration files configured for this node
-{% for website in node_config.get('nginx', {}).get('websites', []) %}
+{% for website, website_config in node_config.get('nginx', {}).get('websites', {}).items() %}
 /etc/nginx/sites-enabled/{{website}}:
   file.managed:
     - source: salt://nginx/{{website}}
     - template: jinja
+      config: {{ website_config }}
     - require:
       - pkg: nginx
     - watch_in:
