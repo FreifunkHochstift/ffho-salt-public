@@ -2,7 +2,8 @@
 # Nginx
 #
 
-{% set nginx_pkg = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:pkg', 'nginx') %}
+{% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
+{% set nginx_pkg = node_config.get('nginx:pkg', 'nginx') %}
 
 nginx:
   pkg.installed:
@@ -54,7 +55,7 @@ nginx-cache:
       - cmd: nginx-configtest
 
 # Install website configuration files configured for this node
-{% for website in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':nginx:websites', []) %}
+{% for website in node_config.get('nginx', {}).get('websites', []) %}
 /etc/nginx/sites-enabled/{{website}}:
   file.managed:
     - source: salt://nginx/{{website}}
@@ -65,7 +66,7 @@ nginx-cache:
       - cmd: nginx-configtest
 {% endfor %}
 
-{% if 'frontend' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if 'frontend' in node_config.get('roles', []) %}
   {% for domain, config in pillar.get('frontend', {}).items()|sort %}
     {% if 'file' in config %}
 /etc/nginx/sites-enabled/{{domain}}:
