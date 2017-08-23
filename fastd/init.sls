@@ -3,13 +3,14 @@
 #
 
 {% set sites_all = pillar.get ('sites') %}
-{% set sites_node = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', {}) %}
-{% set device_no = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':id', -1) %}
+{% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
+{% set sites_node = node_config.get('sites', {}) %}
+{% set device_no = node_config.get('id', -1) %}
 
 include:
   - apt
   - network.interfaces
-{% if 'fastd_peers' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if 'fastd_peers' in node_config.get('roles', []) %}
   - fastd.peers
 {% endif %}
 
@@ -41,10 +42,10 @@ fastd:
 # for every site associated for the current minion ID.
 #
 {% for site in sites_node %}
-  {% set site_no = salt['pillar.get']('sites:' ~ site ~ ':site_no') %}
+  {% set site_no = sites_all.get(site, {}).get('site_no') %}
 
   {% set networks = ['intergw'] %}
-  {% if 'fastd_peers' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+  {% if 'fastd_peers' in node_config.get('roles', []) %}
     {% do networks.extend (['nodes4', 'nodes6']) %}
   {% endif %}
 
@@ -69,12 +70,12 @@ fastd:
       site: {{ site }}
       site_no: {{ site_no }}
       mac_address: {{ mac_address }}
-    {% if 'batman_ext' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+    {% if 'batman_ext' in node_config.get('roles', []) %}
       bat_iface: bat-{{ site }}-ext
     {% else %}
       bat_iface: bat-{{ site }}
     {% endif %}
-      peer_limit: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':fastd:peer_limit', False) }}
+      peer_limit: {{ node_config.get('fastd', {}).get('peer_limit', False) }}
     - require:
       - file: /etc/fastd/{{ instance_name }}
     - watch_in:
@@ -83,7 +84,7 @@ fastd:
   file.managed:
     - source: salt://fastd/secret.conf.tmpl
     - template: jinja
-      secret: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':fastd:' ~ network_type + '_privkey') }}
+      secret: {{ node_config.get('fastd', {}).get(network_type ~ '_privkey') }}
     - mode: 600
     - user: root
     - group: root
@@ -124,13 +125,12 @@ fastd@{{ instance_name }}:
 #
 # Set up Inter-Gw-VPN link to all nodes of this site
   {% set has_ipv6 = False %}
-  {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
   {% if  salt['ffho_net.get_node_iface_ips'](node_config, 'vrf_external')['v6']|length %}
     {% set has_ipv6 = True %}
   {% endif %}
-  {% for node, node_config in salt['pillar.get']('nodes').items ()|sort  %}
+  {% for node, peer_config in salt['pillar.get']('nodes').items ()|sort  %}
 /etc/fastd/{{ site }}_intergw/gateways/{{ node }}:
-    {% if site in node_config.get ('sites', {}) and 'fastd' in node_config %}
+    {% if site in peer_config.get ('sites', {}) and 'fastd' in peer_config %}
   file.managed:
     - source: salt://fastd/inter-gw.peer.tmpl
     - template: jinja
@@ -138,7 +138,7 @@ fastd@{{ instance_name }}:
       site_no: {{ site_no }}
       has_ipv6: {{ has_ipv6 }}
       node: {{ node }}
-      pubkey: {{ salt['pillar.get']('nodes:' ~ node ~ ':fastd:intergw_pubkey') }}
+      pubkey: {{ peer_config.get('fastd', {}).get('intergw_pubkey') }}
     - require:
       - file: /etc/fastd/{{ site }}_intergw/gateways
     {% else %}
