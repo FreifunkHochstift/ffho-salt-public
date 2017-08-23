@@ -79,7 +79,6 @@ fastd:
       peer_limit: {{ node_config.get('fastd', {}).get('peer_limit', False) }}
     - require:
       - file: /etc/fastd/{{ instance_name }}
-    - watch_in:
   
 /etc/fastd/{{ instance_name }}/secret.conf:
   file.absent
@@ -89,7 +88,6 @@ fastd:
 fastd@{{ instance_name }}:
   service.running:
     - enable: True
-    - reload: True
     - require:
       - file: /etc/systemd/system/fastd@.service
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
@@ -98,44 +96,14 @@ fastd@{{ instance_name }}:
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
     {% if network in ['nodes4', 'nodes6'] %}
       - git: peers-git
-    {% else %}
-      - file: /etc/fastd/{{ instance_name }}/gateways/*
     {% endif %}
   {% endfor %} # // foreach network in $site
 
 
 #
-# Generate Inter-GW peers from pillar
+# Remove old Inter-GW peers folder
 /etc/fastd/{{ site }}_intergw/gateways:
-  file.directory:
-    - makedirs: true
-    - mode: 755
-    - require:
-      - file: /etc/fastd/{{ site }}_intergw
-
-#
-# Set up Inter-Gw-VPN link to all nodes of this site
-  {% set has_ipv6 = False %}
-  {% if  salt['ffho_net.get_node_iface_ips'](node_config, 'vrf_external')['v6']|length %}
-    {% set has_ipv6 = True %}
-  {% endif %}
-  {% for node, peer_config in salt['pillar.get']('nodes').items ()|sort  %}
-/etc/fastd/{{ site }}_intergw/gateways/{{ node }}:
-    {% if site in peer_config.get ('sites', {}) and 'fastd' in peer_config %}
-  file.managed:
-    - source: salt://fastd/inter-gw.peer.tmpl
-    - template: jinja
-      site: {{ site }}
-      site_no: {{ site_no }}
-      has_ipv6: {{ has_ipv6 }}
-      node: {{ node }}
-      pubkey: {{ peer_config.get('fastd', {}).get('intergw_pubkey') }}
-    - require:
-      - file: /etc/fastd/{{ site }}_intergw/gateways
-    {% else %}
   file.absent
-    {% endif %}
-  {% endfor %} # // foreach node
 {% endfor %} # // foreach site
 
 
