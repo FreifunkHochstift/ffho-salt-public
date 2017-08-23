@@ -94,17 +94,17 @@ fastd@{{ instance_name }}:
       - service: fastd
     - watch:
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
-    {% if network in ['nodes4', 'nodes6'] %}
+    {% if network_type == 'nodes' %}
       - git: peers-git
     {% endif %}
-  {% endfor %} # // foreach network in $site
+  {% endfor %}{# for network in networks #}
 
 
 #
 # Remove old Inter-GW peers folder
 /etc/fastd/{{ site }}_intergw/gateways:
   file.absent
-{% endfor %} # // foreach site
+{% endfor %}{# for site in sites_node #}
 
 
 #
