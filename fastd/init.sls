@@ -67,6 +67,7 @@ fastd:
     - template: jinja
       network: {{ network }}
       network_type: {{ network_type }}
+      secret: {{ node_config.get('fastd', {}).get(network_type ~ '_privkey') }}
       site: {{ site }}
       site_no: {{ site_no }}
       mac_address: {{ mac_address }}
@@ -81,15 +82,7 @@ fastd:
     - watch_in:
   
 /etc/fastd/{{ instance_name }}/secret.conf:
-  file.managed:
-    - source: salt://fastd/secret.conf.tmpl
-    - template: jinja
-      secret: {{ node_config.get('fastd', {}).get(network_type ~ '_privkey') }}
-    - mode: 600
-    - user: root
-    - group: root
-    - require:
-      - file: /etc/fastd/{{ instance_name }}
+  file.absent
 
 
 # Create systemd start link
@@ -100,11 +93,9 @@ fastd@{{ instance_name }}:
     - require:
       - file: /etc/systemd/system/fastd@.service
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
-      - file: /etc/fastd/{{ instance_name }}/secret.conf
       - service: fastd
     - watch:
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
-      - file: /etc/fastd/{{ instance_name }}/secret.conf
     {% if network in ['nodes4', 'nodes6'] %}
       - git: peers-git
     {% else %}
