@@ -34,15 +34,5 @@ options {
 	allow-recursion {
 		127.0.0.1/8;
 		::1/128;
-
-		// Entries from pillar
-{%- for entry in salt['pillar.get']('dns-server:auth:allow-recursion', []) %}
-		{{ entry }};
-{%- endfor %}
 	};
-
-{%- if grains['id'] != 'dns01.in.ffho.net' %}
-	// Disable notifies on non-master DNS
-	notify no;
-{%- endif %}
 };

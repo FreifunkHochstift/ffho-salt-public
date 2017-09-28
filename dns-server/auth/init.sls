@@ -2,13 +2,19 @@
 # Authoritive FFHO DNS Server configuration (dns01/dns02 anycast)
 #
 
+{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+
 include:
   - dns-server
 
 # Bind options
 /etc/bind/named.conf.options:
   file.managed:
+{% if 'dns-recursor' in roles %}
+    - source: salt://dns-server/auth/named.conf.options.recursor
+{% else %}
     - source: salt://dns-server/auth/named.conf.options
+{% endif %}
     - template: jinja
     - require:
       - pkg: bind9
