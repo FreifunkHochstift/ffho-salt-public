@@ -3,7 +3,7 @@
 #
 {%- set interfaces = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}) %}
 {%- for iface, config in interfaces.items ()|sort %}
-  {%- if config.get ('_state', '') == 'planned' %}
+  {%- if config.get ('_state', '') in [ 'planned', 'offline' ] %}
 {{ iface }}
   {%- endif %}
 {%- endfor %}
