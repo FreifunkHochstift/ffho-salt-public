@@ -18,7 +18,11 @@ user "{{ user }}"
 # This line should work fine if this computer is the only one accessing
 # the Internet through this DSL connection. This is the right line to use
 # for most people.
-{%- set iface = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':pppoe:iface', 'eth2') %}
+{%- set default_iface = 'eth2' %}
+{%- if salt['grains.get']('oscodename') == 'stretch' %}
+  {%- set default_iface = 'enp3s0' %}
+{%- endif %}
+{%- set iface = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':pppoe:iface', default_iface) %}
 pty "/usr/sbin/pppoe -I {{ iface }} -T 80 -m 1452"
 
 # An even more conservative version of the previous line, if things
