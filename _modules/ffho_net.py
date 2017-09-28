@@ -537,7 +537,10 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				else:
 					batman_ifaces += ' ' + iface
 
-			_set_mtu_to_iface_and_upper (ifaces, iface, MTU['batman_underlay_iface'])
+			# Use the MTU configured for this interface or, if none is set,
+			# the default value for batman underlay iface.
+			mtu = config.get('mtu', MTU['batman_underlay_iface'])
+			_set_mtu_to_iface_and_upper (ifaces, iface, mtu)
 
 
 #
