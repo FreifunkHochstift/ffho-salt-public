@@ -13,7 +13,9 @@ python-ipcalc:
 # ifupdown2 configuration
 /etc/network/ifupdown2/ifupdown2.conf:
   file.managed:
-    - source: salt://network/ifupdown2.conf
+    - source:
+      - salt://network/ifupdown2.conf.{{ grains['oscodename'] }}
+      - salt://network/ifupdown2.conf
     - require:
       - pkg: ifupdown2
       - pkg: python-ipcalc
