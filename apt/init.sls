@@ -25,11 +25,15 @@ ffho-repo-jessie:
     - comments:
       - "# FFHO APT repo"
     - human_name: FFHO repository
-    - name: deb http://apt.ffho.net/ jessie main contrib non-free
-    - dist: jessie
+    - name: deb http://apt.ffho.net/ {{ grains.oscodename }} main contrib non-free
+    - dist: {{ grains.oscodename }}
     - file: /etc/apt/sources.list.d/ffho.list
     - keyserver: keys.gnupg.net
+{% if grains.oscodename == "jessie" %}
     - keyid: 40FC1CE2
+{% else %}
+    - keyid: EB88A4D5
+{% endif %}
     - require:
       - pkg: python-apt
 
