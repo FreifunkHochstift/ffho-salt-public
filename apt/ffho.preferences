@@ -1,3 +1,7 @@
 Package: *
 Pin: origin repo.universe-factory.net
 Pin-Priority: 900
+
+Package: *
+Pin: origin apt.ffho.net
+Pin-Priority: 1001
