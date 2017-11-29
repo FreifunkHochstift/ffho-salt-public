@@ -97,3 +97,11 @@ base:
   nodes:{{ grains['id'] }}:roles:yanic:
     - match: pillar
     - yanic
+
+#
+# Grains
+#
+  # apu2
+  productname:apu2:
+    - match: grain
+    - apu2
