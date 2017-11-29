@@ -63,11 +63,6 @@ base:
     - match: pillar
     - gogs
 
-  # Hardware nodes
-  virtual:physical:
-    - match: grain
-    - hardware
-
   # KVM hosts
   nodes:{{ grains['id'] }}:roles:kvm:
     - match: pillar
@@ -105,3 +100,8 @@ base:
   productname:apu2:
     - match: grain
     - apu2
+
+  # Hardware nodes
+  virtual:physical:
+    - match: grain
+    - hardware
