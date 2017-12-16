@@ -37,21 +37,8 @@ ffho-repo-jessie:
     - require:
       - pkg: python-apt
 
-{% if grains.oscodename in [ "jessie" ] %}
-apt-neoraider:
-  pkgrepo.managed:
-    - comments:
-      - "# Neoraiders APT repo"
-    - human_name: Neoraiders APT repo
-    - name: deb https://repo.universe-factory.net/debian/ sid main
-    - dist: sid
-    - file: /etc/apt/sources.list.d/universe-factory.list
-    - keyserver: pgpkeys.mit.edu
-    - keyid: 16EF3F64CB201D9C
-{% else %}
 /etc/apt/sources.list.d/universe-factory.list:
   file.absent
-{% endif %}
 
 apt-icinga2:
   pkgrepo.managed:
@@ -63,7 +50,7 @@ apt-icinga2:
     - key_url: http://packages.icinga.org/icinga.key
 
 
-# APT preferences - Pin neoraiders packages to prio 900
+# APT preferences
 /etc/apt/preferences.d/ffho:
   file.managed:
     - source: salt://apt/ffho.preferences
