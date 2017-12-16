@@ -20,6 +20,9 @@ include:
 fastd:
   pkg.installed:
     - name: fastd
+{% if grains.oscodename in ['jessie'] %}
+    - fromrepo: {{ grains.oscodename }}-backports
+{% endif %}
     - require:
       - sls: network.interfaces
   service.dead:
