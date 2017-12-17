@@ -49,6 +49,15 @@ apt-icinga2:
     - file: /etc/apt/sources.list.d/icinga2.list
     - key_url: http://packages.icinga.org/icinga.key
 
+{% if grains.manufacturer == "HP" %}
+apt-hpe:
+  pkgrepo.managed:
+    - comments:
+      - "# HPE repo"
+    - human_name: HPE repo
+    - name: deb http://downloads.linux.hpe.com/SDR/repo/mcp {{ grains.oscodename }}/current non-free
+    - file: /etc/apt/sources.list.d/hpe.list
+{% endif %}
 
 # APT preferences
 /etc/apt/preferences.d/ffho:
