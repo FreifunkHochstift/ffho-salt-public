@@ -132,9 +132,11 @@ def _get_site_no (sites_config, site_name):
 #  ss		is the hexadecimal reprensentation of the site_id the interface is connected to
 #
 #  nn:nn	is the decimal representation of the network the interface is connected to, with
-#    00:00	being the dummy interface
+#    00:00	being the BATMAN interface
+#    00:0d	being the dummy interface
 #    00:0f	being the VEth internal side interface
-#    00:e0	being an external instance dummy interface
+#    00:e0	being an external instance BATMAN interface
+#    00:ed	being an external instance dummy interface
 #    00:e1	being an inter-gw-vpn interface
 #    00:e4	being an nodes fastd tunnel interface of IPv4 transport
 #    00:e6	being an nodes fastd tunnel interface of IPv6 transport
@@ -144,12 +146,14 @@ def _get_site_no (sites_config, site_name):
 #    ff:ff	being the gluon next-node interface
 def gen_batman_iface_mac (site_no, device_no, network):
 	net_type_map = {
-		'dummy'   : "00:00",
+		'bat'     : "00:00",
+		'dummy'   : "00:0d",
 		'int2ext' : "00:0f",
-		'dummy-e' : "00:e0",
+		'bat-e'   : "00:e0",
 		'intergw' : "00:e1",
 		'nodes4'  : "00:e4",
 		'nodes6'  : "00:e6",
+		'dummy-e' : "00:ed",
 		'ext2int' : "00:ef",
 	}
 
@@ -407,6 +411,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				# int2ext_site_if will be added automagically if requred
 				'batman-ifaces' : [ dummy_site_if ],
 				'batman-ifaces-ignore-regex': '.*_.*',
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'bat'),
 			},
 
 			# Dummy interface always present in regular BATMAN instance
@@ -421,6 +426,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				'type' : 'batman',
 				'batman-ifaces' : [ dummy_site_if_ext, ext2int_site_if ],
 				'batman-ifaces-ignore-regex': '.*_.*',
+				'hwaddress' : gen_batman_iface_mac (site_no, device_no, 'bat-e'),
 				'ext_only' : True,
 			},
 
