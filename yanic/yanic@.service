@@ -3,7 +3,7 @@ Description=yanic (Site %I)
 After=network.service
 
 [Service]
-ExecStart=/srv/yanic/yanic -config /srv/yanic/%i.conf
+ExecStart=/srv/yanic/yanic serve --config /srv/yanic/%i.conf
 
 [Install]
 WantedBy=multi-user.target

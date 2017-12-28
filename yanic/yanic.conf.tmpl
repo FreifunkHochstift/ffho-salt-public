@@ -1,14 +1,20 @@
+# This is the config file for Yanic written in "Tom's Obvious, Minimal Language."
+# syntax: https://github.com/toml-lang/toml
+# (if you need somethink multiple times, checkout out the [[table]] section)
+
 # Send respondd request to update information
 [respondd]
 enable           = true
 # Delay startup until a multiple of the period since zero time
 synchronize      = "1m"
-# how oftern request per multicast
+# how often request per multicast
 collect_interval = "1m"
-# on which interface
-interface        = "{{iface}}"
+# interface that has an IP in your mesh network
+interfaces       = ["{{iface}}"]
+# list of sites to save stats for (empty for global only)
+sites            = []
 # define a port to listen
-# (no or 0 would choose at port at his own)
+# if not set or set to 0 the kernel will use a random free port at its own
 #port = 10001
 
 
@@ -21,62 +27,137 @@ webroot = "/srv/yanic/data"
 
 
 [nodes]
-enable         = true
-# state-version of nodes.json to store cached data,
-#  these is the directly collected respondd data
-state_path     = "/srv/yanic/{{site}}.state"
-
+enable        = true
+# Cache file
+# a json file to cache all data collected directly from respondd
+state_path    = "/srv/yanic/{{site}}.state"
+# prune data in RAM, cache-file and output json files (i.e. nodes.json)
+# that were inactive for longer than
+prune_after   = "30d"
 # Export nodes and graph periodically
 save_interval = "1m"
-
 # Set node to offline if not seen within this period
 offline_after = "10m"
 
-# Prune offline nodes after a time of inactivity
-prune_after = "30d"
 
-[meshviewer]
-# structur of nodes.json, which to support
-# version 1 is to support legacy meshviewer (which are in master branch)
-#    i.e. https://github.com/ffnord/meshviewer/tree/master
-# version 2 is to support new version of meshviewer (which are in legacy develop branch or newer)
-#    i.e. https://github.com/ffnord/meshviewer/tree/dev
-#         https://github.com/ffrgb/meshviewer/tree/develop
-version  = 2
+## [[nodes.output.example]]
+# Each output format has its own config block and needs to be enabled by adding:
+#enable = true
+#
+# For each output format there can be set different filters
+#[nodes.output.example.filter]
+#
+# Set to false, if you want the json files to contain the owner information
+#no_owner = true
+#
+# List of nodeids of nodes that should be filtered out, so they won't appear in output
+#blacklist = ["00112233445566", "1337f0badead"]
+#
+# set has_location to true if you want to include only nodes that have geo-coordinates set
+# (setting this to false has no sensible effect, unless you'd want to hide nodes that have coordinates)
+#has_location = true
+
+#[nodes.output.example.filter.in_area]
+# nodes outside this area are not shown on the map but are still listed as a node without coordinates
+#latitude_min = 34.30
+#latitude_max = 71.85
+#longitude_min = -24.96
+#longitude_max = 39.72
+
+
+# definition for the new more compressed meshviewer.json
+[[nodes.output.meshviewer-ffrgb]]
+enable   = true
+path = "/srv/yanic/data/{{site}}/meshviewer.json"
+
+[nodes.output.meshviewer-ffrgb.filter]
+no_owner = true
+#blacklist = ["00112233445566", "1337f0badead"]
+#has_location = true
+
+#[nodes.output.meshviewer-ffrgb.filter.in_area]
+#latitude_min = 34.30
+#latitude_max = 71.85
+#longitude_min = -24.96
+#longitude_max = 39.72
+
+
+# definition for nodes.json
+[[nodes.output.meshviewer]]
+enable = true
+# The structure version of the output which should be generated (i.e. nodes.json)
+# version 1 is accepted by the legacy meshviewer (which is the master branch)
+#   i.e. https://github.com/ffnord/meshviewer/tree/master
+# version 2 is accepted by the new versions of meshviewer (which are in the legacy develop branch or newer)
+#   i.e. https://github.com/ffnord/meshviewer/tree/dev
+#        https://github.com/ffrgb/meshviewer/tree/develop
+version    = 2
 # path where to store nodes.json
-nodes_path     = "/srv/yanic/data/{{site}}/nodes.json"
+nodes_path = "/srv/yanic/data/{{site}}/nodes.json"
 # path where to store graph.json
-graph_path     = "/srv/yanic/data/{{site}}/graph.json"
+graph_path = "/srv/yanic/data/{{site}}/graph.json"
+
+[nodes.output.meshviewer.filter]
+no_owner = true
+
+
+# definition for nodelist.json
+[[nodes.output.nodelist]]
+enable   = true
+path = "/srv/yanic/data/{{site}}/nodelist.json"
+
+[nodes.output.nodelist.filter]
+no_owner = true
+
+
 
 [database]
-# cleaning data of measurement node,
-#   which are older than 7d
-delete_after = "30d"
-#   how often run the cleaning
+# this will send delete commands to the database to prune data
+# which is older than:
+delete_after    = "30d"
+# how often run the cleaning
 delete_interval = "1d"
 
-# Save collected data to InfluxDB
-# there would be the following measurments:
-#  node: store node spezific data i.e. clients memory, airtime
-#  global: store global data, i.e. count of clients and nodes
-#  firmware: store count of nodes tagged with firmware
-#  model: store count of nodes tagged with hardware model
+## [[database.connection.example]]
+# Each database-connection has its own config block and needs to be enabled by adding:
+#enable = true
+
+# Save collected data to InfluxDB.
+# There are the following measurments:
+#   node: store node specific data i.e. clients memory, airtime
+#   global: store global data, i.e. count of clients and nodes
+#   firmware: store the count of nodes tagged with firmware
+#   model: store the count of nodes tagged with hardware model
 [[database.connection.influxdb]]
 enable   = true
 address  = "{{influxdb.address}}"
 database = "{{influxdb.database}}"
 username = "{{influxdb.username}}"
 password = "{{influxdb.password}}"
-# tagging of the data are optional
-# be carefull tags by system would overright config
-[database.connection.influxdb.tags]
-job = "{{site}}"
 
+# Tagging of the data (optional)
+[database.connection.influxdb.tags]
+# Tags used by Yanic would override the tags from this config
+# nodeid, hostname, owner, model and firmware are tags which are already used
+#tagname1 = "tagvalue 1"
+# some usefull e.g.:
+#system   = "productive"
+#site     = "ffhb"
+job      = "{{site}}"
+
+# Logging
 [[database.connection.logging]]
 enable   = false
 path     = "/var/log/yanic.log"
 
+# Graphite settings
 [[database.connection.graphite]]
 enable   = false
 address  = "localhost:2003"
+# Graphite is replacing every "." in the metric name with a slash "/" and uses
+# that for the file system hierarchy it generates. it is recommended to at least
+# move the metrics out of the root namespace (that would be the empty prefix).
+# If you only intend to run one community and only freifunk on your graphite node
+# then the prefix can be set to anything (including the empty string) since you
+# probably wont care much about "polluting" the namespace.
 prefix   = "freifunk"
