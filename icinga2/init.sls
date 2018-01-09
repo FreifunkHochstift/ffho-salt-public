@@ -78,6 +78,7 @@ sudo:
     - source:
       - salt://icinga2/zones.conf.H_{{ grains.id }}
       - salt://icinga2/zones.conf
+    - template: jinja
     - require:
       - pkg: icinga2
     - watch_in:
