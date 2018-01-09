@@ -17,12 +17,13 @@ python-apt:
   pkg.installed
 
 
-ffho-repo-jessie:
+ffho-repo:
   pkgrepo.managed:
     - comments:
       - "# FFHO APT repo"
     - human_name: FFHO repository
     - name: deb http://apt.ffho.net/ {{ grains.oscodename }} main contrib non-free
+    - clean_file: True
     - dist: {{ grains.oscodename }}
     - file: /etc/apt/sources.list.d/ffho.list
     - keyserver: keys.gnupg.net
