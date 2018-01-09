@@ -16,8 +16,3 @@ sudo:
 /etc/sudoers:
   file.managed:
     - source: salt://sudo/sudoers
-
-/etc/sudoers.d/ffho:
-  file.managed:
-    - source: salt://sudo/ffho.tmpl
-    - template: jinja
