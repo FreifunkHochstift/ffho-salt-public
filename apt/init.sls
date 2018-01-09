@@ -16,9 +16,6 @@ apt-transport-https:
 python-apt:
   pkg.installed
 
-ffpb-repo:
-  file.absent:
-    - name: /etc/apt/sources.list.d/freifunk.list
 
 ffho-repo-jessie:
   pkgrepo.managed:
@@ -36,6 +33,11 @@ ffho-repo-jessie:
 {% endif %}
     - require:
       - pkg: python-apt
+
+
+# Purge old stuff
+/etc/apt/sources.list.d/freifunk.list:
+  file.absent
 
 /etc/apt/sources.list.d/universe-factory.list:
   file.absent
