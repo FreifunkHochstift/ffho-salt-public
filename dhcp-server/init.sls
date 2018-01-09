@@ -24,7 +24,10 @@ isc-dhcp-server:
 
 /etc/default/isc-dhcp-server:
   file.managed:
-    - source: salt://dhcp-server/dhcpd.default
+    - source:
+      - salt://dhcp-server/dhcpd.default.{{ grains.oscodename }}
+      - salt://dhcp-server/dhcpd.default
+    - template: jinja
     - watch_in:
       - service: isc-dhcp-server
 
