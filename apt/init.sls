@@ -40,14 +40,10 @@ ffho-repo-jessie:
 /etc/apt/sources.list.d/universe-factory.list:
   file.absent
 
-apt-icinga2:
-  pkgrepo.managed:
-    - comments:
-      - "# Icinga2 repo"
-    - human_name: Icinga2 repo
-    - name: deb http://packages.icinga.org/debian icinga-{{ grains.oscodename }} main
-    - file: /etc/apt/sources.list.d/icinga2.list
-    - key_url: http://packages.icinga.org/icinga.key
+/etc/apt/sources.list.d/icinga2.list:
+  file.absent
+
+
 
 {% if grains.manufacturer == "HP" %}
 apt-hpe:
@@ -58,6 +54,7 @@ apt-hpe:
     - name: deb http://downloads.linux.hpe.com/SDR/repo/mcp {{ grains.oscodename }}/current non-free
     - file: /etc/apt/sources.list.d/hpe.list
 {% endif %}
+
 
 # APT preferences
 /etc/apt/preferences.d/ffho:
