@@ -5,6 +5,7 @@
 {%- set sites = node_config.get ('sites', []) %}
 {%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
 {%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
+{%- set monitoring_config = node_config.get ('monitoring', {}) %}
 
 {%- if 'icinga2server' not in roles %}
 object Endpoint "{{ node_id }}" {
@@ -38,4 +39,17 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 {%- endfor %}
 	]
+
+{%- if 'service_param' in monitoring_config %}
+
+	vars.service_param = {
+  {%- for service, params in monitoring_config.get ('service_param').items ()|sort %}
+		"{{ service }}" = {
+    {%- for entry, value in params.items ()|sort %}
+			"{{ entry }}" = "{{ value }}",
+    {%- endfor %}
+		},
+  {%- endfor %}
+	}
+{%- endif %}
 }									
