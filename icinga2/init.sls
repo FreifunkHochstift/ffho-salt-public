@@ -5,6 +5,7 @@
 
 include:
   - apt
+  - sudo
 
 
 # Install icinga2 package
@@ -40,10 +41,8 @@ ffho-plugins:
     - user: root
     - group: root
 
-# Install sudo
-sudo:
-  pkg.installed
 
+# Install sudoers file for Icinga2 checks
 /etc/sudoers.d/icinga2:
   file.managed:
     - source: salt://icinga2/icinga2.sudoers
