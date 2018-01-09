@@ -129,6 +129,7 @@ ffho-plugins:
 /etc/icinga2/commands.d:
   file.recurse:
     - source: salt://icinga2/commands.d
+    - template: jinja
     - file_mode: 644
     - dir_mode: 755
     - user: root
