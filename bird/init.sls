@@ -75,6 +75,7 @@ bird6-configure:
   file.managed:
     - source: salt://bird/bird.conf
     - template: jinja
+      proto: v4
     - require:
       - file: /etc/bird/bird.d
     - require_in:
@@ -97,8 +98,9 @@ bird6-configure:
 
 /etc/bird/bird6.conf:
   file.managed:
-    - source: salt://bird/bird6.conf
+    - source: salt://bird/bird.conf
     - template: jinja
+      proto: v6
     - require:
       - file: /etc/bird/bird6.d
     - watch_in:
