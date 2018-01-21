@@ -1028,8 +1028,12 @@ def get_ospf_interface_config (node_config, grains_id):
 			# 'type' 			# Area type
 		}
 
-		# OSPF configuration for interface given?
+		# OSPF configuration for interface present?
 		ospf_config_pillar = iface_config.get ('ospf', {})
+
+		# Should be completely ignore this interface?
+		if ospf_config_pillar.get ('ignore', False):
+			continue
 
 		# Local Gigabit Ethernet based connections (PTP or L2 subnets), cost 10
 		if re.search (r'^(br-?|br\d+\.|vlan)10\d\d$', iface):
@@ -1038,19 +1042,19 @@ def get_ospf_interface_config (node_config, grains_id):
 			ospf_config['cost'] = 10
 			ospf_config['desc'] = "Wired Gigabit connection"
 
-		# AF-X based WBBL connection
+		# WBBL connection
 		elif re.search (r'^vlan20\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
 			ospf_config['cost'] = 100
-			ospf_config['desc'] = "AF-X based WBBL connection"
+			ospf_config['desc'] = "WBBL connection"
 
-		# Non-AF-X based WBBL connection
+		# Legacy WBBL connection
 		elif re.search (r'^vlan22\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
 			ospf_config['cost'] = 1000
-			ospf_config['desc'] = "Non-AF-X based WBBL connection"
+			ospf_config['desc'] = "WBBL connection"
 
 		# Management Vlans
 		elif re.search (r'^vlan30\d\d$', iface):
