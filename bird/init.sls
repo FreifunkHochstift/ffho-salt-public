@@ -370,6 +370,8 @@ bird6-configure:
     - require_in:
       - service: bird6
 {% else %}
-/etc/bird/bird6.d/ravd.conf:
-  file.absent
+/etc/bird/bird6.d/radv.conf:
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
 {% endif %}
