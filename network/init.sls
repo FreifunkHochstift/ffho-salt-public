@@ -44,6 +44,21 @@ vnstat:
     - template: jinja
     - source: salt://network/udev-rules.tmpl
 
+# Systemd link files?
+{% if grains['oscodename'] == 'stretch' %}
+  {% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
+    {% if '_udev_mac' in iface_config %}
+/etc/systemd/network/42-{{ iface }}.link:
+  file.managed:
+    - source: salt://network/systemd-link.tmpl
+    - template: jinja
+      interface: {{ iface }}
+      mac: {{ iface_config.get ('_udev_mac') }}
+      desc: {{ iface_config.get ('desc', '') }}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
 
 # /etc/resolv.conf
 /etc/resolv.conf:
