@@ -14,6 +14,10 @@ update_ca_certificates:
     - name: /usr/sbin/update-ca-certificates
     - watch: []
 
+generate-dhparam:
+  cmd.run:
+    - name: openssl dhparam -out /etc/ssl/dhparam.pem 4096
+    - creates: /etc/ssl/dhparam.pem
 
 # Install FFHO internal CA into Debian CA certificate mangling mechanism so
 # libraries (read: openssl) can use the CA cert when validating internal
