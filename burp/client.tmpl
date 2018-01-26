@@ -1,0 +1,8 @@
+#
+# Client specific configuration for {{ node }}
+#
+password = {{ burp_config.get ('password') }}
+
+{%- for entry in burp_config.get ('include_fs') %}
+include = {{ entry }}
+{%- endfor %}

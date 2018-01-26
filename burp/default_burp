@@ -1,0 +1,11 @@
+#
+# Burp backup defaults (Salt Managed)
+#
+# This is a POSIX shell fragment
+#
+
+# We want to run the bloody server
+RUN=yes
+
+# Additional options that are passed to the Daemon.
+DAEMON_ARGS="-c /etc/burp/burp-server.conf"

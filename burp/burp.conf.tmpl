@@ -1,0 +1,45 @@
+#
+# Burp backup client configuration (Salt managed)
+#
+
+mode = client
+port = 4971
+status_port = 4972
+
+server = 10.132.251.71
+
+password = {{ burp_password }}
+cname = {{ grains.id }}
+
+# Where to find all the SSL stuff
+ssl_cert_ca = /etc/ssl/certs/ffho-cacert.pem
+ssl_cert = /etc/ssl/certs/{{ grains.id }}.cert.pem
+ssl_key = /etc/ssl/private/{{ grains.id }}.key.pem
+ssl_dhfile = /etc/ssl/dhfile.pem
+
+ssl_peer_cn = {{ burp_server_name }}
+
+# Choose the protocol automagically
+protocol = 0
+
+pidfile = /var/run/burp.client.pid
+syslog = 1
+stdout = 1
+progress_counter = 1
+
+# Wait a random number of seconds between 0 and the given number before
+# contacting the server on a timed backup.
+randomise = 1200
+
+# Set server_can_restore to 0 if you do not want the server to be able to
+# initiate a restore.
+server_can_restore = 0
+
+# The server should configure what we should back up
+server_can_override_includes = 1
+
+# Example syntax for pre/post scripts
+#backup_script_pre=/path/to/a/script
+#backup_script_post=/path/to/a/script
+#restore_script_pre=/path/to/a/script
+#restore_script_post=/path/to/a/script
