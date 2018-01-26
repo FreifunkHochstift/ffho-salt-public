@@ -19,16 +19,6 @@ nginx:
     - watch:
       - cmd: nginx-configtest
 
-# generate custom DH parameters
-{% if grains['saltversion'] >= '2014.7.0' %}
-nginx-dhparam:
-  cmd.run:
-    - name: openssl dhparam -out /etc/ssl/dhparam.pem 4096
-    - creates: /etc/ssl/dhparam.pem
-    - require_in:
-      - serivce: nginx
-{% endif %}
-
 # Add cache directory
 nginx-cache:
   file.directory:
