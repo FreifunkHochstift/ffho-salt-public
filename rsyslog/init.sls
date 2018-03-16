@@ -12,10 +12,15 @@ rsyslog:
 
 
 /etc/rsyslog-early.d:
-  file.directory:
+  file.recurse:
+    - source: salt://rsyslog/rsyslog-early.d
     - user: root
     - group: root
-    - mode: 0755
+    - file_mode: 644
+    - dir_mode: 755
+    - clean: true
+    - watch_in:
+      - service: rsyslog
 
 
 /etc/rsyslog.conf:
@@ -58,9 +63,9 @@ rsyslog:
 
 
 {% if 'logserver' in roles %}
-/etc/rsyslog.d/99-debug.conf:
+/etc/rsyslog.d/zz-debug.conf:
   file.managed:
-    - source: salt://rsyslog/99-debug.conf
+    - source: salt://rsyslog/zz-debug.conf
     - watch_in:
       - service: rsyslog
 {% endif %}
