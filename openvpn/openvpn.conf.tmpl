@@ -43,6 +43,9 @@ up      /etc/openvpn/ifup
 down    /etc/openvpn/ifdown
 
 keepalive 10 30
+{%- if 'server' in mode %}
+connect-retry 1 1
+{%- endif %}
 
 comp-lzo
 
