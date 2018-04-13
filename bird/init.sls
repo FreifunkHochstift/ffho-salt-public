@@ -341,11 +341,23 @@ bird6-configure:
   file.managed:
     - source: salt://bird/l3-access.conf
     - template: jinja
+    - watch_in:
+      - cmd: bird-configure
+    - require:
+      - file: /etc/bird/bird.d
+    - require_in:
+      - service: bird
 
 /etc/bird/bird6.d/l3-access.conf:
   file.managed:
     - source: salt://bird/l3-access.conf
     - template: jinja
+    - watch_in:
+      - cmd: bird6-configure
+    - require:
+      - file: /etc/bird/bird6.d
+    - require_in:
+      - service: bird6
 
 {% else %}
 /etc/bird/bird.d/l3-access.conf:
