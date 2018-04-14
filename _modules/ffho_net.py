@@ -536,7 +536,7 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 				}
 
 		elif iface_type == 'batman_iface':
-			batman_ifaces = ifaces[bat_site_if]['batman-ifaces']
+			batman_ifaces = ifaces[batman_site_if]['batman-ifaces']
 			if iface not in batman_ifaces:
 				if type (batman_ifaces) == list:
 					batman_ifaces.append (iface)
