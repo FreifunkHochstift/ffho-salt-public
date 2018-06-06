@@ -1042,6 +1042,13 @@ def get_ospf_interface_config (node_config, grains_id):
 			ospf_config['cost'] = 10
 			ospf_config['desc'] = "Wired Gigabit connection"
 
+		# VLL connection
+		elif re.search (r'^vlan15\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 20
+			ospf_config['desc'] = "VLL connection"
+
 		# WBBL connection
 		elif re.search (r'^vlan20\d\d$', iface):
 			ospf_on = True
