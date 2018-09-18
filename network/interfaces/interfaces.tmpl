@@ -10,20 +10,9 @@
 #source /etc/network/interfaces.d/*
 
 {#
- # Configure any secondary IPs / router_id / infra-srv IPs on loopback, if present
+ # Configure any secondary IPs / router_id on loopback, if present
  #}
 {%- set lo_prefixes = ifaces['lo']['prefixes'] %}
-
-{#- Add user/infra-srv VPN IPs, too #}
-{%- for vpn in ['user-srv', 'infra-srv'] %}
-  {#- COMPATIBILITY GLUE #}
-  {%- for prefix in salt['pillar.get']("tinc:" ~ vpn ~ ":" ~ grains['nodename'] ~ ":subnet", []) %}
-    {%- do lo_prefixes.append (prefix) %}
-  {%- endfor %}
-  {%- for prefix in salt['pillar.get']("tinc:" ~ vpn ~ ":" ~ grains['id'] ~ ":subnet", []) %}
-    {%- do lo_prefixes.append (prefix) %}
-  {%- endfor %}
-{%- endfor %}
 # The loopback network interface
 auto lo
 iface lo
@@ -90,9 +79,3 @@ iface {{ interface }}
  # OpenVPN VPNs (if any)
  #}
 {%- include "network/interfaces/openvpn.tmpl" %}
-
-
-{#-
- # Tinc VPNs (if any)
- #}
-{#%- include "network/interfaces/tinc.tmpl" %#}
