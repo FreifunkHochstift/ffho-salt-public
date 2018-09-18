@@ -336,7 +336,7 @@ bird6-configure:
 #
 # L3 Access
 #
-{% if 'l3_access' in roles %}
+{% if 'l3-access' in roles %}
 /etc/bird/bird.d/l3-access.conf:
   file.managed:
     - source: salt://bird/l3-access.conf
@@ -370,7 +370,7 @@ bird6-configure:
 #
 # RAdvd (for B.A.T.M.A.N. Gateways / L3-Access)
 #
-{% if 'radv' in roles or 'l3_access' in roles or ('batman_gw' in roles and grains.id.startswith('gw')) %}
+{% if 'radv' in roles or 'l3-access' in roles or ('batman_gw' in roles and grains.id.startswith('gw')) %}
 /etc/bird/bird6.d/radv.conf:
   file.managed:
     - source: salt://bird/radv.conf
