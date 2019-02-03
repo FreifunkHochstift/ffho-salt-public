@@ -93,6 +93,11 @@ base:
     - match: pillar
     - yanic
 
+  # Docker
+  nodes:{{ grains['id'] }}:roles:docker:
+    - match: pillar
+    - docker
+
 #
 # Grains
 #
