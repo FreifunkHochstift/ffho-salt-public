@@ -49,3 +49,14 @@ at:
   file.managed:
     - source: salt://pppoe/pap-secrets
     - template: jinja
+
+
+# Install pppd restart script and cron-job
+/etc/cron.d/ff_fix_ppp:
+  file.managed:
+    - source: salt://pppoe/ff_fix_ppp.cron
+
+/usr/local/sbin/ff_fix_ppp:
+  file.managed:
+    - source: salt://pppoe/ff_fix_ppp
+    - mode: 755
