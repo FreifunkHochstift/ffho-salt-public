@@ -75,6 +75,9 @@ if [ "${LAST_REVISION}" != "${NEW_REVISION}" ] || [ "${FORCE}" -eq "1" ]; then
 	num_commits="$(git log --abbrev-commit --pretty=oneline ${LAST_REVISION}..${NEW_REVISION} | wc -l)"
 	last_msg="$(git log --abbrev-commit --pretty=oneline ${LAST_REVISION}..${NEW_REVISION} | head -n1)"
 
+	# Update models.json
+	scripts/buildModels.py stable models.json
+
 	echo "Firmware-Website updated: ${num_commits} commit(s) (last: ${last_msg})"
 fi
 [ "${VERBOSE}" -eq "1" ] && echo "Finish"
