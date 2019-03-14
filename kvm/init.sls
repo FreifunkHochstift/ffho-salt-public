@@ -6,9 +6,12 @@ virt-pkgs:
   pkg.installed:
     - pkgs:
       - qemu-kvm
-      - libvirt-bin
+      - libvirt-daemon-system
+      - libvirt-clients
       - xmlstarlet
       - netcat-openbsd
+      - ipmitool
+      - lm-sensors
 
 /etc/libvirt/hooks/qemu:
   file.managed:

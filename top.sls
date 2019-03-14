@@ -1,7 +1,6 @@
 base:
   # Base config for all minions
   '*':
-    - ffinfo
     - apt
     - bash
     - certs

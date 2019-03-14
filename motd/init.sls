@@ -9,11 +9,11 @@ motd:
       - figlet
 
   cmd.run:
-    - name: echo > /etc/motd.ffho ; figlet {{name[0]}} >> /etc/motd.ffho; sed -i -e 's/^\(.*\)/     \1/' /etc/motd.ffho ; sed -i -e '$s/\(.*\)/\1.{{name[1:]|join('.')}}/' /etc/motd.ffho ; echo >> /etc/motd.ffho
-    - creates: /etc/motd.ffho
+    - name: echo > /etc/motd.ffmuc ; figlet {{name[0]}} >> /etc/motd.ffmuc; sed -i -e 's/^\(.*\)/     \1/' /etc/motd.ffmuc ; sed -i -e '$s/\(.*\)/\1.{{name[1:]|join('.')}}/' /etc/motd.ffmuc ; echo >> /etc/motd.ffmuc
+    - creates: /etc/motd.ffmuc
 
   file.symlink:
     - name: /etc/motd
-    - target: /etc/motd.ffho
+    - target: /etc/motd.ffmuc
     - force: True
     - backupname: /etc/motd.old
