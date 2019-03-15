@@ -17,6 +17,8 @@ docker-pkgs:
       - docker-ce
       - docker-ce-cli
       - containerd.io
+    - require:
+      - pkgrepo: docker-repo
 
 # Install docker-compose via pip *shrug*
 python-pip:
