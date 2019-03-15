@@ -25,3 +25,5 @@ ffmuc_packages:
       - iftop
       - iptraf
       - dmidecode
+      - psmisc
+      - lshw
