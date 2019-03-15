@@ -21,3 +21,7 @@ ffmuc_packages:
       - mlocate
       - sysstat
       - dnsutils
+      - curl
+      - iftop
+      - iptraf
+      - dmidecode
