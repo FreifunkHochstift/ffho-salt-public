@@ -9,11 +9,11 @@ motd:
       - figlet
 
   cmd.run:
-    - name: echo > /etc/motd.ffmuc ; figlet {{name[0]}} >> /etc/motd.ffmuc; sed -i -e 's/^\(.*\)/     \1/' /etc/motd.ffmuc ; sed -i -e '$s/\(.*\)/\1.{{name[1:]|join('.')}}/' /etc/motd.ffmuc ; echo >> /etc/motd.ffmuc
-    - creates: /etc/motd.ffmuc
+    - name: echo > /etc/motd.freifunk ; figlet {{name[0]}} >> /etc/motd.freifunk; sed -i -e 's/^\(.*\)/     \1/' /etc/motd.freifunk ; sed -i -e '$s/\(.*\)/\1.{{name[1:]|join('.')}}/' /etc/motd.freifunk ; echo >> /etc/motd.freifunk
+    - creates: /etc/motd.freifunk
 
   file.symlink:
     - name: /etc/motd
-    - target: /etc/motd.ffmuc
+    - target: /etc/motd.freifunk
     - force: True
     - backupname: /etc/motd.old
