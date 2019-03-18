@@ -39,7 +39,7 @@ vnstat:
       - service: vnstat
 
 # Udev rules
-/etc/udev/rules.d/42-ffho-net.rules:
+/etc/udev/rules.d/42-ff-net.rules:
   file.managed:
     - template: jinja
     - source: salt://network/udev-rules.tmpl

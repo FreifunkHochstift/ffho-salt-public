@@ -38,7 +38,7 @@ postfix:
       - service: postfix
 
 #
-# Send root mail to ops@ffho.net
+# Send root mail to hilfe@ffmuc.net
 /etc/aliases:
   file.managed:
     - source:
