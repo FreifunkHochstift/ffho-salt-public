@@ -15,7 +15,7 @@ ffmuc_packages:
       - iftop
       - screen
       - ethtool
-      - mtr
+      - mtr-tiny
       - tmux
       - lldpd
       - mlocate
