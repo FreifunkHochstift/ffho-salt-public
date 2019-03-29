@@ -25,7 +25,7 @@ reload-sysctl:
       - cmd: reload-sysctl
 
 
-{% if 'router' in roles %}
+{% if 'cr' in grains['id'] or 'guardian' in grains['id'] %}
 /etc/sysctl.d/router.conf:
   file.managed:
     - source: salt://sysctl/router.conf
