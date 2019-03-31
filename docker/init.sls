@@ -12,7 +12,7 @@ docker-repo:
     - key_url: https://download.docker.com/linux/debian/gpg
 
 docker-pkgs:
-  pkg.installed:
+  pkg.latest:
     - pkgs:
       - docker-ce
       - docker-ce-cli
