@@ -3,8 +3,7 @@ server_url: "https://log.in.ffmuc.net/api"
 
 # The API token to use to authenticate against the Graylog server API.
 # This field is mandatory
-server_api_token: "1su6u2nq97b851jh7rcqe6e177sner4koe3tbk2db76glhc5eqd1"
-
+server_api_token: "{{ salt['pillar.get']('netbox:services:log.in.ffmuc.net:custom_fields:api_token') }}"
 # The node ID of the sidecar. This can be a path to a file or an ID string.
 # If set to a file and the file doesn't exist, the sidecar will generate an
 # unique ID and writes it to the configured path.

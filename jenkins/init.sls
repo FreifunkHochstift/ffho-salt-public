@@ -1,6 +1,13 @@
 #
 # Jenkins
 #
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
+
+{% if 'buildserver' in role %}
 jenkins:
   pkgrepo.managed:
     - comments:
@@ -16,4 +23,4 @@ jenkins:
 
   pkg.latest:
     - name: jenkins
-
+{% endif %}

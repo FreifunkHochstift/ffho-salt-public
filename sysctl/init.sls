@@ -1,8 +1,11 @@
 #
 # sysctl
 #
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
-
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
 # Define command to reload sysctl settings here without dependencies
 # and define inverse dependencies where useful (see sysctl.conf)
 reload-sysctl:
@@ -25,7 +28,7 @@ reload-sysctl:
       - cmd: reload-sysctl
 
 
-{% if 'cr' in grains['id'] or 'guardian' in grains['id'] %}
+{% if 'corerouter' in role or 'gateway' in role or 'guardian' in grains['id'] %}
 /etc/sysctl.d/router.conf:
   file.managed:
     - source: salt://sysctl/router.conf
