@@ -28,7 +28,7 @@ reload-sysctl:
       - cmd: reload-sysctl
 
 
-{% if 'corerouter' in role or 'gateway' in role or 'guardian' in grains['id'] %}
+{% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role %}
 /etc/sysctl.d/router.conf:
   file.managed:
     - source: salt://sysctl/router.conf
