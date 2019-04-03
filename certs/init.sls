@@ -37,7 +37,7 @@ generate-dhparam:
       - cmd: update_ca_certificates
 
 {%- set cert_validity = salt['cmd.run']('openssl x509 -noout -checkend 2592000 -in /etc/ssl/certs/'~ grains['id']  ~'.cert.pem') %}
-{% if 'Certificate will expire' == cert_validity  %}
+{% if 'Certificate will not expire' not in cert_validity  %}
 {%- set cert_bundle = salt['cfssl_certs.request_cert']('https://ca.in.ffmuc.net', grains['id']) %}
 # Install found certificates
 /etc/ssl/certs/{{ grains['id'] }}.cert.pem:
