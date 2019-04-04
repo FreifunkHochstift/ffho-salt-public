@@ -1,0 +1,13 @@
+endpoint=https://chat.ffmuc.net/hooks/{{ salt['pillar.get']('netbox:services:chat.ffmuc.net:custom_fields:api_token') }}
+username=burp
+payload=$(cat <<-__EOF
+payload={
+    "username" : "$username",
+    "channel" : "#NOC-Monitoring",
+    "text" : "Burp backup for host failed $1 $2 $3"
+    }
+__EOF
+)
+
+  echo "CURL: curl -i -X POST -d $payload $endpoint"
+  curl -i -X POST -d "$payload" "$endpoint"
