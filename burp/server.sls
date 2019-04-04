@@ -9,6 +9,12 @@ include:
 burp-server:
   pkg.installed
 
+/usr/share/burp/scripts/burp_notify_mattermost.sh:
+  file.managed:
+    - source: salt://burp/burp_notify_mattermost.sh.tmpl
+    - mode: 755
+    - template: jinja
+
 /etc/default/burp:
   file.managed:
     - source: salt://burp/default_burp
