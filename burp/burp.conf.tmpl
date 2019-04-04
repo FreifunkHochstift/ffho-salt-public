@@ -6,18 +6,22 @@ mode = client
 port = 4971
 status_port = 4972
 
-server = 10.132.251.71
+server = {{ salt['pillar.get']('netbox:services:backup.in.ffmuc.net:ipaddresses:address') | regex_replace('/\d+$','') }}
 
 password = {{ burp_password }}
 cname = {{ grains.id }}
 
 # Where to find all the SSL stuff
-ssl_cert_ca = /etc/ssl/certs/ffho-cacert.pem
+ssl_cert_ca = /etc/ssl/certs/ffmuc-cacert.pem
 ssl_cert = /etc/ssl/certs/{{ grains.id }}.cert.pem
 ssl_key = /etc/ssl/private/{{ grains.id }}.key.pem
-ssl_dhfile = /etc/ssl/dhfile.pem
+ssl_dhfile = /etc/ssl/dhparam.pem
 
 ssl_peer_cn = {{ burp_server_name }}
+
+{% if grains.osfullname in 'Raspbian' %}
+ca_burp_ca = /etc/ssl/certs/ffmuc-cacert.pem
+{% endif %}
 
 # Choose the protocol automagically
 protocol = 0

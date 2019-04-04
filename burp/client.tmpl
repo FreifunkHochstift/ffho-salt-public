@@ -1,8 +1,7 @@
 #
 # Client specific configuration for {{ node }}
 #
-password = {{ burp_config.get ('password') }}
+password = {{ salt['pillar.get']('netbox:services:backup.in.ffmuc.net:custom_fields:api_token') }}
 
-{%- for entry in burp_config.get ('include_fs') %}
-include = {{ entry }}
-{%- endfor %}
+include = /srv/ 
+include = /etc/

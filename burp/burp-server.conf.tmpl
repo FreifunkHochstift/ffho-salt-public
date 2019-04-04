@@ -6,16 +6,14 @@ mode = server
 
 # The default addresses to listen on depend upon compile time options.
 # They may be overridden here.
-address = 10.132.251.71
-port = 4971
+listen = {{ salt['pillar.get']('netbox:services:backup.in.ffmuc.net:ipaddresses:address') | regex_replace('/\d+$','') }}:4971
 
 # Think carefully before changing the status port address, as it can be used
 # to view the contents of backups.
 #status_address = 10.132.251.71
 # If you do not wish to run a status server at all, comment status_port out.
-status_port = 4972
 
-directory = /srv/burp/
+directory = /srv/burp
 
 dedup_group = global
 clientconfdir = /etc/burp/clientconfdir
@@ -27,7 +25,6 @@ pidfile = /var/run/burp.server.pid
 hardlinked_archive = 0
 working_dir_recovery_method = delete
 max_children = 5
-max_status_children = 5
 umask = 0022
 syslog = 1
 stdout = 0
@@ -62,10 +59,10 @@ keep = 7
 # keep = 6
 
 ca_crl_check = 0
-ssl_cert_ca = /etc/ssl/certs/ffho-cacert.pem
-ssl_cert = /etc/ssl/certs/hamster.in.ffho.net.cert.pem
-ssl_key = /etc/ssl/private/hamster.in.ffho.net.key.pem
-ssl_dhfile = /etc/ssl/dhfile.pem
+ssl_cert_ca = /etc/ssl/certs/ffmuc-cacert.pem
+ssl_cert = /etc/ssl/certs/{{ grains['id']  }}.cert.pem
+ssl_key = /etc/ssl/private/{{ grains['id']  }}.key.pem
+ssl_dhfile = /etc/ssl/dhparam.pem
 
 
 timer_script = /usr/share/burp/scripts/timer_script

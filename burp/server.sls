@@ -13,7 +13,7 @@ burp-server:
   file.managed:
     - source: salt://burp/default_burp
 
-/etc/burp/burp.conf:
+/etc/burp/burp-server.conf:
   file.managed:
     - source: salt://burp/burp-server.conf.tmpl
     - template: jinja
@@ -22,13 +22,12 @@ burp-server:
   file.directory:
     - mode: 700
 
-{% set nodes = salt['pillar.get']('nodes') %}
-{% for node, node_config in nodes.items()|sort if 'burp' in node_config %}
+{% for node,data in salt['mine.get']('netbox:config_context:roles:backup_client', 'minion_id', tgt_type='pillar').items() %}
 /etc/burp/clientconfdir/{{ node }}:
    file.managed:
      - source: salt://burp/client.tmpl
      - template: jinja
      - context:
-       node: {{ node }}
-       burp_config: {{ node_config.get ('burp') }}
+         node: {{ node }}
+         burp_config: {{ node }}
 {% endfor %}
