@@ -19,7 +19,7 @@ def __virtual__():
 
 def request_cert(ca_url,certname):
   cert_req = '{ "request": {"CN": "%s","hosts":["%s"],"key": { "algo": "rsa","size": 2048 }, "names": [{"C":"DE","ST":"Bavaria", "L":"Munich","O":"FFMUC"}]}}' % (certname,certname)
-  print cert_req
+  print(cert_req)
   headers = {'Content-type': 'application/json'}
   r = requests.post(ca_url + '/api/v1/cfssl/newcert', data=cert_req, headers=headers)
   try:

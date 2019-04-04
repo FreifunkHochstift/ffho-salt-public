@@ -178,7 +178,7 @@ def gen_batman_iface_mac (site_no, device_no, network):
 def _update_batman_config (node_config, iface, sites_config):
 	try:
 		node_batman_hop_penalty = int (node_config['batman']['hop-penalty'])
-	except KeyError,ValueError:
+	except (KeyError,ValueError):
 		node_batman_hop_penalty = None
 
 	iface_config = node_config['ifaces'][iface]
