@@ -37,7 +37,7 @@ ffho-repo:
 
 
 # Purge old stuff
-/etc/apt/sources.list.d/freifunk.list:
+/etc/apt/sources.list.d/raspi.list:
   file.absent
 
 /etc/apt/sources.list.d/universe-factory.list:
@@ -45,18 +45,6 @@ ffho-repo:
 
 /etc/apt/sources.list.d/icinga2.list:
   file.absent
-
-
-
-{% if grains.manufacturer == "HP" %}
-apt-hpe:
-  pkgrepo.managed:
-    - comments:
-      - "# HPE repo"
-    - human_name: HPE repo
-    - name: deb http://downloads.linux.hpe.com/SDR/repo/mcp {{ grains.oscodename }}/current non-free
-    - file: /etc/apt/sources.list.d/hpe.list
-{% endif %}
 
 
 # APT preferences

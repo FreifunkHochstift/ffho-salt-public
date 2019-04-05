@@ -4,7 +4,6 @@
 
 include:
   - apt
-  - network.interfaces
 
 network-pkg:
   pkg.installed:
@@ -17,8 +16,6 @@ network-pkg:
       - host
       - dnsutils
       - ipv6calc
-    - require_in:
-      - file: /etc/network/interfaces
 #    - require:
 #      - APT-FFHO
 
@@ -64,3 +61,4 @@ vnstat:
 /etc/resolv.conf:
   file.managed:
     - source: salt://network/resolv.conf
+    - template: jinja

@@ -1,7 +1,13 @@
 #
 # Setup docker.io
 #
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
 
+{% if 'docker' in role %}
 docker-repo:
   pkgrepo.managed:
     - comments: "# Docker.io"
@@ -28,3 +34,4 @@ docker-compose:
   pip.installed:
     - require:
       - pkg: python-pip
+{% endif  %}
