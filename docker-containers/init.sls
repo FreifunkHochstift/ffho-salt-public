@@ -44,7 +44,7 @@ mounts-{{ mount }}:
 
 {% if 'files' in containers[container] %}
 {% for file in containers[container]['files'] %}
-{% if not salt['file.directory_exists' ](file) %}
+{% if not salt['file.file_exists' ](file) %}
 files-{{ file  }}:
   file.managed:
     - name: {{ file }}
