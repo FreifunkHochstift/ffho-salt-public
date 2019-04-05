@@ -7,6 +7,7 @@ base:
     - certs
     - console-tools
     - docker
+    - docker-containers
     - dphys-swapfile
     - graylog-sidecar
     - fail2ban
