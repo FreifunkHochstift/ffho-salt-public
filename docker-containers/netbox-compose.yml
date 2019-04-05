@@ -1,0 +1,71 @@
+version: '3'
+services:
+  netbox: &netbox
+    build:
+      context: .
+      args:
+        - BRANCH=${VERSION-master}
+    image: netboxcommunity/netbox:latest-ldap
+    depends_on:
+    - postgres
+    - redis
+    - netbox-worker
+    env_file:
+    - env/netbox.env
+    - env/ldap.env
+    volumes:
+    - /srv/docker/netbox/startup_scripts:/opt/netbox/startup_scripts:ro
+    - /srv/docker/netbox/initializers:/opt/netbox/initializers:ro
+    - /srv/docker/netbox/configuration:/etc/netbox/config:ro
+    - /srv/docker/netbox/reports:/etc/netbox/reports:ro
+    - netbox-nginx-config:/etc/netbox-nginx/
+    - netbox-static-files:/opt/netbox/netbox/static
+    - netbox-media-files:/opt/netbox/netbox/media
+    restart: unless-stopped
+  netbox-worker:
+    <<: *netbox
+    depends_on:
+    - redis
+    entrypoint:
+    - python3
+    - /opt/netbox/netbox/manage.py
+    command:
+    - rqworker
+  nginx:
+    command: nginx -c /etc/netbox-nginx/nginx.conf
+    image: nginx:1.15-alpine
+    depends_on:
+    - netbox
+    ports:
+    - 10.80.248.2:8080:8080
+    volumes:
+    - netbox-static-files:/opt/netbox/netbox/static:ro
+    - netbox-nginx-config:/etc/netbox-nginx/:ro
+    restart: unless-stopped
+  postgres:
+    image: postgres:10.4-alpine
+    env_file: env/postgres.env
+    volumes:
+    - /srv/docker/postgres-netbox:/var/lib/postgresql/data
+    restart: unless-stopped
+  redis:
+    image: redis:4-alpine
+    command:
+    - sh
+    - -c # this is to evaluate the $REDIS_PASSWORD from the env
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
+    env_file: env/redis.env
+    volumes:
+    - netbox-redis-data:/data
+    restart: unless-stopped
+volumes:
+  netbox-static-files:
+    driver: local
+  netbox-nginx-config:
+    driver: local
+  netbox-media-files:
+    driver: local
+  netbox-report-files:
+    driver: local
+  netbox-redis-data:
+    driver: local
