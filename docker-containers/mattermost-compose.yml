@@ -1,0 +1,47 @@
+version: "2"
+
+
+services:
+
+  db:
+    image: mariadb:latest
+    restart: unless-stopped
+    volumes:
+      - /srv/docker/mysql-mattermost/mysql:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - MYSQL_USER=mmuser
+      - MYSQL_PASSWORD={{ credentials['db_password'] }}
+      - MYSQL_DB=mattermost
+      - MYSQL_ROOT_PASSWORD={{ credentials['db_root_password'] }}
+
+  app:
+    build:
+      context: app
+      # uncomment following lines for team edition or change UID/GID
+      args:
+         - edition=team
+      #   - PUID=1000
+      #   - PGID=1000
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - /srv/docker/mattermost/config:/mattermost/config:rw
+      - /srv/docker/mattermost/data:/mattermost/data:rw
+      - /srv/docker/mattermost/logs:/mattermost/logs:rw
+      - /srv/docker/mattermost/plugins:/mattermost/plugins:rw
+      - /srv/docker/mattermost/client-plugins:/mattermost/client/plugins:rw
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      # set same as db credentials and dbname
+      - MM_USERNAME=mmuser
+      - MM_PASSWORD={{ credentials['db_password'] }}
+      - MM_DBNAME=mattermost
+      - MM_SQLSETTINGS_DRIVERNAME=mysql
+      - MM_SQLSETTINGS_DATASOURCE=mmuser:{{ credentials['db_password'] }}@tcp(db:3306)/mattermost?charset=utf8mb4,utf8&readTimeout=30s&writeTimeout=30s
+      # in case your config is not in default location
+      #- MM_CONFIG=/mattermost/config/config.json
+    links:
+      - db:db
+

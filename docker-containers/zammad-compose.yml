@@ -1,0 +1,102 @@
+version: '2'
+
+services:
+
+  zammad-backup:
+    command: ["zammad-backup"]
+    depends_on:
+      - zammad-railsserver
+    entrypoint: /usr/local/bin/backup.sh
+    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
+    links:
+      - zammad-postgresql
+    restart: ${RESTART}
+    volumes:
+      - /srv/docker/zammad-backup:/var/tmp/zammad
+      - /srv/docker/zammad-data:/opt/zammad
+
+  zammad-elasticsearch:
+    image: ${IMAGE_REPO}:zammad-elasticsearch${VERSION}
+    restart: ${RESTART}
+    volumes:
+            - /srv/docker/elasticsearch-zammad/data:/usr/share/elasticsearch/data:z
+
+  zammad-init:
+    command: ["zammad-init"]
+    depends_on:
+      - zammad-postgresql
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - zammad-elasticsearch
+      - zammad-postgresql
+    restart: on-failure
+    volumes:
+            - /srv/docker/zammad-data:/opt/zammad:z
+
+  zammad-memcached:
+    command: ["zammad-memcached"]
+    image: ${IMAGE_REPO}:zammad-memcached${VERSION}
+    restart: ${RESTART}
+
+  zammad-nginx:
+    command: ["zammad-nginx"]
+    depends_on:
+      - zammad-railsserver
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - zammad-railsserver
+      - zammad-websocket
+    restart: ${RESTART}
+    volumes:
+      - /srv/docker/zammad-data:/opt/zammad
+    ports:
+      - "8000:80"
+
+  zammad-postgresql:
+    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
+    restart: ${RESTART}
+    volumes:
+            - /srv/docker/postgresql-zammad/data:/var/lib/postgresql/data:z
+
+  zammad-railsserver:
+    command: ["zammad-railsserver"]
+    depends_on:
+      - zammad-memcached
+      - zammad-postgresql
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - zammad-elasticsearch
+      - zammad-memcached
+      - zammad-postgresql
+    restart: ${RESTART}
+    volumes:
+            - /srv/docker/zammad-data:/opt/zammad:z
+
+  zammad-scheduler:
+    command: ["zammad-scheduler"]
+    depends_on:
+      - zammad-memcached
+      - zammad-railsserver
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - zammad-elasticsearch
+      - zammad-memcached
+      - zammad-postgresql
+    restart: ${RESTART}
+    volumes:
+            - /srv/docker/zammad-data:/opt/zammad:z
+
+  zammad-websocket:
+    command: ["zammad-websocket"]
+    depends_on:
+      - zammad-memcached
+      - zammad-railsserver
+    image: ${IMAGE_REPO}:zammad${VERSION}
+    links:
+      - zammad-postgresql
+      - zammad-memcached
+    restart: ${RESTART}
+    volumes:
+            - /srv/docker/zammad-data:/opt/zammad:z
+
+

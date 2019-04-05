@@ -1,0 +1,25 @@
+version: '2'
+services:
+  # CFSSL
+  postgresql:
+    image: postgres:9.6
+    environment:
+      POSTGRES_USER: "cfssl"
+      POSTGRES_PASSWORD: "{{ credentials['db_password'] }}"
+      POSTGRES_DATABASE: "cfssl"
+    volumes:
+      - /srv/docker/postgresql-cfssl/data:/var/lib/postgresql/data
+    restart: always
+  cfssl:
+    image: astarte/cfssl
+    depends_on:
+      - "postgresql"
+    volumes:
+      - /srv/docker/cfssl/config:/config
+      - /srv/docker/cfssl/data:/data
+    # Ensure we wait for pg
+    command: wait-for postgresql:5432 -t 90 -- cfssl serve -address=0.0.0.0 -ca=/data/ca.pem -ca-key=/data/ca-key.pem -port=8080 -config=/etc/cfssl/ca_root_config.json -db-config=/etc/cfssl/db_config.json
+    # Restart if we fail
+    restart: on-failure
+    ports:
+      - 8080:8080
