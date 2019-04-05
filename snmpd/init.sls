@@ -2,8 +2,6 @@
 # SNMPd
 #
 
-include:
-  - network.interfaces
 
 #
 # Install and start SNMPd
@@ -12,8 +10,6 @@ include:
 snmpd:
   pkg.installed:
     - name: snmpd
-    - require:
-      - file: /etc/network/interfaces
   service.running:
     - enable: true
     - reload: true
@@ -48,4 +44,3 @@ snmpd:
       - pkg: snmpd
 
 
-# TODO: Lookback-IP aus grains

@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+
+  openldap:
+    hostname: ldap.in.ffmuc.net
+    domainname: ldap.in.ffmuc.net
+    image: osixia/openldap:1.2.2
+    ports:
+      - 636:636
+    environment:
+      - LDAP_ORGANISATION="Freifunk Muenchen"
+      - LDAP_DOMAIN="ffmuc.net"
+      - HOSTNAME=ldap.in.ffmuc.net
+      - LDAP_ADMIN_PASSWORD="{{ credentials['admin_user']  }}"
+      - LDAP_TLS_CRT_FILENAME=cert.pem
+      - LDAP_TLS_KEY_FILENAME=privkey.pem
+      - LDAP_TLS_CA_CRT_FILENAME=chain.pem
+      - LDAP_TLS_VERIFY_CLIENT=try
+      - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
+      - LDAP_READONLY_USER=true
+      - LDAP_READONLY_USER_USERNAME=binduser
+      - LDAP_READONLY_USER_PASSWORD={{ credentials['readonly_user'] }}
+      - KEEP_EXISTING_CONFIG=true
+    volumes:
+      - /srv/docker/openldap/data:/var/lib/ldap
+      - /srv/docker/openldap/config:/etc/ldap/slapd.d
+      - /srv/docker/openldap/certs:/container/service/slapd/assets/certs
+    restart: always
+
+  phpldapadmin-service:
+    image: osixia/phpldapadmin:0.7.2
+    environment:
+      PHPLDAPADMIN_HTTPS_CRT_FILENAME: cert.pem
+      PHPLDAPADMIN_HTTPS_KEY_FILENAME: privkey.pem
+      PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME: chain.pem
+      PHPLDAPADMIN_LDAP_HOSTS: ldap-host
+    volumes:
+      - /srv/docker/openldap/certs/:/container/service/phpldapadmin/assets/apache2/certs
+    restart: always
+    ports:
+      - 8443:443
+    depends_on:
+      - openldap
+    links:
+      - openldap:ldap-host
