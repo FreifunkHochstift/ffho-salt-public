@@ -98,7 +98,7 @@ for line in ifquery.readlines ():
 
 
 ret_code = 0
-if len (interfaces_err) > 0:
+if len (interfaces_err) > 10:
 	print "ERR: %s" % "; ".join (interfaces_err)
 	ret_code = 2
 

@@ -8,8 +8,8 @@
 {% endif %}
 {%- set roles = salt['pillar.get']('netbox:config_context:roles') %}
 {%- set sites = salt['pillar.get']('netbox:config_context:sites') %}
-{%- set address = salt['pillar.get']('netbox:primary_ip4:address') %}
-{%- set address6 = salt['pillar.get']('netbox:primary_ip6:address') %}
+{%- set address = salt['pillar.get']('netbox:primary_ip4:address') | regex_replace('/\d+$','') %}
+{%- set address6 = salt['pillar.get']('netbox:primary_ip6:address') | regex_replace('/\d+$','') %}
 
 {%- if 'monitoring' not in role %}
 object Endpoint "{{ node_id }}" {
@@ -29,7 +29,7 @@ object Host "{{ node_id }}" {
 
 	address = "{{ address }}"
 	address6 = "{{ address6 }}"
-
+        check_command = "hostalive"
 
 	vars.os = "Linux"
 
@@ -44,5 +44,4 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 {%- endfor %}
 	]
-
 }									

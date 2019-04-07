@@ -1,0 +1,20 @@
+#
+# zones.conf (Salt managed)
+#
+
+{% for node_id,data in salt['mine.get']('netbox:config_context:roles:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
+object Endpoint "{{ node_id }}"  {
+        host = "{{ node_id }}"
+}
+object Zone "{{ node_id }}" {
+        endpoints = [ "{{ node_id }}"] 
+	parent = "master"
+}
+{% endfor %}
+object Endpoint NodeName {
+	host = NodeName
+}
+
+object Zone "master" {
+	endpoints = [ NodeName ]
+}

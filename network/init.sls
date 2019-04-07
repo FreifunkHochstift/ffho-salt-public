@@ -15,6 +15,7 @@ network-pkg:
       - iperf
       - host
       - dnsutils
+      - ifupdown2
       - ipv6calc
 #    - require:
 #      - APT-FFHO

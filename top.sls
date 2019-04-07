@@ -12,6 +12,7 @@ base:
     - graylog-sidecar
     - fail2ban
     - ff_base
+    - icinga2
     - jenkins
     - locales
     - kvm

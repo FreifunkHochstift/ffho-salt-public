@@ -1,6 +1,7 @@
 #
 # Icinga2
 #
+{% if 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') or 'icinga2_client' in salt['pillar.get']('netbox:config_context:roles') %}
 {% if salt['pillar.get']('netbox:role:name') %}
 {%- set role = salt['pillar.get']('netbox:role:name') %}
 {% else %}
@@ -19,6 +20,8 @@ icinga2:
   service.running:
     - enable: True
     - reload: True
+    - require:
+      - user: icinga-user
 
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
@@ -41,13 +44,20 @@ ffho-plugins:
     - user: root
     - group: root
 
-
 # Install sudoers file for Icinga2 checks
 /etc/sudoers.d/icinga2:
   file.managed:
     - source: salt://icinga2/icinga2.sudoers
     - mode: 0440
 
+icinga-user:
+  user.present:
+    - name: nagios
+    - groups:
+      - nagios
+      - ssl-cert
+    - require:
+      - pkg: icinga2
 
 # Icinga2 master config (for master and all nodes)
 /etc/icinga2/icinga2.conf:
@@ -143,7 +153,7 @@ ffho-plugins:
 ################################################################################
 #                               Icinga2 Server                                 #
 ################################################################################
-{% if 'monitoring' in role %}
+{% if 'monitoring' in role and 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') %}
 
 # Install command definitions
 /etc/icinga2/ffmuc-conf.d/services:
@@ -176,7 +186,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
       - service: icinga2
 
   # Generate config file for every client known to pillar
-{% for node_id,data in salt['mine.get']('netbox:config_context:roles:monitoring_client', 'minion_id', tgt_type='pillar').items() %}
+{% for node_id,data in salt['mine.get']('netbox:config_context:roles:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
 /etc/icinga2/ffmuc-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
@@ -191,6 +201,52 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - watch_in:
       - service: icinga2
   {% endfor %}
+
+/etc/icinga2/scripts/mattermost-notifications.py:
+  file.managed:
+    - source: salt://icinga2/mattermost-notifications.py
+    - template: jinja
+    - mode: 755
+    - user: root
+    - group: root
+
+/etc/icinga2/conf.d/commands.conf:
+  file.managed:
+    - source: salt://icinga2/commands.conf
+    - mode: 644
+    - user: root
+    - group: root
+    - watch_in:
+      - service: icinga2
+
+/etc/icinga2/conf.d/notifications.conf:
+  file.managed:
+    - source: salt://icinga2/notifications.conf
+    - mode: 644
+    - user: root
+    - group: root
+    - watch_in:
+      - service: icinga2
+
+/etc/icinga2/conf.d/templates.conf:
+  file.managed:
+    - source: salt://icinga2/templates.conf
+    - mode: 644
+    - user: root
+    - group: root
+    - watch_in:
+      - service: icinga2
+
+/etc/icinga2/conf.d/users.conf:
+  file.managed:
+    - source: salt://icinga2/users.conf.tmpl
+    - mode: 644
+    - user: root
+    - group: root
+    - template: jinja
+    - watch_in:
+      - service: icinga2
+
 
 
 # Create configuration for network devices
@@ -237,6 +293,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
 /etc/icinga2/features-available/api.conf:
   file.managed:
     - source: salt://icinga2/api.conf
+    - template: jinja
     - require:
       - pkg: icinga2
     - watch_in:
@@ -260,4 +317,4 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
     - template: jinja
     - require:
       - file: /etc/icinga2/ffmuc-conf.d
-
+{% endif %}
