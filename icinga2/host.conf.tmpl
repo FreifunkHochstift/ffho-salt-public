@@ -1,14 +1,17 @@
 #
 # {{ node_id }}
 #
-{%- set roles = node_config.get ('roles', []) %}
-{%- set sites = node_config.get ('sites', []) %}
-{%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
-{%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
-{%- set monitoring_config = node_config.get ('monitoring', {}) %}
-{%- set state = node_config.get ('state', 'operation') %}
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
+{%- set roles = salt['pillar.get']('netbox:config_context:roles') %}
+{%- set sites = salt['pillar.get']('netbox:config_context:sites') %}
+{%- set address = salt['pillar.get']('netbox:primary_ip4:address') %}
+{%- set address6 = salt['pillar.get']('netbox:primary_ip6:address') %}
 
-{%- if 'icinga2server' not in roles %}
+{%- if 'monitoring' not in role %}
 object Endpoint "{{ node_id }}" {
         host = "{{ node_id }}"
 }
@@ -27,11 +30,6 @@ object Host "{{ node_id }}" {
 	address = "{{ address }}"
 	address6 = "{{ address6 }}"
 
-{%- if state != 'operation' %}
-
-	# This node has state {{ state }}, don't whine about anything here
-	enable_notifications = false
-{%- endif %}
 
 	vars.os = "Linux"
 
@@ -47,16 +45,4 @@ object Host "{{ node_id }}" {
 {%- endfor %}
 	]
 
-{%- if 'service_param' in monitoring_config %}
-
-	vars.service_param = {
-  {%- for service, params in monitoring_config.get ('service_param').items ()|sort %}
-		"{{ service }}" = {
-    {%- for entry, value in params.items ()|sort %}
-			"{{ entry }}" = "{{ value }}",
-    {%- endfor %}
-		},
-  {%- endfor %}
-	}
-{%- endif %}
 }									

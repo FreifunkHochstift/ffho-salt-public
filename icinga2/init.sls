@@ -1,7 +1,11 @@
 #
 # Icinga2
 #
-{% set roles = salt['pillar.get']('nodes:' ~ grains.id ~ ':roles', []) %}
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
 
 include:
   - apt
@@ -23,11 +27,7 @@ monitoring-plugin-pkgs:
       - monitoring-plugins
       - nagios-plugins-contrib
       - libyaml-syck-perl
-{% if grains['oscodename'] == 'jessie' %}
-      - libnagios-plugin-perl
-{% else %}
       - libmonitoring-plugin-perl
-{% endif %}
       - lsof
     - watch_in:
       - service: icinga2
@@ -85,33 +85,24 @@ ffho-plugins:
 
 
 # Install host cert + key readable for icinga
-{% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ grains['id'] %}
-/etc/icinga2/pki/ffhohost.cert.pem:
-  file.managed:
-    {% if salt['pillar.get'](pillar_name ~ ':cert') == "file" %}
-    - source: salt://certs/certs/{{ cn }}.cert.pem
-    {% else %}
-    - contents_pillar: {{ pillar_name }}:cert
-    {% endif %}
-    - user: root
-    - group: root
-    - mode: 644
+/etc/icinga2/pki/{{ grains['id']  }}.crt:
+  file.symlink:
+    - target: /etc/ssl/certs/{{ grains['id'] }}.cert.pem
     - require:
       - pkg: icinga2
     - watch_in:
       - service: icinga2
 
-/etc/icinga2/pki/ffhohost.key.pem:
-  file.managed:
-    - contents_pillar: {{ pillar_name }}:privkey
-    - user: root
-    - group: nagios
-    - mode: 440
+/etc/icinga2/pki/{{ grains['id']  }}.key:
+  file.symlink:
+    - target: /etc/ssl/private/{{ grains['id'] }}.key.pem
     - require:
       - pkg: icinga2
     - watch_in:
       - service: icinga2
-
+/etc/icinga2/pki/ca.crt:
+  file.symlink:
+   - target: /etc/ssl/certs/ffmuc-cacert.pem 
 
 # Activate Icinga2 features: API
 {% for feature in ['api'] %}
@@ -142,7 +133,7 @@ ffho-plugins:
    
 
 # Create directory for ffho specific configs
-/etc/icinga2/ffho-conf.d:
+/etc/icinga2/ffmuc-conf.d:
   file.directory:
     - makedirs: true
     - require:
@@ -152,10 +143,10 @@ ffho-plugins:
 ################################################################################
 #                               Icinga2 Server                                 #
 ################################################################################
-{% if 'icinga2server' in roles %}
+{% if 'monitoring' in role %}
 
 # Install command definitions
-/etc/icinga2/ffho-conf.d/services:
+/etc/icinga2/ffmuc-conf.d/services:
   file.recurse:
     - source: salt://icinga2/services
     - file_mode: 644
@@ -170,51 +161,49 @@ ffho-plugins:
 
 
 # Create client node/zone objects
-Create /etc/icinga2/ffho-conf.d/hosts/generated/:
+Create /etc/icinga2/ffmuc-conf.d/hosts/generated/:
   file.directory:
-    - name: /etc/icinga2/ffho-conf.d/hosts/generated/
+    - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - makedirs: true
     - require:
       - pkg: icinga2
 
-Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
+Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
   file.directory:
-    - name: /etc/icinga2/ffho-conf.d/hosts/generated/
+    - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - clean: true
     - watch_in:
       - service: icinga2
 
   # Generate config file for every client known to pillar
-  {% for node_id, node_config in salt['pillar.get']('nodes', {}).items () %}
-    {% if node_config.get ('icinga2', "") != 'ignore' %}
-/etc/icinga2/ffho-conf.d/hosts/generated/{{ node_id }}.conf:
+{% for node_id,data in salt['mine.get']('netbox:config_context:roles:monitoring_client', 'minion_id', tgt_type='pillar').items() %}
+/etc/icinga2/ffmuc-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
     - template: jinja
     - context:
       node_id: {{ node_id }}
-      node_config: {{ node_config }}
+      node_config: {{ data }}
     - require:
-      - file: Create /etc/icinga2/ffho-conf.d/hosts/generated/
+      - file: Create /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - require_in:
-      - file: Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/
+      - file: Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - watch_in:
       - service: icinga2
-    {% endif %}
   {% endfor %}
 
 
 # Create configuration for network devices
-Create /etc/icinga2/ffho-conf.d/net/wbbl/:
+Create /etc/icinga2/ffmuc-conf.d/net/wbbl/:
   file.directory:
-    - name: /etc/icinga2/ffho-conf.d/net/wbbl/
+    - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
       - pkg: icinga2
 
-Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
+Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
   file.directory:
-    - name: /etc/icinga2/ffho-conf.d/net/wbbl/
+    - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
       - pkg: icinga2
@@ -223,7 +212,7 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
 
   # Generate config files for every WBBL device known to pillar
   {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
-/etc/icinga2/ffho-conf.d/net/wbbl/{{ link_id }}.conf:
+/etc/icinga2/ffmuc-conf.d/net/wbbl/{{ link_id }}.conf:
   file.managed:
     - source: salt://icinga2/wbbl.conf.tmpl
     - template: jinja
@@ -231,9 +220,9 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
       link_id: {{ link_id }}
       link_config: {{ link_config }}
     - require:
-      - file: Create /etc/icinga2/ffho-conf.d/net/wbbl/
+      - file: Create /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - require_in:
-      - file: Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/
+      - file: Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - watch_in:
       - service: icinga2
   {% endfor %}
@@ -265,10 +254,10 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
 ################################################################################
 #                              Check related stuff                             #
 ################################################################################
-/etc/icinga2/ffho-conf.d/bird_ospf_interfaces_down_ok.txt:
+/etc/icinga2/ffmuc-conf.d/bird_ospf_interfaces_down_ok.txt:
   file.managed:
     - source: salt://icinga2/bird_ospf_interfaces_down_ok.txt.tmpl
     - template: jinja
     - require:
-      - file: /etc/icinga2/ffho-conf.d
+      - file: /etc/icinga2/ffmuc-conf.d
 

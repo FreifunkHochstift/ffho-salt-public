@@ -20,6 +20,7 @@ base:
     - network
     - ntp
     - screen
+    - snmpd
     - ssh
     - sudo
     - sysctl
