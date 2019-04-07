@@ -7,10 +7,16 @@ include:
 
 {% if grains.osfullname in 'Raspbian' %}
 burp:
-  pkg.installed
+  pkg.installed:
+    - refresh: True
+    - require:
+      - pkgrepo: burp-repo
 {% else %}
 burp-client:
-  pkg.installed
+  pkg.installed:
+    - refresh: True
+    - require:
+      - pkgrepo: burp-repo
 {% endif %}
 
 /etc/default/burp-client:
@@ -27,3 +33,5 @@ burp-client:
     - template: jinja
       burp_server_name: "backup01.in.ffmuc.net"
       burp_password: {{ salt['pillar.get']('netbox:services:backup.in.ffmuc.net:custom_fields:api_token') }}
+    - require:
+      - pkgrepo: burp-repo
