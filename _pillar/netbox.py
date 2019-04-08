@@ -145,6 +145,22 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
        ret['netbox']['services'] = {}
        for service in services:
           ret['netbox']['services'][service['name']] = service
+    query_param = 'device_id'
+    if 'vcpus' in ret['netbox']:
+      query_param = 'virtual_machine_id'
+    interface_url = '{api_url}/{app}/{endpoint}/'.format(api_url=api_url,
+                                                                  app='ipam',
+                                                                  endpoint='ip-addresses')
+    interface_results = salt.utils.http.query(interface_url,
+                                           params={query_param: search_results['dict']['results'][0]['id'] },
+                                           header_dict=headers,
+                                           decode=True)
+    if 'error' in interface_results:
+        log.error('API query failed for "%s", status code: %d',
+                  minion_id, interface_results['status'])
+        log.error(interface_results['error'])
+        return ret
+    ret['netbox']['ipaddresses'] = interface_results['dict']['results']
     if site_details:
         log.debug('Retrieving site details for "%s" - site %s (ID %d)',
                   minion_id, site_name, site_id)
