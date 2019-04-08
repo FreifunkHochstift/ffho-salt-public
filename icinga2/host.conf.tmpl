@@ -1,17 +1,12 @@
 #
 # {{ node_id }}
 #
-{% if salt['pillar.get']('netbox:role:name') %}
-{%- set role = salt['pillar.get']('netbox:role:name') %}
-{% else %}
-{%- set role = salt['pillar.get']('netbox:device_role:name') %}
-{% endif %}
-{%- set roles = salt['pillar.get']('netbox:config_context:roles') %}
+{%- set roles = salt['mine.get'](node_id,'minion_roles')[node_id] %}
 {%- set sites = salt['pillar.get']('netbox:config_context:sites') %}
 {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
 {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
 
-{%- if 'monitoring' not in role %}
+{%- if 'icinga2_server' not in roles %}
 object Endpoint "{{ node_id }}" {
         host = "{{ node_id }}"
 }
