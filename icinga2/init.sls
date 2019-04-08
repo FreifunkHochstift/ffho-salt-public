@@ -14,10 +14,13 @@ include:
 
 
 # Install icinga2 package
-icinga2:
+icinga2-pkg:
   pkg.installed:
     - name: icinga2
+
+icinga2-service:
   service.running:
+    - name: icinga2
     - enable: True
     - reload: True
     - require:
@@ -33,7 +36,7 @@ monitoring-plugin-pkgs:
       - libmonitoring-plugin-perl
       - lsof
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 ffho-plugins:
   file.recurse:
@@ -57,7 +60,7 @@ icinga-user:
       - nagios
       - ssl-cert
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
 
 # Icinga2 master config (for master and all nodes)
 /etc/icinga2/icinga2.conf:
@@ -66,9 +69,9 @@ icinga-user:
       - salt://icinga2/icinga2.conf.H_{{ grains.id }}
       - salt://icinga2/icinga2.conf
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 
 # Add FFHOPluginDir
@@ -76,9 +79,9 @@ icinga-user:
   file.managed:
     - source: salt://icinga2/constants.conf
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 
 # Connect "master" and client zones
@@ -89,9 +92,9 @@ icinga-user:
       - salt://icinga2/zones.conf
     - template: jinja
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 
 # Install host cert + key readable for icinga
@@ -99,17 +102,17 @@ icinga-user:
   file.symlink:
     - target: /etc/ssl/certs/{{ grains['id'] }}.cert.pem
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 /etc/icinga2/pki/{{ grains['id']  }}.key:
   file.symlink:
     - target: /etc/ssl/private/{{ grains['id'] }}.key.pem
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 /etc/icinga2/pki/ca.crt:
   file.symlink:
    - target: /etc/ssl/certs/ffmuc-cacert.pem 
@@ -120,9 +123,9 @@ icinga-user:
   file.symlink:
     - target: "../features-available/{{ feature }}.conf"
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 {% endfor %}
 
 
@@ -137,9 +140,9 @@ icinga-user:
     - group: root
     - clean: true
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
    
 
 # Create directory for ffho specific configs
@@ -147,7 +150,7 @@ icinga-user:
   file.directory:
     - makedirs: true
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
 
 
 ################################################################################
@@ -164,10 +167,11 @@ icinga-user:
     - user: root
     - group: root
     - clean: true
+    - template: jinja
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 
 # Create client node/zone objects
@@ -176,14 +180,14 @@ Create /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - makedirs: true
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
 
 Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
   file.directory:
     - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - clean: true
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
   # Generate config file for every client known to pillar
 {% for node_id,data in salt['mine.get']('netbox:config_context:roles:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
@@ -199,7 +203,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - require_in:
       - file: Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
   {% endfor %}
 
 /etc/icinga2/scripts/mattermost-notifications.py:
@@ -217,7 +221,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - user: root
     - group: root
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 /etc/icinga2/conf.d/notifications.conf:
   file.managed:
@@ -226,7 +230,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - user: root
     - group: root
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 /etc/icinga2/conf.d/templates.conf:
   file.managed:
@@ -235,7 +239,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - user: root
     - group: root
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 /etc/icinga2/conf.d/users.conf:
   file.managed:
@@ -245,7 +249,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - group: root
     - template: jinja
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
 
 
@@ -255,16 +259,16 @@ Create /etc/icinga2/ffmuc-conf.d/net/wbbl/:
     - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
 
 Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
   file.directory:
     - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
-      - pkg: icinga2
+      - pkg: icinga2-pkg
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
 
   # Generate config files for every WBBL device known to pillar
   {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
@@ -280,7 +284,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
     - require_in:
       - file: Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/
     - watch_in:
-      - service: icinga2
+      - service: icinga2-service
   {% endfor %}
 
 
