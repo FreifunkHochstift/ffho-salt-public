@@ -5,6 +5,8 @@
 {%- set sites = salt['pillar.get']('netbox:config_context:sites') %}
 {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
 {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
+{%- set icinga_address = salt['mine.get'](grains['id'],'minion_address', tgt_type='glob')[grains['id']] %}
+{%- set icinga_address6 = salt['mine.get'](grains['id'],'minion_address6', tgt_type='glob')[grains['id']] %}
 
 {%- if 'icinga2_server' not in roles %}
 object Endpoint "{{ node_id }}" {
@@ -21,10 +23,10 @@ object Host "{{ node_id }}" {
 	import "generic-host"
 
 	display_name = "{{ node_id }}"
-	{% if 'mine_interval' not in address %}
+	{% if 'mine_interval' not in address and'mine_interval' not in icinga_address %}
 	address = "{{ address | regex_replace('/\d+$','') }}"
 	{% endif %}
-	{% if 'mine_interval' not in address6 %}
+	{% if 'mine_interval' not in address6 and 'mine_interval' not in icinga_address6 %}
 	address6 = "{{ address6 | regex_replace('/\d+$','') }}"
 	{% endif %}
         check_command = "hostalive"

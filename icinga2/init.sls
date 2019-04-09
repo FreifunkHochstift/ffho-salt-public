@@ -20,14 +20,14 @@ icinga2-repo:
     - name: deb http://packages.icinga.com/debian icinga-{{ grains.oscodename }} main
     {% endif %}
     - file: /etc/apt/sources.list.d/icinga2.list
-    - keyserver: keys.gnupg.net
-    - keyid: C6E319C334410682
+    - key_url: http://packages.icinga.org/icinga.key
 
 # Install icinga2 package
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
 icinga2-pkg:
   pkg.latest:
     - name: icinga2
+    - refresh: True
 
 icinga2-service:
   service.running:
@@ -36,9 +36,10 @@ icinga2-service:
     - reload: True
     - require:
       - user: icinga-user
-      - file: /etc/icinga2/pki/ca.crt
-      - file: /etc/icinga2/pki/{{ grains['id']  }}.crt
-      - file: /etc/icinga2/pki/{{ grains['id']  }}.key
+      - file: icinga2-ca
+      - file: icinga2-hostcert
+      - file: icinga2-hostkey
+      - file: /etc/icinga2/repository.d
 
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
@@ -117,27 +118,33 @@ icinga-user:
     - group: nagios
  
 # Install host cert + key readable for icinga
-/etc/icinga2/pki/{{ grains['id']  }}.crt:
+icinga2-hostcert:
   file.symlink:
+    - name: /var/lib/icinga2/certs/{{ grains['id'] }}.crt
     - target: /etc/ssl/certs/{{ grains['id'] }}.cert.pem
+    - force: True
     - require:
       - pkg: icinga2-pkg
       - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2-service
 
-/etc/icinga2/pki/{{ grains['id']  }}.key:
+icinga2-hostkey:
   file.symlink:
+    - name: /var/lib/icinga2/certs/{{ grains['id'] }}.key
     - target: /etc/ssl/private/{{ grains['id'] }}.key.pem
+    - force: True
     - require:
       - pkg: icinga2-pkg
       - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2-service
 
-/etc/icinga2/pki/ca.crt:
+icinga2-ca:
   file.symlink:
-   - target: /etc/ssl/certs/ffmuc-cacert.pem 
+    - name: /var/lib/icinga2/certs/ca.crt
+    - target: /etc/ssl/certs/ffmuc-cacert.pem 
+    - force: True
 
 # Activate Icinga2 features: API
 {% for feature in ['api'] %}
@@ -169,6 +176,12 @@ icinga-user:
 
 # Create directory for ffho specific configs
 /etc/icinga2/ffmuc-conf.d:
+  file.directory:
+    - makedirs: true
+    - require:
+      - pkg: icinga2-pkg
+
+/etc/icinga2/repository.d:
   file.directory:
     - makedirs: true
     - require:

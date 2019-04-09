@@ -18,8 +18,9 @@ object UserGroup "icingaadmins" {
 
 object User "mattermost" {
   import "generic-user"
-  display_name = "Icinga2"
+  display_name = "{{ grains['id'] }}"
   enable_notifications = true
+  vars.username = "{{ grains['id'] }}"
   vars.channel = "NOC-Monitoring" /* Use here the url channel name, ie. without special characters and spaces */
   vars.url = "https://chat.ffmuc.net/hooks/{{ salt['pillar.get']('netbox:services:chat.ffmuc.net:custom_fields:api_token') }}" /* Copy incoming Webhook URL defined in mattermost */
   vars.oneline = false /* Use true if you prefer having all output squashed on one line */
