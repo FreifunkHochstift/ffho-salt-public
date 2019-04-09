@@ -43,10 +43,6 @@ ffho-repo:
 /etc/apt/sources.list.d/universe-factory.list:
   file.absent
 
-/etc/apt/sources.list.d/icinga2.list:
-  file.absent
-
-
 # APT preferences
 /etc/apt/preferences.d/ffho:
   file.managed:

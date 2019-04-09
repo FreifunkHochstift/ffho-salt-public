@@ -12,10 +12,21 @@ include:
   - apt
   - sudo
 
+icinga2-repo:
+  pkgrepo.managed:
+    {% if grains.osfullname in 'Raspbian' %}
+    - name: deb http://packages.icinga.com/raspbian icinga-{{ grains.oscodename }} main
+    {% else %}
+    - name: deb http://packages.icinga.com/debian icinga-{{ grains.oscodename }} main
+    {% endif %}
+    - file: /etc/apt/sources.list.d/icinga2.list
+    - keyserver: keys.gnupg.net
+    - keyid: C6E319C334410682
 
 # Install icinga2 package
+{% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
 icinga2-pkg:
-  pkg.installed:
+  pkg.latest:
     - name: icinga2
 
 icinga2-service:
@@ -25,6 +36,9 @@ icinga2-service:
     - reload: True
     - require:
       - user: icinga-user
+      - file: /etc/icinga2/pki/ca.crt
+      - file: /etc/icinga2/pki/{{ grains['id']  }}.crt
+      - file: /etc/icinga2/pki/{{ grains['id']  }}.key
 
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
@@ -96,13 +110,19 @@ icinga-user:
     - watch_in:
       - service: icinga2-service
 
-
+/var/lib/icinga2/certs:
+  file.directory:
+    - mode: 700
+    - user: nagios
+    - group: nagios
+ 
 # Install host cert + key readable for icinga
 /etc/icinga2/pki/{{ grains['id']  }}.crt:
   file.symlink:
     - target: /etc/ssl/certs/{{ grains['id'] }}.cert.pem
     - require:
       - pkg: icinga2-pkg
+      - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2-service
 
@@ -111,8 +131,10 @@ icinga-user:
     - target: /etc/ssl/private/{{ grains['id'] }}.key.pem
     - require:
       - pkg: icinga2-pkg
+      - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2-service
+
 /etc/icinga2/pki/ca.crt:
   file.symlink:
    - target: /etc/ssl/certs/ffmuc-cacert.pem 

@@ -4,13 +4,20 @@
 
 {% set sites_all = pillar.get ('sites') %}
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
-{% set sites_node = node_config.get('sites', {}) %}
+{% set sites_node = salt['pillar.get']('netbox:config_context:sites')
 {% set device_no = node_config.get('id', -1) %}
+
+{% set roles = salt['pillar.get']('netbox:config_context:roles')
+
+{% set sites_all = [] %}
+{% for site in sites_node %}
+  {% do sites_all.append(sites_node[site]['name'])
+{% endfor %}
 
 include:
   - apt
   - network.interfaces
-{% if 'fastd_peers' in node_config.get('roles', []) %}
+{% if 'fastd_peers' in roles %}
   - fastd.peers
 {% endif %}
 
