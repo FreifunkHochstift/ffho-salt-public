@@ -82,8 +82,8 @@ dns-key:
     - require:
       - pkg: bind9
 
-# Create DNS records for each node
 
+# Create DNS records for each node
 {% for node_id in nodes %}
 {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
 {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
@@ -123,6 +123,7 @@ record-AAAA-{{ node_id }}:
       - file: dns-key
 {% endif %}
 
+# Create Entries in ext.ffmuc.net for each device with external IPs
 {% if external_address %}
 record-A-external-{{ node_id }}:
   ddns.present:
@@ -161,6 +162,7 @@ record-AAAA-external-{{ node_id }}:
 {% endif %}
 {% endfor %}
 
+# Create CNAMES as defined in Netbox Pillar
 {% for cname in cnames %}
 record-CNAME-{{ cname }}:
   ddns.present:
@@ -177,5 +179,43 @@ record-CNAME-{{ cname }}:
       - file: dns-key
 {% endfor %}
 
+# Create extra DNS entries for devices not in pillars
+{%- set extra_dns_entries = salt['extra_dns_entries.get_extra_dns_entries'](salt['pillar.get']('netbox:config_context:dns_zones:netbox_token'), salt['pillar.get']('netbox:config_context:dns_zones:netbox_url')) %}
+{% for dns_entry in extra_dns_entries %}
+{% if extra_dns_entries[dns_entry]['address'] != '' %}
+record-A-extra-{{ dns_entry }}:
+  ddns.present:
+    - name: {{ dns_entry }}.
+    - zone: in.ffmuc.net
+    - ttl: 60
+    - data: {{ extra_dns_entries[dns_entry]['address'] }}
+    - rdtype: A
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+
+{% endif %}
+
+{% if extra_dns_entries[dns_entry]['address6'] %}
+
+record-AAAA-extra-{{ dns_entry }}:
+  ddns.present:
+    - name: {{ dns_entry }}.
+    - zone: in.ffmuc.net
+    - ttl: 60
+    - data: {{ extra_dns_entries[dns_entry]['address6'] }}
+    - rdtype: AAAA
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+{% endif %}
+
+{% endfor %}
 {% endif %}
 
