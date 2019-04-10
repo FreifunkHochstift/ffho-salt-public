@@ -162,7 +162,17 @@ record-AAAA-external-{{ node_id }}:
 {% endif %}
 {% endfor %}
 
-# Create CNAMES as defined in Netbox Pillar
+# Create CNAMES as defined in netbox:config_context:dns_zones:cnames or netbox:services (cnames field needs to be set to true)
+{% set services = salt['pillar.get']('netbox:services') %}
+{% for service in services %}
+{% if services[service]['custom_fields']['cname'] %}
+{% if services[service]['virtual_machine'] %}
+{% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
+{% else %}
+{% do cnames.update({service: services[service]['device']['name'] }) %}
+{% endif %}
+{% endif %}
+{% endfor %}
 {% for cname in cnames %}
 record-CNAME-{{ cname }}:
   ddns.present:
