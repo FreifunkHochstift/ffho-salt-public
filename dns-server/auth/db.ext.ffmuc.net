@@ -7,5 +7,5 @@ ext.ffmuc.net		IN SOA	dns01.in.ffmuc.net. hostmaster.in.ffmuc.net. (
 				6000       ; expire (1 hour 40 minutes)
 				600        ; minimum (10 minutes)
 				)
-			NS	dns01.in.ffmuc.net.
+			NS	guardian.ffmuc.net.
 $ORIGIN ext.ffmuc.net
