@@ -58,6 +58,8 @@ python-dnspython:
     - mode: 775
     - require:
       - file: /etc/bind/zones
+    - watch_in:
+      - cmd: rndc-reload
 {% endif %}
 
 {% if not salt['file.file_exists' ]('/etc/bind/zones/db.ext.ffmuc.net') %}
@@ -69,7 +71,36 @@ python-dnspython:
     - mode: 775
     - require:
       - file: /etc/bind/zones
+    - watch_in:
+      - cmd: rndc-reload
 {% endif %}
+
+{% if not salt['file.file_exists' ]('/etc/bind/zones/db.80.10.in-addr.arpa') %}
+/etc/bind/zones/db.80.10.in-addr.arpa:
+  file.managed:
+    - source: salt://dns-server/auth/db.80.10.in-addr.arpa
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - file: /etc/bind/zones
+    - watch_in:
+      - cmd: rndc-reload
+{% endif %}
+
+{% if not salt['file.file_exists' ]('/etc/bind/zones/db.1.0.a.0.8.0.6.0.1.0.0.2.ip6.arpa') %}
+/etc/bind/zones/db.1.0.a.0.8.0.6.0.1.0.0.2.ip6.arpa:
+  file.managed:
+    - source: salt://dns-server/auth/db.1.0.a.0.8.0.6.0.1.0.0.2.ip6.arpa
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - file: /etc/bind/zones
+    - watch_in:
+      - cmd: rndc-reload
+{% endif %}
+
 
 dns-key:
   file.managed:
@@ -105,6 +136,22 @@ record-A-{{ node_id }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
+
+record-PTR-{{ node_id }}:
+  ddns.present:
+    - name: {{  salt.network.reverse_ip(address | regex_replace('/\d+$','')) }}.
+    - zone: 80.10.in-addr.arpa
+    - ttl: 60
+    - data: {{ node_id }}.
+    - rdtype: PTR
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+
+
 {% endif %}
 
 {% if 'mine_interval' not in address6 %}
@@ -121,6 +168,22 @@ record-AAAA-{{ node_id }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
+
+record-PTR6-{{ node_id }}:
+  ddns.present:
+    - name: {{  salt.network.reverse_ip(address6 | regex_replace('/\d+$','')) }}.
+    - zone: 1.0.a.0.8.0.6.0.1.0.0.2.ip6.arpa
+    - ttl: 60
+    - data: {{ node_id }}.
+    - rdtype: PTR
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+
+
 {% endif %}
 
 # Create Entries in ext.ffmuc.net for each device with external IPs

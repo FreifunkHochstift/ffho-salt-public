@@ -18,6 +18,10 @@ alias l='ls $LS_OPTIONS -lA'
 # alias cp='cp -i'
 # alias mv='mv -i'
 
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=10000
+HISTFILESIZE=20000
+
 if [ -f ~/.bash_aliases ]; then
 	. ~/.bash_aliases
 fi
