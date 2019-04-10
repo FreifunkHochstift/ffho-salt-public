@@ -2,96 +2,180 @@
 # Authoritive FFHO DNS Server configuration (dns01/dns02 anycast)
 #
 
-{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
 
+# Get all nodes for DNS records
+{% set nodes = salt['mine.get']('netbox:platform:slug:linux', 'minion_id', tgt_type='pillar') %}
+{% set cnames = salt['pillar.get']('netbox:config_context:dns_zones:cnames') %}
+
+{% if 'dnsserver' in role %}
 include:
   - dns-server
+
+python-dnspython:
+  pkg.installed:
+    - name: python-dnspython
 
 # Bind options
 /etc/bind/named.conf.options:
   file.managed:
-{% if 'dns-recursor' in roles %}
-    - source: salt://dns-server/auth/named.conf.options.recursor
-{% else %}
     - source: salt://dns-server/auth/named.conf.options
-{% endif %}
-    - template: jinja
     - require:
       - pkg: bind9
     - watch_in:
       - cmd: rndc-reload
-
 
 # Configure authoritive zones in local config
 /etc/bind/named.conf.local:
   file.managed:
     - source: salt://dns-server/auth/named.conf.local
-    - require:
-      - pkg: bind9
-    - watch_in:
-      - cmd: rndc-reload
-
-
-# Create zones directory
-/etc/bind/zones/:
-  file.directory:
-    - makedirs: true
-    - user: root
-    - group: root
-    - mode: 755
-    - require:
-      - pkg: bind9
-
-# Create directory for static zone files
-/etc/bind/zones/static:
-  file.directory:
-    - makedirs: true
-    - user: root
-    - group: root
-    - mode: 755
-    - require:
-      - pkg: bind9
-      - file: /etc/bind/zones/
-
-# Copy zonefiles
-/etc/bind/zones/static/_tree:
-  file.recurse:
-    - name: /etc/bind/zones/static
-    - source: salt://dns-server/auth/zones
-    - file_mode: 644
-    - dir_mode: 755
-    - user: root
-    - group: root
-    - watch_in:
-      - cmd: rndc-reload
-
-
-# Create directory for generated zone files
-/etc/bind/zones/generated:
-  file.directory:
-    - makedirs: true
-    - user: root
-    - group: root
-    - mode: 755
-    - require:
-      - pkg: bind9
-      - file: /etc/bind/zones/
-
-{% set nodes_config = salt['pillar.get'] ('nodes', {}) %}
-{% set sites_config = salt['pillar.get'] ('sites', {}) %}
-{% set zones = salt['ffho_net.generate_DNS_entries'] (nodes_config, sites_config) %}
-{% for zone, entries in zones.items () %}
-/etc/bind/zones/generated/{{ zone }}.zone:
-  file.managed:
-    - source: salt://dns-server/auth/zone.gen.tmpl
     - template: jinja
-    - context:
-      zone: {{ zone }}
-      nodes_config: {{ nodes_config }}
-      sites_config: {{ sites_config }}
     - require:
-      - file: /etc/bind/zones/generated
+      - pkg: bind9
     - watch_in:
       - cmd: rndc-reload
+
+/etc/bind/zones:
+  file.directory:
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - pkg: bind9
+
+  
+
+{% if not salt['file.file_exists' ]('/etc/bind/zones/db.in.ffmuc.net') %}
+/etc/bind/zones/db.in.ffmuc.net:
+  file.managed:
+    - source: salt://dns-server/auth/db.in.ffmuc.net
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - file: /etc/bind/zones
+{% endif %}
+
+{% if not salt['file.file_exists' ]('/etc/bind/zones/ext.in.ffmuc.net') %}
+/etc/bind/zones/db.ext.ffmuc.net:
+  file.managed:
+    - source: salt://dns-server/auth/db.ext.ffmuc.net
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - file: /etc/bind/zones
+{% endif %}
+
+dns-key:
+  file.managed:
+    - name: /etc/bind/salt-master.key
+    - source: salt://dns-server/auth/salt-master.key
+    - template: jinja
+    - user: bind
+    - group: bind
+    - mode: 600
+    - require:
+      - pkg: bind9
+
+# Create DNS records for each node
+
+{% for node_id in nodes %}
+{%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
+{%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
+
+{%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
+{%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
+
+{% if 'mine_interval' not in address %}
+record-A-{{ node_id }}:
+  ddns.present:
+    - name: {{ node_id }}.
+    - zone: in.ffmuc.net
+    - ttl: 60
+    - data: {{ address | regex_replace('/\d+$','') }}
+    - rdtype: A
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+{% endif %}
+
+{% if 'mine_interval' not in address6 %}
+record-AAAA-{{ node_id }}:
+  ddns.present:
+    - name: {{ node_id }}.
+    - zone: in.ffmuc.net
+    - ttl: 60
+    - data: {{ address6 | regex_replace('/\d+$','') }}
+    - rdtype: AAAA
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+{% endif %}
+
+{% if external_address %}
+record-A-external-{{ node_id }}:
+  ddns.present:
+    {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
+    - name: {{ node[0] }}.ext.ffmuc.net.
+    - zone: ext.ffmuc.net
+    - ttl: 60
+    - data: {{ external_address[node_id][0] }} 
+    - rdtype: A
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+
+{% endif %}
+
+{% if external_address6 %}
+
+record-AAAA-external-{{ node_id }}:
+  ddns.present:
+    {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
+    - name: {{ node[0] }}.ext.ffmuc.net.
+    - zone: ext.ffmuc.net
+    - ttl: 60
+    - data: {{ external_address6[node_id][0] }} 
+    - rdtype: AAAA
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+
+{% endif %}
 {% endfor %}
+
+{% for cname in cnames %}
+record-CNAME-{{ cname }}:
+  ddns.present:
+    - name: {{ cname }}.
+    - zone: in.ffmuc.net
+    - ttl: 60
+    - data: {{ cnames[cname] }}.
+    - rdtype: CNAME
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+{% endfor %}
+
+{% endif %}
 
