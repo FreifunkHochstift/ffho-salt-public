@@ -60,7 +60,7 @@ python-dnspython:
       - file: /etc/bind/zones
 {% endif %}
 
-{% if not salt['file.file_exists' ]('/etc/bind/zones/ext.in.ffmuc.net') %}
+{% if not salt['file.file_exists' ]('/etc/bind/zones/db.ext.ffmuc.net') %}
 /etc/bind/zones/db.ext.ffmuc.net:
   file.managed:
     - source: salt://dns-server/auth/db.ext.ffmuc.net

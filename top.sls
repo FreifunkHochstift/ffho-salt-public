@@ -6,6 +6,7 @@ base:
     - burp
     - certs
     - console-tools
+    - dns-server/auth
     - docker
     - docker-containers
     - dphys-swapfile
