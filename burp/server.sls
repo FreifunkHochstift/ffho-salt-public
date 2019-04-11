@@ -11,6 +11,10 @@ burp-server:
     - refresh: True
     - require:
       - pkgrepo: burp-repo
+  service.running:
+    - enable: true
+    - restart: true
+
 /usr/share/burp/scripts/burp_notify_mattermost.sh:
   file.managed:
     - source: salt://burp/burp_notify_mattermost.sh.tmpl

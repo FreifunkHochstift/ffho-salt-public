@@ -286,7 +286,15 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
     - watch_in:
       - service: icinga2-service
 
-
+/etc/icinga2/conf.d/services.conf:
+  file.managed:
+    - source: salt://icinga2/services.conf.tmpl
+    - mode: 644
+    - user: root
+    - group: root
+    - template: jinja
+    - watch_in:
+      - service: icinga2-service
 
 # Create configuration for network devices
 Create /etc/icinga2/ffmuc-conf.d/net/wbbl/:

@@ -42,17 +42,28 @@ object Host "{{ node_id }}" {
 	vars.os = "Linux"
 
 	vars.roles = [
-{%- for role in roles|sort %}
+	{%- for role in roles|sort %}
 		"{{ role }}",
-{%- endfor %}
+	{%- endfor %}
 	]
 
 	vars.sites = [
-{%- for site in sites|sort %}
+	{%- for site in sites|sort %}
 		"{{ site }}",
-{%- endfor %}
+	{%- endfor %}
 	]
 	vars.disks["disk /"] = {
 	      disk_partitions = "/"
 	}
-}									
+
+	{% if 'backupserver' in roles %}
+	vars.disks["disk /srv"] = {
+	      disk_partitions = "/srv"
+	}
+	{% elif 'buildserver' in roles %}
+	vars.disks["disk /build"] = {
+	      disk_partitions = "/build"
+	}
+	{% endif %}
+}					
+
