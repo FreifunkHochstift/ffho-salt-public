@@ -52,4 +52,7 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 {%- endfor %}
 	]
+	vars.disks["disk /"] = {
+	      disk_partitions = "/"
+	}
 }									
