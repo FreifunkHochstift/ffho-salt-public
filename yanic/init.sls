@@ -10,12 +10,9 @@
 # copy yanic binary to destination
 # the binary needs to be provided by the salt-master
 yanic:
-  file.managed:
-   - name: /srv/yanic/yanic
-   - source: salt://yanic/yanic
-   - mode: 755
-   - require:
-     - file: /srv/yanic/data
+  pkg.installed:
+    - sources:
+      - yanic: http://apt.ffmuc.net/yanic-0.0.2-17.deb
 
 # copy systemd yanic@.service
 /etc/systemd/system/yanic@.service:

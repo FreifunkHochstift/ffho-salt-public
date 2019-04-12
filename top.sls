@@ -13,7 +13,9 @@ base:
     - graylog-sidecar
     - fail2ban
     - ff_base
+    - grafana
     - icinga2
+    - influxdb
     - jenkins
     - locales
     - kvm
