@@ -64,12 +64,16 @@ search_base_dns = ["dc=ffmuc,dc=net"]
 ## An array of the base DNs to search through for groups. Typically uses ou=groups
 # group_search_base_dns = ["ou=groups,dc=grafana,dc=org"]
 
+group_search_filter = "(&(objectClass=posixGroup)(memberUid=%s))"
+group_search_base_dns = ["ou=groups,dc=ffmuc,dc=net"]
+group_search_filter_user_attribute = "uid"
+
 # Specify names of the ldap attributes your ldap uses
 [servers.attributes]
 name = "givenName"
 surname = "sn"
 username = "cn"
-member_of = "memberOf"
+member_of = "dn"
 email =  "mail"
 
 # Map ldap groups to grafana org roles
