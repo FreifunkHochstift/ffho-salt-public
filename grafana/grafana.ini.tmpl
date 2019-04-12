@@ -10,7 +10,7 @@
 ; app_mode = production
 
 # instance name, defaults to HOSTNAME environment variable value or hostname if HOSTNAME var is empty
-; instance_name = ${HOSTNAME}
+; instance_name = {{ grains.id }}
 
 #################################### Paths ####################################
 [paths]
@@ -141,13 +141,13 @@ reporting_enabled = false
 #################################### Security ####################################
 [security]
 # default admin user, created on startup
-admin_user = {{ config.admin_user }}
+admin_user = admin
 
 # default admin password, can be changed before first start of grafana,  or in profile settings
-admin_password = {{ config.admin_password }}
+admin_password = {{ salt['pillar.get']('netbox:config_context:grafana_admin_pw') }}
 
 # used for signing
-secret_key = {{ config.secret_key }}
+secret_key =  {{ salt['pillar.get']('netbox:config_context:grafana_secret') }}
 
 # Auto-login remember days
 ;login_remember_days = 7
@@ -202,7 +202,7 @@ login_hint = username
 enabled = true
 
 # specify organization name that should be used for unauthenticated users
-org_name = Freifunk Hochstift
+org_name = FFMUC
 
 # specify role for unauthenticated users
 org_role = Viewer
@@ -270,11 +270,7 @@ org_role = Viewer
 
 #################################### Auth LDAP ##########################
 [auth.ldap]
-{%- if 'ldap' in config %}
 enabled = true
-{%- else %}
-enabled = false
-{%- endif %}
 config_file = /etc/grafana/ldap.toml
 allow_sign_up = true
 

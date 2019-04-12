@@ -1,12 +1,14 @@
 #
 # influxdb
 #
+{% if 'influxdb_server' in salt['pillar.get']('netbox:config_context:roles') %}
+
 influxdb:
   pkgrepo.managed:
     - humanname: InfluxDB-Repo
-    - name: deb https://repos.influxdata.com/debian jessie stable
+    - name: deb https://repos.influxdata.com/debian stretch stable
     - key_url:  https://repos.influxdata.com/influxdb.key
-    - dist: jessie
+    - dist: stretch
     - file: /etc/apt/sources.list.d/influxdb.list
   pkg.installed:
     - name: influxdb
@@ -34,3 +36,4 @@ influxdb:
     - template: jinja
     - require:
       - pkg: influxdb
+{% endif %}

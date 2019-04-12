@@ -202,7 +202,6 @@ record-A-external-{{ node_id }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
-
 {% endif %}
 
 {% if external_address6 %}
@@ -230,9 +229,19 @@ record-AAAA-external-{{ node_id }}:
 {% for service in services %}
 {% if services[service]['custom_fields']['cname'] %}
 {% if services[service]['virtual_machine'] %}
+{% if services[service]['custom_fields']['public'] %}
+{% set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
+{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+{% else %}
 {% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
+{% endif %}
+{% else %}
+{% if services[service]['custom_fields']['public'] %}
+{% set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
+{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
 {% else %}
 {% do cnames.update({service: services[service]['device']['name'] }) %}
+{% endif %}
 {% endif %}
 {% endif %}
 {% endfor %}
@@ -240,7 +249,11 @@ record-AAAA-external-{{ node_id }}:
 record-CNAME-{{ cname }}:
   ddns.present:
     - name: {{ cname }}.
+    {% if 'ext.ffmuc.net' in cname  %}
+    - zone: ext.ffmuc.net
+    {% else %}
     - zone: in.ffmuc.net
+    {% endif %}
     - ttl: 60
     - data: {{ cnames[cname] }}.
     - rdtype: CNAME

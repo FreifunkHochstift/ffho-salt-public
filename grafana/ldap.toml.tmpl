@@ -8,7 +8,7 @@
 
 [[servers]]
 # Ldap server host (specify multiple hosts space separated)
-host = "{{ config.host }}"
+host = "ldap.in.ffmuc.net"
 # Default port is 389 or 636 if use_ssl = true
 port = 636
 # Set to true if ldap server supports TLS
@@ -21,16 +21,16 @@ ssl_skip_verify = false
 # root_ca_cert = /path/to/certificate.crt
 
 # Search user bind dn
-bind_dn = "uid=grafana,ou=Services,dc=ffho,dc=net"
+bind_dn = "cn=binduser,dc=ffmuc,dc=net"
 # Search user bind password
 # If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
-bind_password = "{{ config.bind_password }}"
+bind_password = "{{ salt['pillar.get']('netbox:services:ldap.in.ffmuc.net:custom_fields:api_token') }}"
 
 # User search filter, for example "(cn=%s)" or "(sAMAccountName=%s)" or "(uid=%s)"
-search_filter = "(uid=%s)"
+search_filter = "(cn=%s)"
 
 # An array of base dns to search through
-search_base_dns = ["dc=ffho,dc=net"]
+search_base_dns = ["dc=ffmuc,dc=net"]
 
 # In POSIX LDAP schemas, without memberOf attribute a secondary query must be made for groups.
 # This is done by enabling group_search_filter below. You must also set member_of= "cn"
@@ -68,19 +68,19 @@ search_base_dns = ["dc=ffho,dc=net"]
 [servers.attributes]
 name = "givenName"
 surname = "sn"
-username = "uid"
+username = "cn"
 member_of = "memberOf"
 email =  "mail"
 
 # Map ldap groups to grafana org roles
 [[servers.group_mappings]]
-group_dn = "cn=noc,ou=Groups,dc=ffho,dc=net"
+group_dn = "cn=Admin,ou=Groups,dc=ffmuc,dc=net"
 org_role = "Admin"
 # The Grafana organization database id, optional, if left out the default org (id 1) will be used
 # org_id = 1
 
 [[servers.group_mappings]]
-group_dn = "cn=ffho,ou=Groups,dc=ffho,dc=net"
+group_dn = "cn=HelpDesk,ou=Groups,dc=ffmuc,dc=net"
 org_role = "Editor"
 
 [[servers.group_mappings]]

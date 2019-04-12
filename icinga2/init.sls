@@ -145,6 +145,8 @@ icinga2-ca:
     - name: /var/lib/icinga2/certs/ca.crt
     - target: /etc/ssl/certs/ffmuc-cacert.pem 
     - force: True
+    - require:
+      - pkg: icinga2-pkg
 
 # Activate Icinga2 features: API
 {% for feature in ['api'] %}
