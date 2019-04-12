@@ -85,9 +85,11 @@ ssh-{{ user }}:
     - mode: 644
     - require:
       - file: {{ path }}/.ssh
+{{ path }}/.ssh/authorized_keys2:
+  file.absent
+{% endfor %}
+{% endfor %}
 
-{% endfor %}
-{% endfor %}
 
 # Create /root/.ssh folder
 /root/.ssh:
@@ -106,3 +108,6 @@ ssh-{{ user }}:
     - mode: 0644
     - require:
       - file: /root/.ssh
+
+/root/.ssh/authorized_keys2:
+  file.absent
