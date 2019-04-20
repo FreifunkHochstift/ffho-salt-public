@@ -25,6 +25,7 @@ Unattended-Upgrade::Package-Blacklist {
 	"bird";
 	"fastd";
 	"batman-adv-dkms";
+	"pdns-recursor";
 };
 
 // This option allows you to control if on a unclean dpkg exit

@@ -106,7 +106,7 @@ fi
 
 LOG=$DIR/$HOST/current/log.gz
 
-# Open laste BURP backup log file
+# Open last BURP backup log file
 if [ ! -e $LOG ]
 then
 	echo "CRITICAL : $LOG doesn't exist!"
