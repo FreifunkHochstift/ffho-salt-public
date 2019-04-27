@@ -2,7 +2,7 @@
 This repo is a fork of Public FFHO configuration for Salt-Orchestrated OpenSource based Software Defined Freifunk Infrastructure :)
 
 ## Dependencies
-This repo makes heavy use of Netbox based ext-pillarext-pilla information especially config_contexts, services and ip information
+This repo makes heavy use of Netbox based ext-pillar information especially config_contexts, services and ip information
 
 ## Sample config_context
 ```
