@@ -8,8 +8,6 @@ services:
     image: netboxcommunity/netbox:latest-ldap
     depends_on:
     - postgres
-    - redis
-    - netbox-worker
     env_file:
     - env/netbox.env
     - env/ldap.env
@@ -22,15 +20,6 @@ services:
     - netbox-static-files:/opt/netbox/netbox/static
     - netbox-media-files:/opt/netbox/netbox/media
     restart: unless-stopped
-  netbox-worker:
-    <<: *netbox
-    depends_on:
-    - redis
-    entrypoint:
-    - python3
-    - /opt/netbox/netbox/manage.py
-    command:
-    - rqworker
   nginx:
     command: nginx -c /etc/netbox-nginx/nginx.conf
     image: nginx:1.15-alpine
@@ -47,16 +36,6 @@ services:
     env_file: env/postgres.env
     volumes:
     - /srv/docker/postgres-netbox:/var/lib/postgresql/data
-    restart: unless-stopped
-  redis:
-    image: redis:4-alpine
-    command:
-    - sh
-    - -c # this is to evaluate the $REDIS_PASSWORD from the env
-    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD ## $$ because of docker-compose
-    env_file: env/redis.env
-    volumes:
-    - netbox-redis-data:/data
     restart: unless-stopped
 volumes:
   netbox-static-files:

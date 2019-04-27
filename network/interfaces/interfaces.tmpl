@@ -2,11 +2,21 @@
 # /etc/network/interfaces (Salt managed)
 #
 
-{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
+{%- set ipaddresses = salt['pillar.get']('netbox:ipaddresses') %}
 {%- set node_id = grains['id'] %}
-{%- set sites_config = salt['pillar.get']('sites', {}) %}
-{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
+{%- set sites_config = salt['pillar.get']('netbox:config_context:sites', {}) %}
 
+{% set node_config = dict() %}
+{% do node_config.update({ 'ifaces': {} }) %}
+{%- for ipaddress in ipaddresses %}
+{% if ipaddress['interface']['name'] in node_config['ifaces'] %}
+{% do node_config['ifaces'][ipaddress['interface']['name']]['prefixes'].append(ipaddress['address']) %}
+{% else %}
+{% do node_config['ifaces'].update({ ipaddress['interface']['name']: { 'prefixes': [ipaddress['address']] }}) %}
+{% endif %}
+{% endfor %}
+{% do node_config.update({ 'id': salt['pillar.get']('netbox:id') }) %}
+{%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
 #source /etc/network/interfaces.d/*
 
 {#

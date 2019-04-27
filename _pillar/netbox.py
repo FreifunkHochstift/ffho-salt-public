@@ -161,6 +161,32 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         log.error(interface_results['error'])
         return ret
     ret['netbox']['ipaddresses'] = interface_results['dict']['results']
+
+    ## Get all interfaces for device
+    interface_ids = []
+    for ipaddress in ret['netbox']['ipaddresses']:
+        interface_id = ipaddress['interface']['id']
+        interface_ids.append(interface_id)
+    ret['netbox']['interfaces'] = {}
+    for int_id in interface_ids:
+        app = 'dcim'
+        if 'vcpus' in ret['netbox']:
+            app = 'virtualization'
+        interface_url = '{api_url}/{app}/{endpoint}/{id}/'.format(api_url=api_url,
+                                                                  app=app,
+                                                                  endpoint='interfaces',
+								  id=int_id)
+        interface_results = salt.utils.http.query(interface_url,
+                                           header_dict=headers,
+                                           decode=True)
+        if 'error' in interface_results:
+                log.error('API query failed for "%s", status code: %d',
+                  minion_id, interface_results['status'])
+                log.error(interface_results['error'])
+                return ret
+        ret['netbox']['interfaces'][interface_results['dict']['name']] = interface_results['dict']
+
+
     if site_details:
         log.debug('Retrieving site details for "%s" - site %s (ID %d)',
                   minion_id, site_name, site_id)

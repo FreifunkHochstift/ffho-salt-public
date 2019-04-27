@@ -2,32 +2,40 @@
 # Bird routing daemon
 #
 
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if salt['pillar.get']('netbox:role:name') %}
+{%- set role = salt['pillar.get']('netbox:role:name') %}
+{% else %}
+{%- set role = salt['pillar.get']('netbox:device_role:name') %}
+{% endif %}
+{%- set node_id = grains['id'] %}
+{%- set roles = salt['mine.get'](node_id,'minion_roles')[node_id] %}
 
+{% if 'mine_interval' not in role %}
+{% do roles.append(role) %}
+{% elif 'mine_interval' not in device_role %}
+{% do roles.append(device_role) %}
+{% endif %}
+
+{%- set ipaddresses = salt['pillar.get']('netbox:ipaddresses') %}
+{%- set sites_config = salt['pillar.get']('netbox:config_context:sites', {}) %}
+
+{% set node_config = dict() %}
+{% do node_config.update({ 'ifaces': {} }) %}
+{%- for ipaddress in ipaddresses %}
+{% if ipaddress['interface']['name'] in node_config['ifaces'] %}
+{% do node_config['ifaces'][ipaddress['interface']['name']]['prefixes'].append(ipaddress['address']) %}
+{% else %}
+{% do node_config['ifaces'].update({ ipaddress['interface']['name']: { 'prefixes': [ipaddress['address']] }}) %}
+{% endif %}
+{% endfor %}
+
+{% do node_config.update({ 'id': salt['pillar.get']('netbox:id') }) %}
 include:
   - network.interfaces
-
-bird-repo:
-{% if grains.oscodename in ['jessie', 'wheezy'] %}
-  pkgrepo.managed:
-    - comments: "# Official bird repo"
-    - human_name: Official bird repository
-    - name: "deb http://bird.network.cz/debian/ {{ grains['oscodename'] }} main"
-    - dist: {{ grains['oscodename'] }}
-    - file: /etc/apt/sources.list.d/bird.list
-    - key_url: salt://bird/bird_apt.key
-{% else %}
-  file.absent:
-    - name: /etc/apt/sources.list.d/bird.list
-{% endif %}
 
 bird-pkg:
   pkg.installed:
     - name: bird
-{% if grains.oscodename in ['jessie', 'wheezy'] %}
-    - require:
-      - pkgrepo: bird-repo
-{% endif %}
 
 # Make sure both services are enabled
 bird:

@@ -58,8 +58,8 @@ GRE_FFRL_attrs = {
 
 # The IPv4/IPv6 prefix used for Loopback IPs
 loopback_prefix = {
-	'v4' : '10.132.255.',
-	'v6' : '2a03:2260:2342:ffff::',
+	'v4' : '10.80.255.',
+	'v6' : '2001:608:a01:ffff::',
 }
 
 

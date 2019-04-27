@@ -10,17 +10,6 @@ ifupdown2:
 python-ipcalc:
   pkg.installed
 
-# ifupdown2 configuration
-/etc/network/ifupdown2/ifupdown2.conf:
-  file.managed:
-    - source:
-      - salt://network/ifupdown2.conf.{{ grains['oscodename'] }}
-      - salt://network/ifupdown2.conf
-    - require:
-      - pkg: ifupdown2
-      - pkg: python-ipcalc
-
-
 # Write network configuration
 /etc/network/interfaces:
  file.managed:
@@ -28,6 +17,7 @@ python-ipcalc:
     - source: salt://network/interfaces/interfaces.tmpl
     - require:
       - pkg: ifupdown2
+      - pkg: python-ipcalc
 
 
 # Reload interface configuration if neccessary
@@ -36,8 +26,6 @@ ifreload:
     - name: /sbin/ifreload -a
     - watch:
       - file: /etc/network/interfaces
-    - require:
-      - file: /etc/network/ifupdown2/ifupdown2.conf
 
 
 # If there is an interface in vrf_external, install a workaround script
@@ -46,16 +34,12 @@ ifreload:
 #
 # The fix script will be called every minute by cron and after ifreload
 # was called to try to minimize any downtime.
-{% set vrf = [False] %}
-{% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items() %}
-  {% if iface_config.get ('vrf', '') == 'vrf_external' %}
-    {% do vrf.append(True) %}
-    {% break %}
-  {% endif %}
-{% endfor %}
-
+{% set vrf = False %}
+{% if 'vrf_external' in grains['hwaddr_interfaces'] %}
+{% set vrf = True %}
+{% endif %}
 /usr/local/sbin/ff_fix_default_route:
-{% if True in vrf %}
+{% if vrf %}
   file.managed:
     - source: salt://network/interfaces/ff_fix_default_route
     - mode: 755
@@ -70,7 +54,7 @@ ifreload:
 {% endif %}
 
 /etc/cron.d/ff_fix_default_route:
-{% if True in vrf %}
+{% if vrf %}
   file.managed:
     - source: salt://network/interfaces/ff_fix_default_route.cron
 {% else %}
