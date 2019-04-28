@@ -1,0 +1,6 @@
+#
+# /etc/apt/sources.list (Salt managed)
+#
+
+deb	http://debian.bio.lmu.de/raspbian/raspbian/ stretch main contrib non-free rpi
+deb-src	http://debian.bio.lmu.de/raspbian/raspbian/ stretch main contrib non-free rpi
