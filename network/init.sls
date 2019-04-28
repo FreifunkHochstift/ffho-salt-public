@@ -64,3 +64,4 @@ vnstat:
 /etc/resolv.conf:
   file.managed:
     - source: salt://network/resolv.conf
+    - template: jinja
