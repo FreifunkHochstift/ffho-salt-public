@@ -1,0 +1,2 @@
+Europe/Berlin:
+  timezone.system
