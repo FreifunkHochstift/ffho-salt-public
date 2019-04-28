@@ -1,0 +1,9 @@
+#
+# Sessions which are OK to be down in iBGP (Salt managed)
+#
+{%- set nodes = salt['pillar.get']('nodes', {}) %}
+{%- for node, node_config in nodes.items ()|sort %}
+  {%- if node_config.get ('status', '') != "active" %}
+{{ salt['ffho.re_replace']('[.-]', '_', node) }}
+  {%- endif %}
+{%- endfor %}

@@ -272,3 +272,9 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
     - require:
       - file: /etc/icinga2/ffho-conf.d
 
+/etc/icinga2/ffho-conf.d/bird_ibgp_sessions_down_ok.txt:
+  file.managed:
+    - source: salt://icinga2/bird_ibgp_sessions_down_ok.txt.tmpl
+    - template: jinja
+    - require:
+      - file: /etc/icinga2/ffho-conf.d
