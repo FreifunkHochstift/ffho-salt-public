@@ -15,6 +15,7 @@ build:
       - libz-dev
       - libssl-dev
       - lua5.1
+      - rsync
   user.present:
     - name: build
     - shell: /bin/bash
