@@ -828,7 +828,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 			# or set the default, when no automtu is present.
 			config['mtu'] = config.get ('automtu', MTU['default'])
 
-		for key in [ 'automtu', 'batman_connect_sites', 'ospf', 'site', 'type' ]:
+		for key in [ 'automtu', 'batman_connect_sites', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans' ]:
 			if key in config:
 				config.pop (key)
 	# This leaves 'auto', 'prefixes' and 'desc' as keys which should not be directly
