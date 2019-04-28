@@ -10,14 +10,15 @@ PS1='${debian_chroot:+($debian_chroot)}${fqdn}:\w\$ '
 export LS_OPTIONS='--color=auto'
 eval "`dircolors`"
 alias ls='ls $LS_OPTIONS'
-# alias ll='ls $LS_OPTIONS -l'
-# alias l='ls $LS_OPTIONS -lA'
-#
-# Some more alias to avoid making mistakes:
-# alias rm='rm -i'
-# alias cp='cp -i'
-# alias mv='mv -i'
+alias ll='ls $LS_OPTIONS -l'
+alias l='ls $LS_OPTIONS -lA'
 
+# Increase history size and make sure the history is always appended
+HISTSIZE=1000
+HISTFILESIZE=2000
+shopt -s histappend
+
+# Load any aliases which might be present
 if [ -f ~/.bash_aliases ]; then
 	. ~/.bash_aliases
 fi
