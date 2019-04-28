@@ -160,22 +160,19 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                   minion_id, interface_results['status'])
         log.error(interface_results['error'])
         return ret
-    ret['netbox']['ipaddresses'] = interface_results['dict']['results']
-
+    ipaddresses = interface_results['dict']['results']
     ## Get all interfaces for device
     interface_ids = []
-    for ipaddress in ret['netbox']['ipaddresses']:
-        interface_id = ipaddress['interface']['id']
-        interface_ids.append(interface_id)
     ret['netbox']['interfaces'] = {}
-    for int_id in interface_ids:
+    for ipaddress in ipaddresses:
+        interface_id = ipaddress['interface']['id']
         app = 'dcim'
         if 'vcpus' in ret['netbox']:
             app = 'virtualization'
         interface_url = '{api_url}/{app}/{endpoint}/{id}/'.format(api_url=api_url,
                                                                   app=app,
                                                                   endpoint='interfaces',
-								  id=int_id)
+								  id=interface_id)
         interface_results = salt.utils.http.query(interface_url,
                                            header_dict=headers,
                                            decode=True)
@@ -184,7 +181,11 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                   minion_id, interface_results['status'])
                 log.error(interface_results['error'])
                 return ret
-        ret['netbox']['interfaces'][interface_results['dict']['name']] = interface_results['dict']
+        if interface_results['dict']['name'] not in ret['netbox']['interfaces']:
+            ret['netbox']['interfaces'][interface_results['dict']['name']] = interface_results['dict']
+        if 'ipaddresses' not in ret['netbox']['interfaces'][interface_results['dict']['name']]:
+            ret['netbox']['interfaces'][interface_results['dict']['name']]['ipaddresses'] = []
+        ret['netbox']['interfaces'][interface_results['dict']['name']]['ipaddresses'].append(ipaddress)
 
 
     if site_details:

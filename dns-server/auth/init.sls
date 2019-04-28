@@ -133,6 +133,7 @@ record-A-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -147,6 +148,7 @@ record-PTR-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -165,6 +167,7 @@ record-AAAA-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -179,6 +182,7 @@ record-PTR6-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -199,6 +203,7 @@ record-A-external-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -217,6 +222,7 @@ record-AAAA-external-{{ node_id }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -260,6 +266,7 @@ record-CNAME-{{ cname }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -279,6 +286,7 @@ record-A-extra-{{ dns_entry }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key
@@ -297,6 +305,7 @@ record-AAAA-extra-{{ dns_entry }}:
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
+    - replace_on_change: True
     - require:
       - pkg: python-dnspython
       - file: dns-key

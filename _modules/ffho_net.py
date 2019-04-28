@@ -1036,7 +1036,7 @@ def get_ospf_interface_config (node_config, grains_id):
 			continue
 
 		# Local Gigabit Ethernet based connections (PTP or L2 subnets), cost 10
-		if re.search (r'^(br-?|br\d+\.|vlan)10\d\d$', iface):
+		if re.search (r'^(br-?|br\d+\.|eth0\.|vlan)10\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
 			ospf_config['cost'] = 10

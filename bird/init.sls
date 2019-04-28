@@ -7,7 +7,7 @@
 {% else %}
 {%- set role = salt['pillar.get']('netbox:device_role:name') %}
 {% endif %}
-{%- set node_id = grains['id'] %}
+{%- set node_id = grains['id'] %}                                                                                                                                                                          
 {%- set roles = salt['mine.get'](node_id,'minion_roles')[node_id] %}
 
 {% if 'mine_interval' not in role %}
@@ -16,22 +16,22 @@
 {% do roles.append(device_role) %}
 {% endif %}
 
-{%- set ipaddresses = salt['pillar.get']('netbox:ipaddresses') %}
-{%- set sites_config = salt['pillar.get']('netbox:config_context:sites', {}) %}
+{%- set sites_config = salt['pillar.get']('netbox:config_context:sites', {}) %}                                                                                                                            
+{%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
 
 {% set node_config = dict() %}
 {% do node_config.update({ 'ifaces': {} }) %}
-{%- for ipaddress in ipaddresses %}
-{% if ipaddress['interface']['name'] in node_config['ifaces'] %}
-{% do node_config['ifaces'][ipaddress['interface']['name']]['prefixes'].append(ipaddress['address']) %}
+{%- for interface in interfaces %}
+{% for ipaddress in interfaces[interface]['ipaddresses'] %}
+{% if interface in node_config['ifaces'] %}
+{% do node_config['ifaces'][interface]['prefixes'].append(ipaddress['address']) %}
 {% else %}
-{% do node_config['ifaces'].update({ ipaddress['interface']['name']: { 'prefixes': [ipaddress['address']] }}) %}
+{% do node_config['ifaces'].update({ interface: { 'prefixes': [ipaddress['address']] }}) %}
 {% endif %}
 {% endfor %}
+{% endfor %}
 
-{% do node_config.update({ 'id': salt['pillar.get']('netbox:id') }) %}
-include:
-  - network.interfaces
+{% do node_config.update({ 'id': salt['pillar.get']('netbox:custom_fields:node_id') }) %}                    
 
 bird-pkg:
   pkg.installed:

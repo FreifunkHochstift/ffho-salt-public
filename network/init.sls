@@ -43,20 +43,29 @@ vnstat:
     - source: salt://network/udev-rules.tmpl
 
 # Systemd link files?
+{%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
 {% if grains['oscodename'] == 'stretch' %}
-  {% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
-    {% if '_udev_mac' in iface_config %}
+  {% for iface in interfaces |sort %}
+    {% if interfaces[iface]['mac_address'] is not none %}
 /etc/systemd/network/42-{{ iface }}.link:
   file.managed:
     - source: salt://network/systemd-link.tmpl
     - template: jinja
       interface: {{ iface }}
-      mac: {{ iface_config.get ('_udev_mac') }}
-      desc: {{ iface_config.get ('desc', '') }}
+      mac: {{ interfaces[iface]['mac_address'] }}
+      desc: {{ interfaces[iface]['description'] }}
     {% endif %}
   {% endfor %}
 {% endif %}
 
+# ifupdown2 configuration
+/etc/network/ifupdown2/ifupdown2.conf:
+  file.managed:
+    - source:
+      - salt://network/ifupdown2.conf.{{ grains['oscodename'] }}
+      - salt://network/ifupdown2.conf
+    - require:
+      - pkg: network-pkg
 
 # /etc/resolv.conf
 /etc/resolv.conf:
