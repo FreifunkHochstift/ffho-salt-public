@@ -1,15 +1,22 @@
 base:
   '*':
+    # Site wide options
+    - globals
+
+    - net
     - nodes
     - sites
+    - regions
     - cert
-    - ffho
+
+    # SSH authorized_keys configuration
+    - ssh
 
     #
     # Role/Application specific stuff
 
-    # SSH authorized_keys configuration
-    - ssh
+    # Automatic Certificate Management
+    - acme
 
     # Traffic engineering
     - te
@@ -22,3 +29,6 @@ base:
 
     # Anycast Healthchecker
     - anycast-healthchecker
+
+    # Frontend Config
+    - frontend
