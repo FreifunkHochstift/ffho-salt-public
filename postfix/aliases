@@ -12,4 +12,4 @@ abuse: root
 noc: root
 security: root
 
-root: ops@ffho.net
+root: {{ root_mail_address }}

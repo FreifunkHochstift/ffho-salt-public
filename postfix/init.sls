@@ -38,12 +38,15 @@ postfix:
       - service: postfix
 
 #
-# Send root mail to ops@ffho.net
+# Send root mail to pillar <globals:ops_mail>
 /etc/aliases:
   file.managed:
     - source:
       - salt://postfix/aliases.{{ grains['id'] }}
       - salt://postfix/aliases
+    - template: jinja
+    - context:
+      root_mail_address: {{ salt['pillar.get']('globals:ops_mail') }}
 
 newaliases:
   cmd.wait:
