@@ -35,12 +35,4 @@ snmpd:
 
 
 /etc/snmp/ifAlias:
-  file.managed:
-    - source: salt://snmpd/ifAlias
-    - user: root
-    - group: root
-    - mode: 755
-    - require:
-      - pkg: snmpd
-
-
+  file.absent
