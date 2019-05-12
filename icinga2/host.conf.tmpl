@@ -52,10 +52,10 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 	{%- endfor %}
 	]
+	vars.disk_wfree = "10%"
 	vars.disks["disk /"] = {
 	      disk_partitions = "/"
 	}
-
 	{% if 'backupserver' in roles %}
 	vars.disks["disk /srv"] = {
 	      disk_partitions = "/srv"

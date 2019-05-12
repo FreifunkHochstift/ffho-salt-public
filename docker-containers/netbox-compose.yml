@@ -4,7 +4,7 @@ services:
     build:
       context: .
       args:
-        - BRANCH=v2.5.10
+        - BRANCH=v2.5.12
     image: netboxcommunity/netbox:latest-ldap
     depends_on:
     - postgres

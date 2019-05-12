@@ -395,3 +395,41 @@ bird6-configure:
     - watch_in:
       - cmd: bird6-configure
 {% endif %}
+
+#
+# Default Originate?
+#
+{% if 'default_originate' in salt['pillar.get']('netbox:config_context:router_options') %}
+/etc/bird/bird.d/default_originate.conf:
+  file.managed:
+    - source: salt://bird/default_originate.conf
+    - template: jinja
+      proto: v4
+    - watch_in:
+      - cmd: bird-configure
+    - require:
+      - file: /etc/bird/bird.d
+    - require_in:
+      - service: bird
+
+/etc/bird/bird6.d/default_originate.conf:
+  file.managed:
+    - source: salt://bird/default_originate.conf
+    - template: jinja
+      proto: v6
+    - watch_in:
+      - cmd: bird6-configure
+    - require:
+      - file: /etc/bird/bird6.d
+    - require_in:
+      - service: bird6
+{% else %}
+/etc/bird/bird.d/default_originate.conf:
+  file.absent:
+    - watch_in:
+      - cmd: bird-configure
+/etc/bird/bird6.d/default_originate.conf:
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
+{% endif %}
