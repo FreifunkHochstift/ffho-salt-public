@@ -2,10 +2,10 @@
 # Fastd for gateways
 #
 
-{% set sites_all = pillar.get ('sites') %}
+{% set sites_all = salt['pillar.get']('netbox:config_context:sites_config') %}
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
 {% set sites_node = salt['pillar.get']('netbox:config_context:sites')
-{% set device_no = node_config.get('id', -1) %}
+{% set device_no = salt['pillar.get']('netbox:custom_fields:node_id') %}
 
 {% set roles = salt['pillar.get']('netbox:config_context:roles')
 
@@ -34,10 +34,6 @@ fastd:
       - sls: network.interfaces
   service.dead:
     - enable: False
-
-/etc/systemd/system/fastd@.service:
-  file.managed:
-    - source: salt://fastd/fastd@.service
 
 /etc/fastd:
   file.directory:
