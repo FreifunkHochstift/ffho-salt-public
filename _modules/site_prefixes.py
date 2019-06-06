@@ -19,4 +19,3 @@ def get_site_prefixes(netbox_token, url):
     except Exception as e:
         return e
 
-print(get_site_prefixes("bla", "https://nb.in.ffmuc.net/ipam/prefixes/?q=&within_include=&family=4&mask_length=&site=ff-segmente&is_pool=&export=export_ff_sites"))
