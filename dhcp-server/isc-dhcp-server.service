@@ -1,0 +1,12 @@
+[Unit]
+Description=isc-dhcp-server with vrf support
+After=syslog.target network-online.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=/sbin/ip vrf exec vrf_external /usr/sbin/dhcpd -4 -q -cf /etc/dhcp/dhcpd.conf {% for site in salt['pillar.get']('netbox:config_context:sites') -%} br-{{ site }} {% endfor %}
+
+[Install]
+WantedBy=multi-user.target

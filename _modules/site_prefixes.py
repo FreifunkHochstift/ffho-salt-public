@@ -12,17 +12,11 @@ def get_site_prefixes(netbox_token, url):
     try:
         request = urllib2.Request(url, headers=headers)
         response = urllib2.urlopen(request)
-        json_reader = json.load(response)
-
-	site_config = {}
-        for id in json_reader:
-		pretty_id = id.split('-')[0]
-		if pretty_id in site_config:
-			site_config[pretty_id].update(json_reader[id])
-		else:
-			site_config[pretty_id] = json_reader[id]
-	
-	return(site_config)
+	prefixes = []
+        for prefix in response:
+		prefixes.append(prefix.strip())
+	return(prefixes)
     except Exception as e:
         return e
-     
+
+print(get_site_prefixes("bla", "https://nb.in.ffmuc.net/ipam/prefixes/?q=&within_include=&family=4&mask_length=&site=ff-segmente&is_pool=&export=export_ff_sites"))

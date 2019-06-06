@@ -66,7 +66,7 @@ search_base_dns = ["dc=ffmuc,dc=net"]
 
 group_search_filter = "(&(objectClass=posixGroup)(memberUid=%s))"
 group_search_base_dns = ["ou=groups,dc=ffmuc,dc=net"]
-group_search_filter_user_attribute = "uid"
+group_search_filter_user_attribute = "cn"
 
 # Specify names of the ldap attributes your ldap uses
 [servers.attributes]
@@ -78,7 +78,7 @@ email =  "mail"
 
 # Map ldap groups to grafana org roles
 [[servers.group_mappings]]
-group_dn = "cn=Admin,ou=Groups,dc=ffmuc,dc=net"
+group_dn = "cn=admin,ou=Groups,dc=ffmuc,dc=net"
 org_role = "Admin"
 # The Grafana organization database id, optional, if left out the default org (id 1) will be used
 # org_id = 1

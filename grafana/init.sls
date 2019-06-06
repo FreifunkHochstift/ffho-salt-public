@@ -15,7 +15,6 @@ grafana:
     - name: grafana
     - require:
       - pkgrepo: grafana
-      - pkgrepo: grafana-src
   service.running:
     - name: grafana-server
     - enable: True
