@@ -16,7 +16,6 @@ ffmuc_packages:
       - screen
       - ethtool
       - mtr-tiny
-      - tmux
       - lldpd
       - mlocate
       - sysstat

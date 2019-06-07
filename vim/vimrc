@@ -2,3 +2,4 @@ set nowrap
 set ai
 syn on
 color delek
+set mouse=a

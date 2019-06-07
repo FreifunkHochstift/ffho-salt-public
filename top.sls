@@ -29,5 +29,6 @@ base:
     - sudo
     - sysctl
     - timezone
+    - tmux
     - unattended-upgrades
     - vim
