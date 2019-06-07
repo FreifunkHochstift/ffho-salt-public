@@ -14,11 +14,12 @@ pdns-recursor:
     - refresh: True
     - require:
       - pkgrepo: pdns-repo
-      - file: /etc/systemd/system/pdns-recursor.service
-      - file: /etc/powerdns/recursor.conf
   service.running:
     - enable: True
     - restart: True
+    - require:
+      - file: /etc/systemd/system/pdns-recursor.service
+      - file: /etc/powerdns/recursor.conf
 
 /etc/systemd/system/pdns-recursor.service:
   file.managed:
