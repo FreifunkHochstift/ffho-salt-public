@@ -10,6 +10,8 @@ radvd:
     - restart: True
     - require:
       - file: /etc/radvd.conf
+    - watch:
+      - file: /etc/radvd.conf
 
 /etc/radvd.conf:
   file.managed:

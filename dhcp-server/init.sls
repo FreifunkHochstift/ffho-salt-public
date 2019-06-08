@@ -12,6 +12,8 @@ isc-dhcp-server:
     - require:
       - file: /etc/systemd/system/isc-dhcp-server.service
       - file: /var/lib/dhcp/dhcpd.leases
+    - watch:
+      - file: /etc/dhcp/dhcpd.conf
 
 /var/lib/dhcp/dhcpd.leases:
   file.managed:
