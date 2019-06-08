@@ -12,10 +12,11 @@ def get_site_prefixes(netbox_token, url):
     try:
         request = urllib2.Request(url, headers=headers)
         response = urllib2.urlopen(request)
-	prefixes = []
+	prefixes = {}
         for prefix in response:
-		prefixes.append(prefix.strip())
+		name = prefix.split(';')[0]
+		pref = prefix.split(';')[1]
+		prefixes[name] = pref.strip()
 	return(prefixes)
     except Exception as e:
         return e
-

@@ -3,6 +3,12 @@
 #
 
 
+python-netifaces:
+  pkg.installed
+
+python-netaddr:
+  pkg.installed
+
 isc-dhcp-server:
   pkg.installed:
     - name: isc-dhcp-server
@@ -36,6 +42,8 @@ dhcpd-pools:
     - template: jinja
     - require:
       - file: /etc/systemd/system/isc-dhcp-server.service
+      - pkg: python-netifaces
+      - pkg: python-netaddr
     - watch_in:
       - service: isc-dhcp-server
 
