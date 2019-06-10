@@ -20,6 +20,8 @@ pdns-recursor:
     - require:
       - file: /etc/systemd/system/pdns-recursor.service
       - file: /etc/powerdns/recursor.conf
+    - watch:
+      - file: /etc/powerdns/recursor.conf
 
 /etc/systemd/system/pdns-recursor.service:
   file.managed:

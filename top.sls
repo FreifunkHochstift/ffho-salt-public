@@ -32,3 +32,9 @@ base:
     - tmux
     - unattended-upgrades
     - vim
+  'gw*':
+    - fastd
+    - dhcp-server
+    - pdns-recursor
+    - radvd
+    - respondd

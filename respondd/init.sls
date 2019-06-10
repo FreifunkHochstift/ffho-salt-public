@@ -11,7 +11,7 @@ python3-netifaces:
 
 {% for site in salt['pillar.get']('netbox:config_context:sites')  %}
 
-{% if not salt['file.directory_exists']('/opt/respondd-{{ site }}') %}
+{% if not salt['file.directory_exists']('/opt/respondd-' ~ site ) %}
 /opt/respondd-{{ site }}:
   file.recurse:
     - source: salt://respondd/respondd-tmpl
