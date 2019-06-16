@@ -7,7 +7,7 @@
 {%- set role = salt['pillar.get']('netbox:device_role:name') %}
 {% endif %}
 
-{% if 'docker' in role %}
+{% if 'docker' in role or 'mailserver' in role %}
 docker-repo:
   pkgrepo.managed:
     - comments: "# Docker.io"

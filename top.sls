@@ -18,6 +18,7 @@ base:
     - influxdb
     - jenkins
     - locales
+    - logrotate
     - kvm
     - mosh
     - motd
