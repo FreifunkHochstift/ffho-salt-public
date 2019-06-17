@@ -27,6 +27,12 @@ reload-sysctl:
     - watch_in:
       - cmd: reload-sysctl
 
+# Workaround for https://marc.info/?l=oss-security&m=156079308022823&w=2
+/etc/sysctl.d/cve-2019-11477.conf:
+  file.managed:
+    - source: salt://sysctl/cve-2019-11477.conf
+    - watch_in:
+      - cmd: reload-sysctl
 
 {% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role or 'router' in role %}
 
