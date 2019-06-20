@@ -32,7 +32,13 @@ snmpd:
       - pkg: snmpd
     - watch_in:
       - service: snmpd
-
+/etc/systemd/system/snmpd.service:
+  file.managed:
+    - source: salt://snmpd/snmpd.service
+    - require:
+      - pkg: snmpd
+    - watch_in:
+      - service: snmpd
 
 /etc/snmp/ifAlias:
   file.absent
