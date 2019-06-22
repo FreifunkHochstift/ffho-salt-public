@@ -7,13 +7,13 @@ include:
 
 {% if grains.osfullname in 'Raspbian' %}
 burp:
-  pkg.installed:
+  pkg.latest:
     - refresh: True
     - require:
       - pkgrepo: burp-repo
 {% else %}
 burp-client:
-  pkg.installed:
+  pkg.latest:
     - refresh: True
     - require:
       - pkgrepo: burp-repo

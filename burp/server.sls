@@ -7,7 +7,7 @@ include:
 
 
 burp-server:
-  pkg.installed:
+  pkg.latest:
     - refresh: True
     - require:
       - pkgrepo: burp-repo
