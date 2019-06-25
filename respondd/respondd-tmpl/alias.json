@@ -1,0 +1,24 @@
+{
+  "nodeinfo": {
+    "hostname": "{{ grains['id'] | regex_replace('in\.ffmuc\.net','ext.ffmuc.net')}}",
+    "hardware": {
+      "model": "KVM VirtualMachine"
+    },
+    "owner": {
+      "contact": "hilfe@ffmuc.net"
+    },
+    "system": {
+      "domain_code": "ffmuc_{{ site }}",
+      "role": "gateway"
+    },
+    "location": {
+      "latitude": 48.185406,
+      "longitude": 11.602850
+    },
+    "pages": [
+      "https://stats.ffmuc.net",
+      "https://ffmuc.net"
+    ]
+  },
+  "firstseen": "2015-04-12T15:41:01"
+}

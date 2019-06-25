@@ -1,0 +1,12 @@
+{
+  "batman": "bat-{{ site  }}",
+  {%- if "gw02.in.ffmuc.net" in grains['id']  %}
+  "bridge": "veth-{{ site }}",
+  {%- else %}
+  "bridge": "br-{{ site }}",
+  {%- endif %}
+  "mesh-vpn": [ "fastd-{{ site }}" ],
+  "wan": "vlan3",
+  "rate_limit": 30,
+  "rate_limit_burst": 10
+}
