@@ -16,7 +16,7 @@ apt-transport-https:
 python-apt:
   pkg.installed
 
-
+{% if grains.oscodename != "buster" %}
 ffho-repo:
   pkgrepo.managed:
     - comments:
@@ -34,7 +34,7 @@ ffho-repo:
 {% endif %}
     - require:
       - pkg: python-apt
-
+{% endif %}
 
 # Purge old stuff
 /etc/apt/sources.list.d/raspi.list:
