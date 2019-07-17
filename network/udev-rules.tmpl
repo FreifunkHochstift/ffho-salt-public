@@ -2,9 +2,10 @@
 # FFHO net rules (Salt managed)
 #
 {%- for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
-  {%- if '_udev_mac' in iface_config %}
+  {%- if '_udev_mac' in iface_config or 'mac' in iface_config %}
+    {%- set mac = iface_config.get ('mac', iface_config.get ('_udev_mac')) -%}
 # {{ iface_config.get ('desc', '') }}
-SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ iface_config.get ('_udev_mac') }}", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="{{ iface }}"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ mac }}", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="{{ iface }}"
 
   {%- endif %}
 {%- endfor %}
