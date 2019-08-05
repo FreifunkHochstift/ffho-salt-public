@@ -31,6 +31,15 @@ python3-netifaces:
     - defaults:
       site: {{ site }}
 
+/opt/respondd-{{site}}/lib/respondd_client.py:
+  file.managed:
+    - source: salt://respondd/respondd-tmpl/lib/respondd_client.py
+    - template: jinja
+    - defaults:
+      site: {{ site }}
+      id: {{ salt['pillar.get']('netbox:config_context:site_config:{{ site }}:site_no')  }}
+
+
 /opt/respondd-{{ site }}/ext-respondd.py:
   file.managed:
     - mode: 0755

@@ -97,5 +97,11 @@ class ResponddClient:
       # return compress(str.encode(json.dumps(ret)))[2:-4] # bug? (mesh-announce strip here)
 
     if not self._config['dry_run']:
+    {% if "gw02" not in grains['id'] %}
+      destAddressTmp = list(destAddress)
+      destAddressTmp[0] = destAddressTmp[0].replace("vrf_external", "br-{{ site }}")
+      destAddressNew = tuple(destAddressTmp)
+      self._sock.sendto(responseData, (destAddressNew[0], 45124))
+    {% else %}
       self._sock.sendto(responseData, destAddress)
-
+    {% endif %}
