@@ -1,0 +1,37 @@
+setACL({'0.0.0.0/0', '::/0'})
+-- drop ANY queries sent over udp , not useful for DoT and DoH only servers.
+addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
+
+ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
+ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
+
+-- listen for DoT on external interface
+addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="vrf_external" })
+addTLSLocal("[::]", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="vrf_external" })
+
+-- listen for DoH on localhost for reverse proxy
+addDOHLocal("127.0.0.1:445", ssl_cert, ssl_key, "/dns-query", { doTCP=true, reusePort=true })
+-- set higher QPS limit as nginx sets the limit itself
+addAction({"127.0.0.1/32"}, QPSAction(10000))
+
+-- set number of queries to be allowed per second from an IP
+addAction(MaxQPSIPRule(300), DropAction())
+
+newServer({address="2001:608:a01::40", name="gw01"})     -- downstream servers for recursion
+newServer({address="2001:608:a01::41", name="gw02"})     -- downstream servers for recursion
+newServer({address="2001:608:a01::42", name="gw07"})     -- downstream servers for recursion
+
+-- add cache for X possible entries
+pc = newPacketCache(100000)
+getPool(""):setCache(pc)
+
+{%- set dnsdist_webserver = salt["pillar.get"]("netbox:config_context:dnsdist:webserver", []) %}
+{%- if "bind" in dnsdist_webserver %}
+webserver("{{ dnsdist_webserver["bind"] }}", "{{ dnsdist_webserver["password"] }}", "{{ dnsdist_webserver["api_token"] }}")
+{% endif -%}
+
+setMaxUDPOutstanding(65535)
+setMaxTCPClientThreads(1000)           -- set X(int) to handle number of maximum tcp clients
+setMaxTCPConnectionDuration(120)      -- set X(int) for tcp connection duaration from a connected client. X is number of seconds.
+setMaxTCPConnectionsPerClient(10)    -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
+setMaxTCPQueriesPerConnection(100)    -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())
