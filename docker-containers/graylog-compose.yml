@@ -24,7 +24,7 @@ services:
     restart: on-failure
     # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:3.0
+    image: graylog/graylog:3.1
     volumes:
             - /srv/docker/graylog/data:/usr/share/graylog/data/journal:z
             - /srv/docker/graylog/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb:z

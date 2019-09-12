@@ -23,6 +23,7 @@ ffmuc_packages:
       - curl
       - iftop
       - iptraf
+      - speedtest-cli
       - dmidecode
       - psmisc
       - lshw
