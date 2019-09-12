@@ -29,6 +29,11 @@ getPool(""):setCache(pc)
 {%- if "bind" in dnsdist_webserver %}
 webserver("{{ dnsdist_webserver["bind"] }}", "{{ dnsdist_webserver["password"] }}", "{{ dnsdist_webserver["api_token"] }}")
 {% endif -%}
+{%- set dnsdist_console = salt["pillar.get"]("netbox:config_context:dnsdist:console", []) %}
+{%- if "bind" in dnsdist_console %}
+controlSocket("{{ dnsdist_console["bind"] }}")
+setKey("{{ dnsdist_console["key"] }}")
+{% endif %}
 
 setMaxUDPOutstanding(65535)
 setMaxTCPClientThreads(1000)           -- set X(int) to handle number of maximum tcp clients
