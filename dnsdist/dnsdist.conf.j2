@@ -11,11 +11,9 @@ addTLSLocal("[::]", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="
 
 -- listen for DoH on localhost for reverse proxy
 addDOHLocal("127.0.0.1:445", ssl_cert, ssl_key, "/dns-query", { doTCP=true, reusePort=true })
--- set higher QPS limit as nginx sets the limit itself
-addAction({"127.0.0.1/32"}, QPSAction(10000))
 
--- set number of queries to be allowed per second from an IP
-addAction(MaxQPSIPRule(300), DropAction())
+-- set number of queries to be allowed per second from an IP but exclude localhost
+addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
 
 newServer({address="2001:608:a01::40", name="gw01"})     -- downstream servers for recursion
 newServer({address="2001:608:a01::41", name="gw02"})     -- downstream servers for recursion
