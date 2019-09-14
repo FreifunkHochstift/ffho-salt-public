@@ -19,6 +19,10 @@ newServer({address="2001:608:a01::40", name="gw01"})     -- downstream servers f
 newServer({address="2001:608:a01::41", name="gw02"})     -- downstream servers for recursion
 newServer({address="2001:608:a01::42", name="gw07"})     -- downstream servers for recursion
 
+-- ask authorative servers for ffmuc.net directly
+newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
+addAction({'in.ffmuc.net.', 'ext.ffmuc.net'}, PoolAction("auth"))
+
 -- add cache for X possible entries
 pc = newPacketCache(100000)
 getPool(""):setCache(pc)
