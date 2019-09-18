@@ -36,6 +36,7 @@ base:
   'gw*':
     - fastd
     - dhcp-server
-    - pdns-recursor
+    - pdns-recursor.remove
+    - knot-resolver
     - radvd
     - respondd
