@@ -31,6 +31,13 @@ knot-resolver:
       - file: /etc/knot-resolver/kresd.conf
     - watch:
       - file: /etc/knot-resolver/kresd.conf
+      - cmd: systemd-reload
+
+systemd-reload:
+  cmd.run:
+   - name: systemctl --system daemon-reload
+   - onchanges:
+     - file: /etc/systemd/system/kresd.socket.d/override.conf
 
 /etc/systemd/system/kresd@1.service.d:
   file.absent
