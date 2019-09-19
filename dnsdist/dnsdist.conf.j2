@@ -2,6 +2,8 @@ setACL({'0.0.0.0/0', '::/0'})
 -- drop ANY queries sent over udp , not useful for DoT and DoH only servers.
 addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
 
+addLocal("127.0.0.1")
+
 ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
 
