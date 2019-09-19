@@ -1,0 +1,13 @@
+[Socket]
+BindToDevice=vrf_external
+ListenDatagram=
+ListenStream=
+{%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
+{%- if ipaddress.family.value == 6 %}
+ListenDatagram=[{{ ipaddress["address"].split('/')[0] }}]:53
+ListenStream=[{{ ipaddress["address"].split('/')[0] }}]:53
+{%- else %}
+ListenDatagram={{ ipaddress["address"].split('/')[0] }}:53
+ListenStream={{ ipaddress["address"].split('/')[0] }}:53
+{%- endif %}
+{% endfor %}

@@ -27,14 +27,18 @@ knot-resolver:
     - enable: True
     - restart: True
     - require:
-      - file: /etc/systemd/system/kresd@1.service.d/override.conf
+      - file: /etc/systemd/system/kresd.socket.d/override.conf
       - file: /etc/knot-resolver/kresd.conf
     - watch:
       - file: /etc/knot-resolver/kresd.conf
 
-/etc/systemd/system/kresd@1.service.d/override.conf:
+/etc/systemd/system/kresd@1.service.d:
+  file.absent
+
+/etc/systemd/system/kresd.socket.d/override.conf:
   file.managed:
-    - source: salt://knot-resolver/knot-resolver-override.service
+    - source: salt://knot-resolver/kresd.socket
+    - template: jinja
     - makedirs: True
 
 /etc/knot-resolver/kresd.conf:
