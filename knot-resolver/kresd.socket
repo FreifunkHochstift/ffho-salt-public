@@ -11,3 +11,12 @@ ListenDatagram={{ ipaddress["address"].split('/')[0] }}:53
 ListenStream={{ ipaddress["address"].split('/')[0] }}:53
 {%- endif %}
 {% endfor %}
+{%- set dhcp_prefixes = salt['site_prefixes.get_site_prefixes'](salt['pillar.get']('netbox:config_context:site_prefixes:netbox_token'), salt['pillar.get']('netbox:config_context:site_prefixes:netbox_url')) %}
+{%- for name in dhcp_prefixes %}
+{%- for ip in salt['grains.get']('ipv4') %}
+{%- if salt['network.ip_in_subnet'](ip, dhcp_prefixes[name])  %}
+ListenDatagram={{ ip  }}:53
+ListenStream={{ ip  }}:53
+{%- endif  %}
+{%- endfor  %}
+{%- endfor %}
