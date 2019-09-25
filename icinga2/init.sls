@@ -177,7 +177,7 @@ icinga2-ca:
    
 
 # Create directory for ffho specific configs
-/etc/icinga2/ffmuc-conf.d:
+/etc/icinga2/zones.d/master/ffmuc-conf.d:
   file.directory:
     - makedirs: true
     - require:
@@ -196,7 +196,7 @@ icinga2-ca:
 {% if 'monitoring' in role and 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') %}
 
 # Install command definitions
-/etc/icinga2/ffmuc-conf.d/services:
+/etc/icinga2/zones.d/master/ffmuc-conf.d/services:
   file.recurse:
     - source: salt://icinga2/services
     - file_mode: 644
@@ -212,23 +212,23 @@ icinga2-ca:
 
 
 # Create client node/zone objects
-Create /etc/icinga2/ffmuc-conf.d/hosts/generated/:
+Create /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/:
   file.directory:
-    - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
+    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/
     - makedirs: true
     - require:
       - pkg: icinga2-pkg
 
-Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
+Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/:
   file.directory:
-    - name: /etc/icinga2/ffmuc-conf.d/hosts/generated/
+    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/
     - clean: true
     - watch_in:
       - service: icinga2-service
 
   # Generate config file for every client known to pillar
 {% for node_id,data in salt['mine.get']('netbox:config_context:roles:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
-/etc/icinga2/ffmuc-conf.d/hosts/generated/{{ node_id }}.conf:
+/etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
     - template: jinja
@@ -236,9 +236,9 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
       node_id: {{ node_id }}
       node_config: {{ data }}
     - require:
-      - file: Create /etc/icinga2/ffmuc-conf.d/hosts/generated/
+      - file: Create /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/
     - require_in:
-      - file: Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/
+      - file: Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/
     - watch_in:
       - service: icinga2-service
   {% endfor %}
@@ -299,16 +299,16 @@ Cleanup /etc/icinga2/ffmuc-conf.d/hosts/generated/:
       - service: icinga2-service
 
 # Create configuration for network devices
-Create /etc/icinga2/ffmuc-conf.d/net/wbbl/:
+Create /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/:
   file.directory:
-    - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
+    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
       - pkg: icinga2-pkg
 
-Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
+Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/:
   file.directory:
-    - name: /etc/icinga2/ffmuc-conf.d/net/wbbl/
+    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
     - makedirs: true
     - require:
       - pkg: icinga2-pkg
@@ -317,7 +317,7 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
 
   # Generate config files for every WBBL device known to pillar
   {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
-/etc/icinga2/ffmuc-conf.d/net/wbbl/{{ link_id }}.conf:
+/etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/{{ link_id }}.conf:
   file.managed:
     - source: salt://icinga2/wbbl.conf.tmpl
     - template: jinja
@@ -325,9 +325,9 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
       link_id: {{ link_id }}
       link_config: {{ link_config }}
     - require:
-      - file: Create /etc/icinga2/ffmuc-conf.d/net/wbbl/
+      - file: Create /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
     - require_in:
-      - file: Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/
+      - file: Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
     - watch_in:
       - service: icinga2-service
   {% endfor %}
@@ -360,10 +360,10 @@ Cleanup /etc/icinga2/ffmuc-conf.d/net/wbbl/:
 ################################################################################
 #                              Check related stuff                             #
 ################################################################################
-/etc/icinga2/ffmuc-conf.d/bird_ospf_interfaces_down_ok.txt:
+/etc/icinga2/zones.d/master/ffmuc-conf.d/bird_ospf_interfaces_down_ok.txt:
   file.managed:
     - source: salt://icinga2/bird_ospf_interfaces_down_ok.txt.tmpl
     - template: jinja
     - require:
-      - file: /etc/icinga2/ffmuc-conf.d
+      - file: /etc/icinga2/zones.d/master/ffmuc-conf.d
 {% endif %}

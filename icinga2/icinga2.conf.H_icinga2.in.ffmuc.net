@@ -64,4 +64,4 @@ include_recursive "conf.d"
 include_recursive "commands.d"
 
 # Include FFHO server configuration
-include_recursive "ffmuc-conf.d"
+#include_recursive "ffmuc-conf.d"
