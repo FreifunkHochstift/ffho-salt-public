@@ -58,3 +58,11 @@ ffho-repo:
 /etc/apt/apt.conf.d/ffho:
   file.managed:
     - source: salt://apt/ffho.apt.conf
+
+set-salt-minion-hold:
+  pkg.installed:
+    - name: salt-minion
+    # prevent installing when not present
+    - only_upgrade: True
+    - version: 2019.2.0+ds-1
+    - hold: True
