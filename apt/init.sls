@@ -48,6 +48,12 @@ ffho-repo:
   file.managed:
     - source: salt://apt/ffho.preferences
 
+/etc/apt/preferences.d/libluajit:
+  file.managed:
+    - contents: |
+        Package: libluajit-5.1-2
+        Pin: origin deb.debian.org
+        Pin-Priority: 1001
 
 /etc/apt/apt.conf.d/ffho:
   file.managed:
