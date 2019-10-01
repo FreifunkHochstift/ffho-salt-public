@@ -13,8 +13,8 @@ addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interfac
 addTLSLocal("[::]", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="vrf_external" })
 
 -- listen for DoH on localhost for reverse proxy
-addDOHLocal("127.0.0.1:445", ssl_cert, ssl_key, "/dns-query", { doTCP=true, reusePort=true })
-addDOHLocal("[::1]:445", ssl_cert, ssl_key, "/dns-query", { doTCP=true, reusePort=true })
+addDOHLocal("127.0.0.1:445", nil, nil, "/", { doTCP=true, reusePort=true })
+addDOHLocal("[::1]:445", nil, nil, "/", { doTCP=true, reusePort=true })
 
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
