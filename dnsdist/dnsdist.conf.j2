@@ -1,6 +1,7 @@
 setACL({'0.0.0.0/0', '::/0'})
 -- drop ANY queries sent over udp , not useful for DoT and DoH only servers.
 addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
+addAction(RegexRule(".*.(10|168.192|(1[6-9]|2[0-9]|3[0-1]).172).in-addr.arpa$"), DropAction())
 
 addLocal("127.0.0.1")
 
@@ -21,6 +22,11 @@ addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), Dro
 newServer({address="2001:608:a01::40", name="gw01"})     -- downstream servers for recursion
 newServer({address="2001:608:a01::41", name="gw02"})     -- downstream servers for recursion
 newServer({address="2001:608:a01::42", name="gw07"})     -- downstream servers for recursion
+
+addAction({'ffmuc.net'}, NoneAction())
+addAction({'ffmuc.bayern'}, NoneAction())
+addAction({'freewifi.bayern'}, NoneAction())
+addAction({'in-addr.arpa'}, NoneAction())
 
 -- ask authorative servers for ffmuc.net directly
 newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
