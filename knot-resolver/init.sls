@@ -60,3 +60,4 @@ knot-socket-config:
 /etc/knot-resolver/kresd.conf:
   file.managed:
     - source: salt://knot-resolver/kresd.conf
+    - template: jinja
