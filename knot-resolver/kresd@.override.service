@@ -1,5 +1,4 @@
 [Service]
 ExecStart=
 ExecStart=ip vrf exec vrf_external /usr/sbin/kresd --config=/etc/knot-resolver/kresd.conf
-Sockets=
 User=

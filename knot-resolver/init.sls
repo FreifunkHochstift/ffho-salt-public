@@ -27,7 +27,8 @@ knot-resolver:
     - enable: True
     - restart: True
     - require:
-      - file: knot-socket-config
+      - file: knot-socket-override
+      - file: knot-service-override
       - file: /etc/knot-resolver/kresd.conf
     - watch:
       - file: /etc/knot-resolver/kresd.conf
@@ -37,15 +38,19 @@ systemd-reload:
   cmd.run:
    - name: systemctl --system daemon-reload
    - onchanges:
-     - file: knot-socket-config
+     - file: knot-socket-override
+     - file: knot-service-override
 
-/etc/systemd/system/kresd@1.service.d:
-  file.absent
+knot-service-override:
+  file.managed:
+    - name: /etc/systemd/system/kresd@.service.d/override.conf
+    - source: salt://knot-resolver/kresd@.override.service
+    - makedirs: True
 
-knot-socket-config:
+knot-socket-override:
   file.managed:
     - name: /etc/systemd/system/kresd.socket.d/override.conf
-    - source: salt://knot-resolver/kresd.socket
+    - source: salt://knot-resolver/kresd.override.socket
     - template: jinja
     - makedirs: True
   service.running:
