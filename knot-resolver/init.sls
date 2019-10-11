@@ -66,3 +66,11 @@ knot-socket-override:
   file.managed:
     - source: salt://knot-resolver/kresd.conf
     - template: jinja
+
+# workaround for module prefill which downloads root zone
+internic-host:
+  host.present:
+    - ip:
+      - 192.0.32.9
+      - 2620:0:2d0:200::9
+    - name: www.internic.net
