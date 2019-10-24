@@ -64,5 +64,5 @@ set-salt-minion-hold:
     - name: salt-minion
     # prevent installing when not present
     - only_upgrade: True
-    - version: 2019.2.0+ds-1
-    - hold: True
+    - version: 2019.2.2+ds-1
+    - hold: False
