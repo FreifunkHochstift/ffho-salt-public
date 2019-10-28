@@ -19,9 +19,9 @@ addDOHLocal("[::1]:445", nil, nil, "/", { doTCP=true, reusePort=true })
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
 
-newServer({address="2001:608:a01::40", name="gw01"})     -- downstream servers for recursion
-newServer({address="2001:608:a01::41", name="gw02"})     -- downstream servers for recursion
-newServer({address="2001:608:a01::42", name="gw07"})     -- downstream servers for recursion
+newServer({address="2001:608:a01::40", name="gw01", source="vrf_external"})
+newServer({address="2001:608:a01::41", name="gw02", source="vrf_external"})
+newServer({address="2001:608:a01::42", name="gw07", source="vrf_external"})
 
 addAction({'ffmuc.net'}, NoneAction())
 addAction({'ffmuc.bayern'}, NoneAction())
@@ -39,12 +39,12 @@ getPool(""):setCache(pc)
 {%- set dnsdist_webserver = salt["pillar.get"]("netbox:config_context:dnsdist:webserver", []) %}
 {%- if "bind" in dnsdist_webserver %}
 webserver("{{ dnsdist_webserver["bind"] }}", "{{ dnsdist_webserver["password"] }}", "{{ dnsdist_webserver["api_token"] }}")
-{% endif -%}
+{%- endif -%}
 {%- set dnsdist_console = salt["pillar.get"]("netbox:config_context:dnsdist:console", []) %}
 {%- if "bind" in dnsdist_console %}
 controlSocket("{{ dnsdist_console["bind"] }}")
 setKey("{{ dnsdist_console["key"] }}")
-{% endif %}
+{%- endif %}
 
 setMaxUDPOutstanding(65535)
 setMaxTCPClientThreads(1000)           -- set X(int) to handle number of maximum tcp clients
