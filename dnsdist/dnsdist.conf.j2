@@ -19,9 +19,13 @@ addDOHLocal("[::1]:445", nil, nil, "/", { doTCP=true, reusePort=true })
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
 
-newServer({address="2001:608:a01::40", name="gw01", source="vrf_external"})
-newServer({address="2001:608:a01::41", name="gw02", source="vrf_external"})
-newServer({address="2001:608:a01::42", name="gw07", source="vrf_external"})
+{%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
+{%- if ipaddress.family.value == 6 %}
+newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
+newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
+newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
+{%- endif %}
+{% endfor %}
 
 addAction({'ffmuc.net'}, NoneAction())
 addAction({'ffmuc.bayern'}, NoneAction())
