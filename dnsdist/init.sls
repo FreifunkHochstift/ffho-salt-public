@@ -20,8 +20,10 @@ dnsdist:
     - restart: True
     - require:
       - file: /etc/dnsdist/dnsdist.conf
+      - file: dnsdist-service-override
     - watch:
       - file: /etc/dnsdist/dnsdist.conf
+      - file: dnsdist-service-override
 
 /etc/dnsdist/dnsdist.conf:
   file.managed:
@@ -29,5 +31,11 @@ dnsdist:
     - template: jinja
     - require:
         - pkg: dnsdist
+
+dnsdist-service-override:
+  file.managed:
+    - name: /etc/systemd/system/dnsdist.service.d/override.conf
+    - source: salt://dnsdist/dnsdist.override.service
+    - makedirs: True
 
 {% endif %}
