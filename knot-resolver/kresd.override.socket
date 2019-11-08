@@ -1,3 +1,6 @@
+[Unit]
+After=networking.service
+
 [Socket]
 BindToDevice=vrf_external
 ListenDatagram=
