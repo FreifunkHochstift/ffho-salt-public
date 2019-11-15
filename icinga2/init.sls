@@ -8,6 +8,15 @@
 {%- set role = salt['pillar.get']('netbox:device_role:name') %}
 {% endif %}
 
+{%- if 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') %}
+# Server should accept config and commands from Icinga2 CLI server and
+# server should send states to graylog
+{%- set icinga2_features = ["api", "gelf"] %}
+{%- else %}
+# Nodes should accept config and commands from Icinga2 server
+{%- set icinga2_features = ["api"] %}
+{%- endif %}
+
 include:
   - apt
   - sudo
@@ -148,8 +157,17 @@ icinga2-ca:
     - require:
       - pkg: icinga2-pkg
 
-# Activate Icinga2 features: API
-{% for feature in ['api'] %}
+# Install and activate Icinga2 features
+{% for feature in icinga2_features %}
+/etc/icinga2/features-available/{{ feature }}.conf:
+  file.managed:
+    - source: salt://icinga2/features/{{ feature }}.conf
+    - template: jinja
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
+
 /etc/icinga2/features-enabled/{{ feature }}.conf:
   file.symlink:
     - target: "../features-available/{{ feature }}.conf"
@@ -332,21 +350,10 @@ Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/:
       - service: icinga2-service
   {% endfor %}
 
-
 ################################################################################
 #                               Icinga2 Client                                 #
 ################################################################################
 {% else %}
-
-# Nodes should accept config and commands from Icinga2 server
-/etc/icinga2/features-available/api.conf:
-  file.managed:
-    - source: salt://icinga2/api.conf
-    - template: jinja
-    - require:
-      - pkg: icinga2
-    - watch_in:
-      - service: icinga2
 
 /etc/icinga2/check-commands.conf:
   file.absent:
