@@ -9,24 +9,27 @@ ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
 
 -- listen for DoT on external interface
-addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="vrf_external" })
-addTLSLocal("[::]", ssl_cert, ssl_key, { doTCP=true, reusePort=true, interface="vrf_external" })
+addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { reusePort=true, interface="vrf_external", tcpFastOpenQueueSize=20 })
+addTLSLocal("[::]", ssl_cert, ssl_key, { reusePort=true, interface="vrf_external", tcpFastOpenQueueSize=20 })
 
 -- listen for DoH on localhost for reverse proxy
-addDOHLocal("127.0.0.1:445", nil, nil, "/", { doTCP=true, reusePort=true })
-addDOHLocal("[::1]:445", nil, nil, "/", { doTCP=true, reusePort=true })
+addDOHLocal("127.0.0.1:445", nil, nil, "/", { reusePort=true })
+addDOHLocal("[::1]:445", nil, nil, "/", { reusePort=true })
 
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
 
 {%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
 {%- if ipaddress.family.value == 6 %}
-newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
-newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
-newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external"})
+newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
+newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
+newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
 {%- endif %}
 {% endfor %}
 
+setServerPolicy(whashed)
+
+{#- some stats #}
 addAction({'ffmuc.net'}, NoneAction())
 addAction({'ffmuc.bayern'}, NoneAction())
 addAction({'freewifi.bayern'}, NoneAction())
