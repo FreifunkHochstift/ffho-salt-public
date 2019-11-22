@@ -68,6 +68,8 @@ logger = logging.getLogger(__name__)
 
 
 def manage_zone_records(name, zone):
+    logger.info(name)
+    logger.info(zone)
     managed = Zone(name, zone)
 
     try:
