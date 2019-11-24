@@ -6,6 +6,7 @@
 # Get all nodes for DNS records
 {% set nodes = salt['mine.get']('netbox:platform:slug:linux', 'minion_id', tgt_type='pillar') %}
 {% set cnames = salt['pillar.get']('netbox:config_context:dns_zones:cnames') %}
+{% set custom_records = salt['pillar.get']('netbox:config_context:dns_zones:custom_records', []) %}
 
 freewifi.bayern:
   cloudflare.manage_zone_records:
@@ -58,3 +59,10 @@ freewifi.bayern:
                   type: CNAME
 {% endif %}
 {% endfor %}{# cname in cnames #}
+{% for custom_record in custom_records %}
+{% if "freewifi.bayern" in custom_record.name or custom_record.name == "*" %}
+                - name: {{ custom_record.name }}
+                  content: {{ custom_record.content }}
+                  type: {{ custom_record.type | default("A") }}
+{% endif %}
+{% endfor %}
