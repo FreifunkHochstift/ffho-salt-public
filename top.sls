@@ -40,3 +40,5 @@ base:
     - knot-resolver
     - radvd
     - respondd
+  'dns01.in.ffmuc.net':
+    - cloudflare
