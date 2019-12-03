@@ -21,8 +21,10 @@ dnsdist:
     - require:
       - file: /etc/dnsdist/dnsdist.conf
       - file: /var/lib/dnsdist
+      - cmd: generate-DNSCrypt-ProviderCert
       - file: dnsdist-service-override
     - watch:
+      - cmd: generate-DNSCrypt-ProviderCert
       - file: /etc/dnsdist/dnsdist.conf
       - file: dnsdist-service-override
 
@@ -32,6 +34,14 @@ dnsdist:
     - template: jinja
     - require:
         - pkg: dnsdist
+
+generate-DNSCrypt-ProviderCert:
+  cmd.run:
+    - name: /usr/bin/dnsdist -e 'generateDNSCryptProviderKeys("/var/lib/dnsdist/providerPublic.cert", "/var/lib/dnsdist/providerPrivate.key")'
+    - creates: /var/lib/dnsdist/providerPrivate.key
+    - require:
+      - pkg: dnsdist
+      - file: /var/lib/dnsdist
 
 /var/lib/dnsdist:
   file.directory:

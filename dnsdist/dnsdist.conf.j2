@@ -16,15 +16,9 @@ addTLSLocal("[::]", ssl_cert, ssl_key, { reusePort=true, interface="vrf_external
 addDOHLocal("127.0.0.1:445", nil, nil, "/", { reusePort=true })
 addDOHLocal("[::1]:445", nil, nil, "/", { reusePort=true })
 
--- Create DNSCrypt keys in case of absence
-if not file_exists("/var/lib/dnsdist/providerPublic.key") or not file_exists("/var/lib/dnsdist/providerPrivate.key") then
-    infolog("Generate new DNSCrypt Provider keys.")
-    generateDNSCryptProviderKeys("/var/lib/dnsdist/providerPublic.key", "/var/lib/dnsdist/providerPrivate.key")
-end
-if not file_exists("/run/dnsdist/resolver.cert") or not file_exists("/run/dnsdist/resolver.key") then
-    infolog("Generate new DNSCrypt keys.")
-    generateDNSCryptCertificate("/var/lib/dnsdist/providerPrivate.key", "/run/dnsdist/resolver.cert", "/run/dnsdist/resolver.key", os.date('%Y%m%d', os.time()), os.time(os.date("!*t")), os.time({year=2025, month=2, day=1, hour=00, minute=00}))
-end
+-- this should be recreated regularly
+infolog("Generate new DNSCrypt keys.")
+generateDNSCryptCertificate("/var/lib/dnsdist/providerPrivate.key", "/run/dnsdist/resolver.cert", "/run/dnsdist/resolver.key", os.date('%Y%m%d', os.time()), os.time(os.date("!*t")), os.time({year=2025, month=2, day=1, hour=00, minute=00}))
 
 -- listen for DNSCrypt
 addDNSCryptBind("0.0.0.0:8443", "2.dnscrypt-cert.ffmuc.net", "/run/dnsdist/resolver.cert", "/run/dnsdist/resolver.key", { reusePort=true, interface="vrf_external" })
