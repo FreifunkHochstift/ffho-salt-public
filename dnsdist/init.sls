@@ -20,6 +20,7 @@ dnsdist:
     - restart: True
     - require:
       - file: /etc/dnsdist/dnsdist.conf
+      - file: /var/lib/dnsdist
       - file: dnsdist-service-override
     - watch:
       - file: /etc/dnsdist/dnsdist.conf
@@ -31,6 +32,13 @@ dnsdist:
     - template: jinja
     - require:
         - pkg: dnsdist
+
+/var/lib/dnsdist:
+  file.directory:
+    - user: _dnsdist
+    - group: _dnsdist
+    - require:
+      - pkg: dnsdist
 
 dnsdist-service-override:
   file.managed:
