@@ -52,7 +52,8 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 	{%- endfor %}
 	]
-	vars.disk_wfree = "5%"
+	vars.disk_wfree = "7%"
+	vars.disk_cfree = "5%"
 	vars.disks["disk /"] = {
 	      disk_partitions = "/"
 	}
