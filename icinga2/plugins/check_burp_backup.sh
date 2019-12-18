@@ -143,7 +143,7 @@ then
 	echo "CRITICAL : Last backup $LASTDIFF ago with $WARNINGS warnings $PERFDATA"
 	exit $STATE_CRITICAL
 else
-	if [ $LAST -gt $WARNING ] || [ $WARNINGS -gt 200 ]
+	if [ $LAST -gt $WARNING ] || [ $WARNINGS -gt 800 ]
 	then
 		echo "WARNING : Last backup $LASTDIFF ago with $WARNINGS warnings $PERFDATA"
 	        exit $STATE_WARNING
