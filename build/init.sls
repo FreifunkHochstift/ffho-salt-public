@@ -12,10 +12,10 @@ build:
       - gawk
       - unzip
       - libncurses-dev
-      - libz-dev
       - libssl-dev
       - lua5.1
       - rsync
+      - zlib1g-dev
   user.present:
     - name: build
     - shell: /bin/bash
@@ -27,6 +27,22 @@ build:
   group.present:
     - name: build
     - system: False
+
+/home/build/.ssh/id_rsa:
+  file.managed:
+    - contents_pillar: nodes:{{grains.id}}:ssh:build:privkey
+    - mode: 600
+    - user: build
+    - makedirs: True
+    - require:
+      - user: build
+
+/home/build/.ssh/id_rsa.pub:
+  file.managed:
+    - contents_pillar: nodes:{{grains.id}}:ssh:build:privkey
+    - makedirs: True
+    - require:
+      - user: build
 
 /home/build/.vimrc:
   file.managed:
