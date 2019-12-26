@@ -1,0 +1,2 @@
+# Insert one key per row. verify.sh greps for the connecting key in this file
+# and exits with 1 if key is found.
