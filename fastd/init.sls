@@ -23,8 +23,6 @@ fastd:
 {% if grains.oscodename in ['jessie'] %}
     - fromrepo: {{ grains.oscodename }}-backports
 {% endif %}
-    - require:
-      - sls: network.interfaces
   service.dead:
     - enable: False
 
@@ -44,15 +42,23 @@ fastd:
 # Set up fastd configuration for every network (nodes4, nodes6, intergw-vpn)
 # for every site associated for the current minion ID.
 #
-{% for site in sites_node %}
+{% for site in sites_all %}
+  {% set networks_absent = [] %}
+  {% set networks_present = [] %}
   {% set site_no = sites_all.get(site, {}).get('site_no') %}
 
-  {% set networks = ['intergw'] %}
-  {% if 'fastd_peers' in node_config.get('roles', []) %}
-    {% do networks.extend (['nodes4', 'nodes6']) %}
+  {% if site in sites_node %}
+    {% do networks_present.extend(['intergw']) %}
+    {% if 'fastd_peers' in node_config.get('roles', []) %}
+      {% do networks_present.extend(['nodes4', 'nodes6']) %}
+    {% else %}
+      {% do networks_absent.extend(['nodes4', 'nodes6']) %}
+    {% endif %}
+  {% else %}
+    {% do networks_absent.extend(['intergw', 'nodes4', 'nodes6']) %}
   {% endif %}
 
-  {% for network in networks %}
+  {% for network in networks_present %}
     {% set network_type = 'nodes' if network.startswith ('nodes') else network %}
     {% set instance_name = site ~ '_' ~ network %}
     {% set mac_address = salt['ffho_net.gen_batman_iface_mac'](site_no, device_no, network) %}
@@ -107,14 +113,12 @@ fastd@{{ instance_name }}:
 # Remove old Inter-GW peers folder
 /etc/fastd/{{ site }}_intergw/gateways:
   file.absent
-{% endfor %}{# for site in sites_node #}
 
 
 #
 # Cleanup configurations for previosly configured instances.
 # Stop fastd instance before purging the configuration.
-{% for site in sites_all if site not in sites_node %}
-  {% for network in ['intergw', 'nodes4', 'nodes6'] %}
+  {% for network in networks_absent %}
     {% set instance_name = site ~ '_' ~ network %}
 Cleanup /etc/fastd/{{ instance_name }}:
   file.absent:
@@ -128,7 +132,7 @@ Stop fastd@{{ instance_name }}:
     - prereq:
       - file: Cleanup /etc/fastd/{{ instance_name }}
   {% endfor %}
-{% endfor %}
+{% endfor %}{# for site in sites_all #}
 
 
 /usr/local/bin/ff_log_vpnpeer:
