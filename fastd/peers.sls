@@ -9,7 +9,7 @@ include:
 
 # publish blacklist
 /etc/fastd/peers-blacklist:
-  file.manaed:
+  file.managed:
     - source: salt://fastd/peers-blacklist
     - user: root
     - group: root
