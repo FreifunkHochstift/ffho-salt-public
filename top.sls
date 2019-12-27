@@ -38,6 +38,11 @@ base:
     - match: pillar
     - bird
 
+  # acme
+  nodes:{{ grains['id'] }}:roles:acme:
+    - match: pillar
+    - acme
+
   # Batman node
   nodes:{{ grains['id'] }}:roles:batman:
     - match: pillar
@@ -49,7 +54,12 @@ base:
     - match: pillar
     - dhcp-server
 
-  # BRAS / Fastd
+  # Build-Server
+  nodes:{{ grains['id'] }}:roles:build:
+    - match: pillar
+    - build
+
+  # Fastd
   nodes:{{ grains['id'] }}:roles:fastd:
     - match: pillar
     - fastd
@@ -69,10 +79,10 @@ base:
     - match: pillar
     - kvm
 
-  # Authoritive DNS server
-  nodes:{{ grains['id'] }}:roles:dns-auth:
+  # (Authoritive?) DNS server
+  nodes:{{ grains['id'] }}:roles:dns-server:
     - match: pillar
-    - dns-server.auth
+    - dns-server
 
   # Webfrontend
   nodes:{{ grains['id'] }}:roles:frontend:
@@ -89,6 +99,11 @@ base:
     - match: pillar
     - influxdb
 
+  # webserver
+  nodes:{{ grains['id'] }}:roles:webserver:
+    - match: pillar
+    - nginx
+
   # yanic
   nodes:{{ grains['id'] }}:roles:yanic:
     - match: pillar
@@ -103,11 +118,11 @@ base:
 # Grains
 #
   # apu2
-  productname:apu2:
-    - match: grain
-    - apu2
+# Disabled for now
+#  productname:apu2:
+#    - match: grain
+#    - apu2
 
   # Hardware nodes
-  virtual:physical:
-    - match: grain
+  'G@virtual:physical and not G@productname:apu2':
     - hardware
