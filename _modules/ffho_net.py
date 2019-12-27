@@ -241,10 +241,15 @@ def _update_batman_config (node_config, iface, sites_config):
 def _update_bond_config (config):
 	bond_config = default_bond_config.copy ()
 
+	to_pop = []
+
 	for item, value in config.items ():
 		if item.startswith ('bond-'):
 			bond_config[item] = value
-			config.pop (item)
+			to_pop.append (item)
+
+	for item in to_pop:
+		config.pop (item)
 
 	if bond_config['bond-mode'] not in ['2', 'balance-xor', '4', '802.3ad']:
 		bond_config.pop ('bond-xmit-hash-policy')
