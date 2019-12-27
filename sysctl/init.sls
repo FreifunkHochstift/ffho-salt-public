@@ -13,7 +13,9 @@ reload-sysctl:
 
 /etc/sysctl.conf:
   file.managed:
-    - source: salt://sysctl/sysctl.conf
+    - source:
+      - salt://sysctl/sysctl.conf.{{ grains.os }}.{{ grains.oscodename }}
+      - salt://sysctl/sysctl.conf
     - watch_in:
       - cmd: reload-sysctl
 
