@@ -3,7 +3,7 @@
 #
 {%- set nodes = salt['pillar.get']('nodes', {}) %}
 {%- for node, node_config in nodes.items ()|sort %}
-  {%- if node_config.get ('status', '') != "active" %}
+  {%- if node_config.get ('status', 'active') != "active" %}
 {{ salt['ffho.re_replace']('[.-]', '_', node) }}
   {%- endif %}
 {%- endfor %}
