@@ -24,6 +24,7 @@ apu2-copy-firmware:
 apu2-write-firmware:
   cmd.wait:
     - name: flashrom --programmer internal --write /tmp/apu2-firmware.rom
+#    - name: flashrom --programmer internal:boardmismatch=force --write /tmp/apu2-firmware.rom
     - watch:
       - file: apu2-copy-firmware
 {% endif %}
