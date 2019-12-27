@@ -5,4 +5,6 @@
 # Only read PVs from sw/hw RAID and physical disks. Ignore anything else (like PVs within VM LVs).
 /etc/lvm/lvm.conf:
   file.managed:
-    - source: salt://hardware/lvm.conf
+    - source:
+      - salt://hardware/lvm.conf.{{ grains.os }}.{{ grains.oscodename }}
+      - salt://hardware/lvm.conf
