@@ -30,7 +30,13 @@ iface lo
   {%- set config = ifaces.get (interface) %}
 
   {#- Let's go #}
-# {{ config.get ('desc', interface) }}
+  {%- set planned = "" %}
+  {%- if config.get ('status', 'online') == 'planned' %}
+    {%- set planned = " (Planned)" %}
+  {%- endif %}
+  {%- set desc = config.get ('desc', interface) %}
+  {%- set alias = config.get ('alias', desc) + planned %}
+# {{ desc + planned }}
   {%- if config.get ('auto', True) == True %}
 auto {{ interface }}
   {%- endif %}
@@ -41,7 +47,7 @@ iface {{ interface }}
   {%- endif %}
   {#- Alias / Description set? #}
   {%- if 'alias' in config or 'desc' in config %}
-	alias "{{ config.get ('alias', config.get ('desc')) }}"
+	alias "{{ alias }}"
 	#
   {%- endif %}
   {#- Configure stuff for bonding, bridging, etc.? #}
@@ -63,7 +69,7 @@ iface {{ interface }}
     {%- set argument = config.get (keyword) %}
     {%- if argument is none %}
     {%- elif keyword.startswith ("_") %}
-    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'method', 'vlan', 'vxlan', 'desc', 'prefixes' ] %}
+    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'method', 'vlan', 'vxlan', 'desc', 'prefixes', 'status', 'tagged_vlans', 'has_gateway' ] %}
     {%- elif argument is string or argument is number %}
 	{{ keyword }} {{ argument }}
     {%- else %}
