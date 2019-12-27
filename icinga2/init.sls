@@ -54,6 +54,7 @@ ffho-plugins:
   file.managed:
     - source:
       - salt://icinga2/icinga2.conf.H_{{ grains.id }}
+      - salt://icinga2/icinga2.conf.{{ grains.os }}.{{ grains.oscodename }}
       - salt://icinga2/icinga2.conf
     - require:
       - pkg: icinga2
