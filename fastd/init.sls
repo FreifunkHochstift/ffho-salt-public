@@ -135,13 +135,6 @@ Stop fastd@{{ instance_name }}:
 {% endfor %}{# for site in sites_all #}
 
 
-/usr/local/bin/ff_log_vpnpeer:
-  file.managed:
-    - source: salt://fastd/ff_log_vpnpeer
-    - template: jinja
-    - mode: 755
-
-
 ff_fastd_con_pkgs:
   pkg.installed:
     - pkgs:
