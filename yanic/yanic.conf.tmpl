@@ -9,14 +9,12 @@ enable           = true
 synchronize      = "1m"
 # how often request per multicast
 collect_interval = "1m"
-# interface that has an IP in your mesh network
-interfaces       = ["{{iface}}"]
-# list of sites to save stats for (empty for global only)
-sites            = []
 # define a port to listen
 # if not set or set to 0 the kernel will use a random free port at its own
 #port = 10001
 
+[[respondd.interfaces]]
+ifname = "{{iface}}"
 
 # A little build-in webserver, which statically serves a directory.
 # This is useful for testing purposes or for a little standalone installation.
@@ -27,7 +25,6 @@ webroot = "/srv/yanic/data"
 
 
 [nodes]
-enable        = true
 # Cache file
 # a json file to cache all data collected directly from respondd
 state_path    = "/srv/yanic/{{site}}.state"
