@@ -25,7 +25,7 @@ addDNSCryptBind("0.0.0.0:8443", "2.dnscrypt-cert.ffmuc.net", "/run/dnsdist/resol
 addDNSCryptBind("[::]:8443", "2.dnscrypt-cert.ffmuc.net", "/run/dnsdist/resolver.cert", "/run/dnsdist/resolver.key", { reusePort=true, interface="vrf_external" })
 
 -- set number of queries to be allowed per second from an IP but exclude localhost
-addAction(AndRule({MaxQPSIPRule(300), NotRule(makeRule("{127.0.0.1/32}"))}), DropAction())
+addAction(AndRule({MaxQPSIPRule(300), NotRule(OrRule({makeRule("127.0.0.1"), makeRule("::1")}))}), DropAction())
 
 {%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
 {%- if ipaddress.family.value == 6 %}
