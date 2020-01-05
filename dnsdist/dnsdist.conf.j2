@@ -47,6 +47,9 @@ addAction({'in-addr.arpa'}, NoneAction())
 newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
 addAction({'in.ffmuc.net.', 'ext.ffmuc.net'}, PoolAction("auth"))
 
+-- OpenNIC
+addAction({'bbs','chan','cyb','dns.opennic.glue','dyn','epic','geek','gopher','indy','libre','neo','null','o','opennic.glue','oss','oz','parody','pirate'}, PoolAction("auth"))
+
 -- add cache for X possible entries
 pc = newPacketCache(100000)
 getPool(""):setCache(pc)
