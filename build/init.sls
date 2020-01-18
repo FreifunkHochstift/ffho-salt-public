@@ -110,7 +110,7 @@ firmware-git:
 
 /srv/build/opkg-keys/key-build:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:privkey
+    - source: salt://build/key-build
     - user: build
     - group: build
     - mode: 400
@@ -119,7 +119,7 @@ firmware-git:
 
 /srv/build/opkg-keys/key-build.pub:
   file.managed:
-    - contents_pillar: nodes:{{ grains['id'] }}:opkg:build:pubkey
+    - source: salt://build/key-build.pub
     - user: build
     - group: build
     - mode: 400
