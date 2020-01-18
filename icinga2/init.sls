@@ -280,9 +280,10 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
     - require:
       - file: /etc/icinga2/ffho-conf.d
 
-/etc/cron.d/icinga_check_salt:
-  file.managed:
-    - contents: "0 */4 * * * root sleep $(($RANDOM % 14400)) ; /usr/bin/salt-call state.highstate --state-verbose=False test=True > /var/cache/salt/state_apply 2>/dev/null"
+salt-cron-state-apply:
+  cron.present:
+    - name: /usr/bin/salt-call state.highstate --state-verbose=False test=True > /var/cache/salt/state_apply 2>/dev/null
     - user: root
-    - mode: 640
+    - minute: random
+    - hour: "*/6"
 
