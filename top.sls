@@ -23,8 +23,6 @@ base:
     - vim
     - unattended-upgrades
 
-#    - tinc
-
 #
 # Roles
 #
