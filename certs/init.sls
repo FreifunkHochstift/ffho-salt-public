@@ -37,25 +37,6 @@ generate-dhparam:
       - cmd: update_ca_certificates
 
 
-/usr/local/share/ca-certificates/StartSSL_Class1_CA.crt:
-  file.managed:
-    - source: salt://certs/StartSSL_Class1_CA.pem
-    - user: root
-    - group: root
-    - mode: 644
-    - watch_in:
-      - cmd: update_ca_certificates
-
-/usr/local/share/ca-certificates/StartSSL_Class2_CA.crt:
-  file.managed:
-    - source: salt://certs/StartSSL_Class2_CA.pem
-    - user: root
-    - group: root
-    - mode: 644
-    - watch_in:
-      - cmd: update_ca_certificates
-
-
 {% set certs = {} %}
 
 # Are there any certificates defined or referenced in the node pillar?
