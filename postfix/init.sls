@@ -23,7 +23,7 @@ postfix:
   file.managed:
     - source:
       - salt://postfix/master.cf.{{ grains['id'] }}
-      - salt://postfix/master.cf.{{ grains.oscodename }}
+      - salt://postfix/master.cf.{{ grains.os }}.{{ grains.oscodename }}
     - watch_in:
       - service: postfix
 
@@ -32,6 +32,7 @@ postfix:
   file.managed:
     - source:
       - salt://postfix/main.cf.{{ grains['id'] }}
+      - salt://postfix/main.cf.{{ grains.os }}.{{ grains.oscodename }}
       - salt://postfix/main.cf
     - template: jinja
     - watch_in:
