@@ -29,9 +29,9 @@ addAction(AndRule({MaxQPSIPRule(300), NotRule(OrRule({makeRule("127.0.0.1"), mak
 
 {%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
 {%- if ipaddress.family.value == 6 %}
-newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
-newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
-newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3})
+newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
+newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
+newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
 {%- endif %}
 {% endfor %}
 
@@ -68,4 +68,4 @@ setMaxUDPOutstanding(65535)
 setMaxTCPClientThreads(1000)           -- set X(int) to handle number of maximum tcp clients
 setMaxTCPConnectionDuration(120)      -- set X(int) for tcp connection duaration from a connected client. X is number of seconds.
 setMaxTCPConnectionsPerClient(10)    -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
-setMaxTCPQueriesPerConnection(100)    -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())
+setMaxTCPQueriesPerConnection(1000)    -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())

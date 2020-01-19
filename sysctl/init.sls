@@ -31,7 +31,7 @@ reload-sysctl:
 /etc/sysctl.d/cve-2019-11477.conf:
   file.absent
 
-{% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role or 'router' in role %}
+{% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role or 'router' in role or 'vpngw' in role %}
 
 /etc/sysctl.d/router.conf:
   file.managed:

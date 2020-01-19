@@ -34,6 +34,7 @@ snmpd:
       - service: snmpd
 /etc/systemd/system/snmpd.service:
   file.managed:
+    - template: jinja
     - source: salt://snmpd/snmpd.service
     - require:
       - pkg: snmpd
