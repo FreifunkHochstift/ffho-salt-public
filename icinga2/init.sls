@@ -282,7 +282,8 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
 
 salt-cron-state-apply:
   cron.present:
-    - name: /usr/bin/salt-call state.highstate --state-verbose=False test=True > /var/cache/salt/state_apply 2>/dev/null
+    - identifier: SALT_CRON_STATE_APPLY
+    - name: "/usr/bin/salt-call state.highstate --state-verbose=False test=True > /var/cache/salt/state_apply.tmp 2>/dev/null ; mv /var/cache/salt/state_apply.tmp /var/cache/salt/state_apply"
     - user: root
     - minute: random
     - hour: "*/6"
