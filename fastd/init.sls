@@ -103,9 +103,6 @@ fastd@{{ instance_name }}:
       - service: fastd
     - watch:
       - file: /etc/fastd/{{ instance_name }}/fastd.conf
-    {% if network_type == 'nodes' %}
-      - git: peers-git
-    {% endif %}
   {% endfor %}{# for network in networks #}
 
 
