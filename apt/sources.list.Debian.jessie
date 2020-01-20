@@ -2,14 +2,12 @@
 # /etc/apt/sources.list (Salt managed)
 #
 
-deb	http://deb.debian.org/debian/ jessie main non-free contrib
-deb-src	http://deb.debian.org/debian/ jessie main non-free contrib
+deb http://deb.debian.org/debian/ jessie main non-free contrib
+deb-src http://deb.debian.org/debian/ jessie main non-free contrib
 
-deb	http://security.debian.org/ jessie/updates main contrib non-free
-deb-src	http://security.debian.org/ jessie/updates main contrib non-free
+deb http://security.debian.org/ jessie/updates main contrib non-free
+deb-src http://security.debian.org/ jessie/updates main contrib non-free
 
 # jessie-updates, previously known as 'volatile'
-deb	http://deb.debian.org/debian/ jessie-updates main contrib non-free
-deb-src	http://deb.debian.org/debian/ jessie-updates main contrib non-free
-
-# Jessie Backports don't exist no more
+deb http://deb.debian.org/debian/ jessie-updates main contrib non-free
+deb-src http://deb.debian.org/debian/ jessie-updates main contrib non-free
