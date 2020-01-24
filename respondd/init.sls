@@ -61,7 +61,7 @@ ffho-respondd:
     - require:
       - git: ffho-respondd
 
-{% if grains.id in ['gw05.in.ffho.net', 'bbr-upb.in.ffho.net'] and site == 'pad-cty' %}
+{% if grains.id == 'gw05.in.ffho.net' and site == 'pad-cty' %}
 Stop respondd@{{site}}:
   service.dead:
     - name: respondd@{{site}}
