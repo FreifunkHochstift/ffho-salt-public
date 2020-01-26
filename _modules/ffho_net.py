@@ -1101,13 +1101,6 @@ def get_ospf_interface_config (node_config, grains_id):
 			elif iface.startswith ('ovpn-er-'):
 				ospf_config['type'] = 'broadcast'
 
-		# Configure Out-of-band OpenVPN tunnels as stub interfaces,
-		# so recursive next-hop lookups for OOB-BGP-session will work.
-		elif iface.startswith ('oob-'):
-			ospf_on = True
-			ospf_config['stub'] = True
-			ospf_config['cost'] = 1000
-
 		# OSPF explicitly enabled for interface
 		elif 'ospf' in iface_config:
 			ospf_on = True
