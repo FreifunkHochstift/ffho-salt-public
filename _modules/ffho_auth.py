@@ -18,7 +18,7 @@ def _ssh_user_allowed (access_config, node_id, node_config, entry_name):
 			return True
 
 	if type (access_config) not in [ dict, collections.OrderedDict ]:
-        	raise Exception ("SSH configuration for entry %s seems broken!" % (entry_name))
+		raise Exception ("SSH configuration for entry %s seems broken!" % (entry_name))
 
 	# String "global" found in the access config?
 	elif "global" in access_config:
