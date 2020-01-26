@@ -1014,6 +1014,20 @@ def get_router_id (node_config, node_id):
 
 # Compute minions OSPF interface configuration according to FFHO routing policy
 # See https://wiki.ffho.net/infrastruktur:vlans for information about Vlans
+#
+# Costs are based on the following reference values:
+#
+# Iface speed |  Cost
+# ------------+---------
+# 100 Gbit/s  |      1
+#  40 Gbit/s  |      2
+#  25 Gbit/s  |      4
+#  20 Gbit/s  |      5
+#  10 Gbit/s  |     10
+#   1 Gbit/s  |    100
+# 100 Mbit/s  |   1000
+#    VPN      |  10000
+#
 def get_ospf_interface_config (node_config, grains_id):
 	ospf_node_config = node_config.get ('ospf', {})
 
@@ -1048,21 +1062,28 @@ def get_ospf_interface_config (node_config, grains_id):
 		elif re.search (r'^(br-?|br\d+\.|vlan)10\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
-			ospf_config['cost'] = 10
+			ospf_config['cost'] = 100
 			ospf_config['desc'] = "Wired Gigabit connection"
+
+		# 10/20 Gbit/s Dark Fiber connection
+		elif re.search (r'^vlan12\d\d$', iface):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 10
+			ospf_config['desc'] = "Wired 10Gb/s connection"
 
 		# VLL connection
 		elif re.search (r'^vlan15\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
-			ospf_config['cost'] = 20
+			ospf_config['cost'] = 200
 			ospf_config['desc'] = "VLL connection"
 
 		# WBBL connection
 		elif re.search (r'^vlan20\d\d$', iface):
 			ospf_on = True
 			ospf_config['stub'] = False
-			ospf_config['cost'] = 100
+			ospf_config['cost'] = 1000
 			ospf_config['desc'] = "WBBL connection"
 
 		# Legacy WBBL connection
