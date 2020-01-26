@@ -34,7 +34,7 @@ default_bridge_config = {
 
 
 #
-# Hop penalty to set if none is explicitly specified
+# Hop penalty to be set if none is explicitly specified.
 # Check if one of these roles is configured for any given node, use first match.
 default_hop_penalty_by_role = {
 	'bbr'       :  5,
@@ -312,7 +312,7 @@ def _update_veth_config (interface, config):
 		config['veth-peer-name'] = veth_peer_name[interface]
 
 
-# The the given MTU to the given interface - presented by it's interface config dict -
+# The given MTU to the given interface - presented by it's interface config dict -
 # IFF no MTU has already been set in the node pillar.
 #
 # @param ifaces:	All interface configuration (as dict)
@@ -342,7 +342,7 @@ def _set_mtu_to_iface_and_upper (ifaces, iface_name, mtu):
 		set_automtu = False
 
 	# There might be - read: "we have" - a situation where on top of e.g. bond0
-	# there are vlans holding VXLAN communicaton as well a vlans directly carrying
+	# there are vlans holding VXLAN communicaton as well as VLANs directly carrying
 	# BATMAN traffic. Now depending on which interface is evaluated first, the upper
 	# MTU is either correct, or maybe to small.
 	#
@@ -581,7 +581,7 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 		if type (batman_connect_sites) == str:
 			batman_connect_sites = [ batman_connect_sites ]
 
-		# If there the list of sites to connect is empty, there's nothing to do here.
+		# If the list of sites to connect is empty, there's nothing to do here.
 		if len (batman_connect_sites) == 0:
 			continue
 
@@ -792,9 +792,6 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	# Enhance ifaces configuration with some meaningful defaults for
 	# bonding, bridge and vlan interfaces, MAC address for batman ifaces, etc.
 	for interface, config in ifaces.items ():
-#		if type (config) not in [ dict, collections.OrderedDict ]:
-#			raise Exception ("Configuration for interface %s on node %s seems broken: Type %s" % (interface, node_id, type (config)))
-
 		iface_type = config.get ('type', 'inet')
 
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
@@ -937,7 +934,7 @@ def get_ffrl_bgp_config (ifaces, proto):
 #
 # @param: node_config	Pillar node configuration (as dict)
 # @param: iface_name	Name of the interface defined in pillar node config
-# 			OR name of VRF ("vrf_<something>") whichs ifaces are
+#			OR name of VRF ("vrf_<something>") whichs ifaces are
 #			to be examined.
 # @param: with_mask	Don't strip the netmask from the prefix. (Default false)
 def get_node_iface_ips (node_config, iface_name, with_mask = False):
