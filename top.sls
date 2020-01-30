@@ -36,8 +36,8 @@ base:
   'gw*':
     - fastd
     - dhcp-server
-    - pdns-recursor.remove
-    - knot-resolver
+    - knot-resolver.remove
+    - pdns-recursor
     - radvd
     - respondd
   'dns01.in.ffmuc.net':
