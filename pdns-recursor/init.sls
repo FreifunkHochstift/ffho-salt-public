@@ -28,6 +28,7 @@ systemd-reload:
    - name: systemctl --system daemon-reload
    - onchanges:
      - file: pdns-recursor-service-override
+     - file: /etc/systemd/system/pdns-recursor.service
 
 pdns-recursor-service-override:
   file.managed:
