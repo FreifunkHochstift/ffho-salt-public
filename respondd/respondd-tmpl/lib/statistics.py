@@ -141,7 +141,7 @@ class Statistics(Respondd):
 
     lines = lib.helper.call(['batctl', '-m', self._config['batman'], 'gwl', '-n'])
     for line in lines:
-      lineMatch = re.match(r'^(\*|=>) +([0-9a-f:]+) \([\d ]+\) ([0-9a-f:]+)', line)
+      lineMatch = re.match(r'(\*|=>)\s+([0-9a-f:]+)\s\([\d \.]+\)\s+([0-9a-f:]+)', line)
       if lineMatch:
         ret = {}
         ret['gateway'] = lineMatch.group(2)

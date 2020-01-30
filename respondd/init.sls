@@ -1,5 +1,6 @@
 #
 # respondd
+# Source for template: https://github.com/ffggrz/ext-respondd.git
 #
 
 /etc/systemd/system/respondd@.service:
@@ -19,14 +20,14 @@ python3-netifaces:
 
 /opt/respondd-{{site}}/alias.json:
   file.managed:
-    - source: salt://respondd/respondd-tmpl/alias.json
+    - source: salt://respondd/alias.json
     - template: jinja
     - defaults:
       site: {{ site }}
 
 /opt/respondd-{{site}}/config.json:
   file.managed:
-    - source: salt://respondd/respondd-tmpl/config.json
+    - source: salt://respondd/config.json
     - template: jinja
     - defaults:
       site: {{ site }}

@@ -1,0 +1,25 @@
+{
+  "nodeinfo": {
+    "hostname": "Supernode-001",
+    "node_id": "deadcafe1337",
+    "hardware": {
+      "model": "Raspberry Pi 2 B"
+    },
+    "owner": {
+      "contact": "info@example.org"
+    },
+    "system": {
+      "site_code": "ffggrz",
+      "role": "gateway"
+    },
+    "location": {
+      "latitude": 89.10727755551,
+      "longitude": 5.00932562351
+    },
+    "pages": [
+      "http://start.ffggrz/",
+      "http://start.ffggrz.de/"
+    ]
+  },
+  "firstseen": "2015-04-12T15:41:01"
+}

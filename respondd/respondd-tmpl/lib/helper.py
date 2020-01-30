@@ -6,7 +6,7 @@ import sys
 
 def call(cmdnargs):
   try:
-    output = subprocess.check_output(cmdnargs, stderr=subprocess.STDOUT)
+    output = subprocess.check_output(cmdnargs, stderr=None)
     lines = output.splitlines()
     lines = [line.decode('utf-8') for line in lines]
   except subprocess.CalledProcessError as err:

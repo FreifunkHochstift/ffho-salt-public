@@ -5,46 +5,56 @@
 
 ## Dependencies
 
- * lsb_release
- * ethtool
- * python3.3
- * python3-netifaces
- * batman-adv
+* lsb_release
+* ethtool
+* python3 (>= 3.3)
+* python3-netifaces
+* batman-adv
 
 
 ## Setup
 
 ### Debian-Dependencies
-```
+```sh
 apt-get install python3-netifaces ethtool lsb-release
 ```
 
 ### config.json
-Startparameter for ext-respondd.  
-Copy `config.json.example` to `config.json` and change it to match your server configuration.  
-(`cp config.json.example config.json`)
+Start parameter for ext-respondd.  
+Copy `config.json.example` to `config.json` and change it to match your server configuration.
 
- * `batman` (string) (Optional: default bat0)
- * `bridge` (string) (Optional: default br-client)
- * `mesh-wlan` (array of string) (Optional: Ad-Hoc batman-Mesh)
- * `mesh-vpn` (array of string) (Optional: fastd, GRE, L2TP batman-Mesh)
- * `fastd_socket` (string) (Optional: needed for uplink-flag)
- * `rate_limit` (integer) (Optional: limit incoming requests per minutes)
- * `rate_limit_burst` (integer) (Optional: allow burst requests)
+* `"addr"` (`str` / _default:_ `ff05::2:1001`)
+  - address to listen to
+* `"port"` (`str` / _default:_ `1001`)
+  - port to listen to
+* `"batman"` (`str` / _default:_ `bat0`)
+  - batman-adv interface
+* `"bridge"` (`str` / _default:_ `br-client`)
+  - client bridge
+* `"mesh-wlan"` (`str[]`)
+  - ad hoc batman-mesh
+* `"mesh-vpn"` (`str[]`)
+  - fastd, GRE, L2TP batman-Mesh
+* `"fastd_socket"` (`str`)
+  - needed for uplink-flag
+* `"rate_limit"` (`int` / _default:_ `30`)
+  - limit incoming requests per minutes
+* `"rate_limit_burst"` (`int` / _default:_ `10`)
+  - allow burst requests
 
 ### alias.json
 Aliases to overwrite the returned server data.  
-Copy `alias.json.example` to `alias.json` and input e.g. owner information.  
-(`cp alias.json.example alias.json`)
+Copy `alias.json.example` to `alias.json` and input e.g. owner information.
 
 The JSON content matches one block of the nodes.json, which is outputted by e.g. the [HopGlass-Server](https://github.com/hopglass/hopglass-server).
 
 ### ext-respondd.service
 Register ext-respondd as a systemd service
 
-```
+```sh
 cp ext-respondd.service.example /lib/systemd/system/ext-respondd.service
-! modify the path inside of the ext-respondd.service !
+# modify the path inside of the ext-respondd.service if necessary
+systemctl daemon-reload
 systemctl enable ext-respondd
 systemctl start ext-respondd
 ```
@@ -57,5 +67,5 @@ Collecting data from respondd:
 
 Respondd for servers:
 * [ffho-respondd](https://github.com/FreifunkHochstift/ffho-respondd) from Freifunk Hochstift (fork of ext-respondd)
-* [ffnord-alfred-announce](https://github.com/ffnord/ffnord-alfred-announce) from FreiFunkNord
+* [mesh-announce](https://github.com/ffnord/mesh-announce) from Freifunk Nord
 * [py-respondd](https://github.com/descilla/py-respondd)

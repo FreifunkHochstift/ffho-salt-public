@@ -1,0 +1,4 @@
+*.swp
+*.pyc
+alias.json
+config.json
