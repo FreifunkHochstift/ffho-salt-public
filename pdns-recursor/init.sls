@@ -31,13 +31,14 @@ systemd-reload:
      - file: /etc/systemd/system/pdns-recursor.service
 
 pdns-recursor-service-override:
-  file.managed:
+  file.absent:
     - name: /etc/systemd/system/pdns-recursor.d/override.conf
-    - source: salt://pdns-recursor/pdns-recursor.override.service
-    - makedirs: True
+#    - source: salt://pdns-recursor/pdns-recursor.override.service
+#    - makedirs: True
 
 /etc/systemd/system/pdns-recursor.service:
-  file.absent
+  file.managed:
+    - source: salt://pdns-recursor/pdns-recursor.service
 
 /etc/powerdns/recursor.conf:
   file.managed:
