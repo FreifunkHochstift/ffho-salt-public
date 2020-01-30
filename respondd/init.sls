@@ -44,6 +44,9 @@ python3-netifaces:
 /opt/respondd-{{ site }}/ext-respondd.py:
   file.managed:
     - mode: 0755
+    # only to harm the salt gods to not complain with
+    # "Neither 'source' nor 'contents' nor 'contents_pillar' nor 'contents_grains' was defined"
+    - source: salt://respondd/respondd-tmpl/ext-respondd.py
 
 respondd@{{site}}:
   service.running:
