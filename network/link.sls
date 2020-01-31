@@ -14,7 +14,7 @@
 
 # Systemd link files?
   {% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
-    {% if '_udev_mac' in iface_config or 'mac' in iface_config %}
+    {% if 'mac' in iface_config %}
 /etc/systemd/network/42-{{ iface }}.link:
   file.managed:
     - source: salt://network/systemd-link.tmpl

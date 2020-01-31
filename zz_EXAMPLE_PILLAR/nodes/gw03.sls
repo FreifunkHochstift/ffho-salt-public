@@ -23,7 +23,7 @@ gw03.in.ffho.net:
 
     eth0:
       desc: SysEleven
-      _udev_mac: 52:54:1f:03:01:63
+      mac: 52:54:1f:03:01:63
       #
       prefixes:
         - 185.46.137.163/25
@@ -35,7 +35,7 @@ gw03.in.ffho.net:
 
     vlan1015:
       desc: L2-BER
-      _udev_mac: 52:54:1f:03:10:15
+      mac: 52:54:1f:03:10:15
       prefixes:
         - <POP L2-Subnet prefix v4>/28
         - <POP L2-Subnet prefix v6>/64
