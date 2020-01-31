@@ -5,7 +5,6 @@
 # include ffho stuff (ffho.id_rsa)
 include:
   - ffho_base
-  - keys
 
 # publish blacklist
 /etc/fastd/peers-blacklist:
