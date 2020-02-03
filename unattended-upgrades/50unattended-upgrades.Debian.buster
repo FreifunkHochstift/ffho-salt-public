@@ -48,7 +48,7 @@ Unattended-Upgrade::Package-Blacklist {
 	"batman-adv-dkms";
 };
 
-/ This option allows you to control if on a unclean dpkg exit
+// This option allows you to control if on a unclean dpkg exit
 // unattended-upgrades will automatically run 
 //   dpkg --force-confold --configure -a
 // The default is true, to ensure updates keep getting installed
