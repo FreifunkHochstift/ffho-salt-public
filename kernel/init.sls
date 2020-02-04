@@ -10,9 +10,6 @@
 linux-kernel:
   pkg.latest:
     - name: linux-image-{{ version }}
-{% if grains.oscodename in ['jessie'] %}
-    - fromrepo: {{ grains.oscodename }}-backports
-{% endif %}
 
 {#
  # Install kernel headers if we might need to compile a batman_adv module on this node.
@@ -21,7 +18,4 @@ linux-kernel:
 linux-headers:
   pkg.latest:
     - name: linux-headers-{{ version }}
-{% if grains.oscodename in ['jessie'] %}
-    - fromrepo: {{ grains.oscodename }}-backports
-{% endif %}
 {% endif %}
