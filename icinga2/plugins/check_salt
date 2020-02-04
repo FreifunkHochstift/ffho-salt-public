@@ -6,17 +6,15 @@ if [ ! -f /var/cache/salt/state_apply ] ; then echo "Statefile does not exist" ;
 # Check age of statefile. If it's older than 2 hours, exit with unknown
 if [ $(($(date +%s) - $(date -r /var/cache/salt/state_apply +%s))) -gt 25200 ] ; then echo "Statefile too old" ; exit 3 ; fi
 
-if grep -o ' changed=\([0-9]\+\)' /var/cache/salt/state_apply > /dev/null ; then 
+# List all IDs and exclude ffho-repo
+CHANGES_IDS=$(grep "ID:" /var/cache/salt/state_apply | grep -v "ID: .*-repo$")
 
-	ANZ_CHANGED=$(grep -o ' changed=\([0-9]\+\)' /var/cache/salt/state_apply | cut -d= -f2)
-
-	if [ $ANZ_CHANGED -gt 0 ] ; then
-		echo "IDs with changes:"
-		cat /var/cache/salt/state_apply | grep "ID:"
-		exit 1 # warning
-	fi
-
+if [ -n "$CHANGES_IDS" ] ; then
+	echo "IDs with changes:"
+	echo "$CHANGES_IDS"
+	exit 1 # warning
 fi
+
 echo "Nothing to do"
 exit 0 # ok
 
