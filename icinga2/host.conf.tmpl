@@ -6,7 +6,7 @@
 {%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
 {%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
 {%- set monitoring_config = node_config.get ('monitoring', {}) %}
-{%- set state = node_config.get ('state', 'operation') %}
+{%- set status = node_config.get ('status', 'active') %}
 
 {%- if 'icinga2server' not in roles %}
 object Endpoint "{{ node_id }}" {
@@ -27,9 +27,9 @@ object Host "{{ node_id }}" {
 	address = "{{ address }}"
 	address6 = "{{ address6 }}"
 
-{%- if state != 'operation' %}
+{%- if status != 'active' %}
 
-	# This node has state {{ state }}, don't whine about anything here
+	# This node has status {{ status }}, don't whine about anything here
 	enable_notifications = false
 {%- endif %}
 

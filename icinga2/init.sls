@@ -187,7 +187,11 @@ Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
 
   # Generate config file for every client known to pillar
   {% for node_id, node_config in salt['pillar.get']('nodes', {}).items () %}
-    {% if node_config.get ('icinga2', "") != 'ignore' %}
+    {# Only monitor hosts which are active or staged. #}
+    {% if node_config.get ('status', '') not in [ '', 'active', 'staged' ] %}
+      {% continue %}
+    {% endif %}
+
 /etc/icinga2/ffho-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
@@ -201,7 +205,6 @@ Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/:
       - file: Cleanup /etc/icinga2/ffho-conf.d/hosts/generated/
     - watch_in:
       - service: icinga2
-    {% endif %}
   {% endfor %}
 
 
