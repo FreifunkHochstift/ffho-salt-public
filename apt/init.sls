@@ -18,24 +18,16 @@ apt-transport-https:
 python-apt:
   pkg.installed
 
+# FFHO APT
+/etc/apt/trusted.gpg.d/ffho.gpg:
+  file.managed:
+    - source: salt://apt/ffho.gpg.{{ grains.os }}.{{ grains.oscodename }}
 
-ffho-repo:
-  pkgrepo.managed:
-    - comments:
-      - "# FFHO APT repo"
-    - human_name: FFHO repository
-    - name: deb http://apt.ffho.net/ {{ grains.oscodename }} main contrib non-free
-    - clean_file: True
-    - dist: {{ grains.oscodename }}
-    - file: /etc/apt/sources.list.d/ffho.list
-    - keyserver: keys.gnupg.net
-{% if grains.oscodename == "jessie" %}
-    - keyid: 40FC1CE2
-{% else %}
-    - keyid: EB88A4D5
-{% endif %}
+/etc/apt/sources.list.d/ffho.list:
+  file.managed:
+    - source: salt://apt/ffho.list.{{ grains.os }}.{{ grains.oscodename }}
     - require:
-      - pkg: python-apt
+      - file: /etc/apt/trusted.gpg.d/ffho.gpg
 
 
 # APT preferences
