@@ -102,5 +102,4 @@ class ResponddClient:
     {% else %}
       self._sock.sendto(responseData, destAddress)
     {% endif %}
-      self._sock.sendto(responseData, newDestAddressTuple)
 
