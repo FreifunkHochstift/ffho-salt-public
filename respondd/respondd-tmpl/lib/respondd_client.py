@@ -7,7 +7,6 @@ import json
 import zlib
 import time
 import re
-import fcntl
 
 import lib.helper
 
@@ -40,7 +39,6 @@ class ResponddClient:
     sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP, group + struct.pack('I', if_idx))
 
   def start(self):
-    print(self._config['bridge'])
     self._sock.setsockopt(socket.SOL_SOCKET,socket.SO_BINDTODEVICE,bytes(self._config['bridge'].encode()))
     self._sock.bind(('::', self._config['port']))
 
@@ -95,8 +93,14 @@ class ResponddClient:
       responseData = encoder.compress(responseData)
       responseData += encoder.flush()
       # return compress(str.encode(json.dumps(ret)))[2:-4] # bug? (mesh-announce strip here)
-
     if not self._config['dry_run']:
-    
+   {% if "gw02" not in grains['id'] %}
+      destAddressTmp = list(destAddress)
+      destAddressTmp[0] = destAddressTmp[0].replace("vrf_external", "br-{{ site }}")
+      destAddressNew = tuple(destAddressTmp)
+      self._sock.sendto(responseData, (destAddressNew[0], 45124))
+    {% else %}
       self._sock.sendto(responseData, destAddress)
-    
+    {% endif %}
+      self._sock.sendto(responseData, newDestAddressTuple)
+

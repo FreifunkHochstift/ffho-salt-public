@@ -8,7 +8,7 @@ services:
     restart: always
   # Elasticsearch: https://www.elastic.co/guide/en/elasticsearch/reference/5.6/docker.html
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.2
     volumes:
             - /srv/docker/elasticsearch-graylog/data:/usr/share/elasticsearch/data:z
     environment:
@@ -24,7 +24,7 @@ services:
     restart: on-failure
     # Graylog: https://hub.docker.com/r/graylog/graylog/
   graylog:
-    image: graylog/graylog:3.1
+    image: graylog/graylog:3.2
     volumes:
             - /srv/docker/graylog/data:/usr/share/graylog/data/journal:z
             - /srv/docker/graylog/GeoLite2-City.mmdb:/etc/graylog/server/GeoLite2-City.mmdb:z
