@@ -7,7 +7,8 @@ openssl:
     - name: openssl
 
 ssl-cert:
-  pkg.installed
+  pkg.installed:
+    - name: ssl-cert
 
 update_ca_certificates:
   cmd.wait:
