@@ -23,14 +23,14 @@ ffmuc.net:
 {%- if external_address %}
 {%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
-                  content: {{ external_address[node_id][0] }} 
+                  content: {{ external_address[node_id] | first }} 
                   salt_managed: True
                   type: A
 {% endif %}{# external_address #}
 {% if external_address6 %}
 {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
-                  content: {{ external_address6[node_id][0] }} 
+                  content: {{ external_address6[node_id] | first }} 
                   salt_managed: True
                   type: AAAA
 {%- endif %}

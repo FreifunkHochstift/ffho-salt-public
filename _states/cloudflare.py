@@ -280,10 +280,10 @@ class Zone(object):
         return resp.json()
 
     def _add_record(self, record):
-	self._request(
-	    self.ADD_RECORD_URI_TEMPLATE.format(zone_id=self.zone_id),
-            method="POST",
-            json=record.json(),
+        self._request(
+            self.ADD_RECORD_URI_TEMPLATE.format(zone_id=self.zone_id),
+                method="POST",
+                json=record.json(),
         )
 
     def _remove_record(self, record):

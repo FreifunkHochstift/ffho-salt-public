@@ -198,7 +198,7 @@ record-A-external-{{ node_id }}:
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
-    - data: {{ external_address[node_id][0] }} 
+    - data: {{ external_address[node_id] | first }}
     - rdtype: A
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
@@ -217,7 +217,7 @@ record-AAAA-external-{{ node_id }}:
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
-    - data: {{ external_address6[node_id][0] }} 
+    - data: {{ external_address6[node_id] | first }} 
     - rdtype: AAAA
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
