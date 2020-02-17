@@ -192,15 +192,15 @@ def update(zone, name, ttl, rdtype, data, nameserver='127.0.0.1', timeout=5,
                     break
 
     if replace_on_change:
-	# If there are multiple RRs we delete them and add our new one
-	if len(answer.answer) >= 2:
-	    replace = True
-	# If there is one entry and it's not the one we expected replace it
-	elif len(answer.answer) == 1 and rdata not in rrset.items:
-	    replace = True
+    # If there are multiple RRs we delete them and add our new one
+        if len(answer.answer) >= 2:
+            replace = True
+    # If there is one entry and it's not the one we expected replace it
+        elif len(answer.answer) == 1 and rdata not in rrset.items:
+            replace = True
         # If there is no entry usual dns_update.add() happens
 
-    dns_update = dns.update.Update(zone, keyring=keyring, keyname=keyname,
+        dns_update = dns.update.Update(zone, keyring=keyring, keyname=keyname,
                                    keyalgorithm=keyalgorithm)
     if replace:
         dns_update.replace(name, ttl, rdata)
