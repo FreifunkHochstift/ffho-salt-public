@@ -1,3 +1,44 @@
 base:
+  # Base config for all minions
   '*':
-    - common
+    - apt
+    - bash
+    - burp
+    - certs
+    - console-tools
+    - dns-server/auth
+    - docker
+    - docker-containers
+    - dphys-swapfile
+    - graylog-sidecar
+    - fail2ban
+    - ff_base
+    - grafana
+    - icinga2
+    - influxdb
+    - jenkins
+    - locales
+    - logrotate
+    - kvm
+    - mosh
+    - motd
+    - network
+    - ntp
+    - screen
+    - snmpd
+    - ssh
+    - sudo
+    - sysctl
+    - timezone
+    - tmux
+    - unattended-upgrades
+    - vim
+  'gw*':
+    - fastd
+    - dhcp-server
+    - knot-resolver.remove
+    - pdns-recursor
+    - radvd
+    - respondd
+  'dns01.in.ffmuc.net':
+    - cloudflare
