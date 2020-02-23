@@ -20,14 +20,14 @@ ffmuc.net:
 {%- for node_id in nodes %}
 {%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
 {%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
-{%- if external_address %}
+{%- if external_address and not '__data__' in external_address[node_id] %}
 {%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
                   content: {{ external_address[node_id] | first }} 
                   salt_managed: True
                   type: A
 {% endif %}{# external_address #}
-{% if external_address6 %}
+{% if external_address6 and not '__data__' in external_address6[node_id] %}
 {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
                   content: {{ external_address6[node_id] | first }} 

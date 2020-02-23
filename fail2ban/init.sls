@@ -1,4 +1,4 @@
-{% if 'vrf_external' in grains['hwaddr_interfaces'] or 'guardian' in grains['id'] %}
+{% if 'vlan3' in grains['hwaddr_interfaces'] or 'guardian' in grains['id'] %}
 fail2ban-pkg:
   pkg.latest:
     - name: fail2ban

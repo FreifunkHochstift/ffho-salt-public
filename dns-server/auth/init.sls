@@ -191,7 +191,7 @@ record-PTR6-{{ node_id }}:
 {% endif %}
 
 # Create Entries in ext.ffmuc.net for each device with external IPs
-{% if external_address %}
+{% if external_address and not '__data__' in external_address[node_id] %}
 record-A-external-{{ node_id }}:
   ddns.present:
     {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
@@ -209,7 +209,7 @@ record-A-external-{{ node_id }}:
       - file: dns-key
 {% endif %}
 
-{% if external_address6 %}
+{% if external_address6 and not '__data__' in external_address6[node_id] %}
 
 record-AAAA-external-{{ node_id }}:
   ddns.present:
