@@ -8,7 +8,7 @@ Environment="MIBSDIR=/usr/share/snmp/mibs:/usr/share/snmp/mibs/iana:/usr/share/s
 Environment="MIBS="
 Type=simple
 ExecStartPre=/bin/mkdir -p /var/run/agentx
-{% if 'vpn01' in grains['id'] %}
+{% if 'vpn01' in grains['id'] or  'vpn02' in grains['id'] %}
 ExecStart=/sbin/ip vrf exec vrf_internal /usr/sbin/snmpd -Lsd -Lf /dev/null -u Debian-snmp -g Debian-snmp -I -smux,mteTrigger,mteTriggerConf -f
 {% else %}
 ExecStart=/usr/sbin/snmpd -Lsd -Lf /dev/null -u Debian-snmp -g Debian-snmp -I -smux,mteTrigger,mteTriggerConf -f
