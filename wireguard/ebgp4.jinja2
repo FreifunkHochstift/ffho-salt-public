@@ -25,10 +25,11 @@ template bgp ebgp {
         enable route refresh yes;
         graceful restart yes;
 }
-{% for prefix_name in prefix_4 | sort %}
-{% set interface = prefix_name.split("@")[1] %}
-protocol bgp {{ interface }} from ebgp {
-        neighbor {{ salt['netaddress.list_cidr_ips'](prefix_4[prefix_name])[-1] }} as {{ 64511 + loop.index }};
-        source address {{ salt['netaddress.list_cidr_ips'](prefix_4[prefix_name])[0] }};
+{% for interface in interfaces | sort %}
+{% if 'wg-' in interface %}
+protocol bgp {{ interface.split('wg-')[1] }} from ebgp {
+        neighbor {{ salt['netaddress.list_cidr_ips'](interfaces[interface]['ipaddresses'][0]['address'])[-1] }} as {{ 64512 + interfaces[interface]['ipaddresses'][0]['address'].split('.')[3]| regex_replace('/31','') | int }};
+        source address {{ salt['netaddress.list_cidr_ips'](interfaces[interface]['ipaddresses'][0]['address'])[0] }};
 }
+{% endif %}
 {% endfor %}

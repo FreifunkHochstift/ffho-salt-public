@@ -1,6 +1,4 @@
-{% set transfer_prefixes4 = salt['site_prefixes.get_site_prefixes']("", salt['pillar.get']('netbox:config_context:wireguard:transfer_v4')) %}
-{% set transfer_prefixes6 = salt['site_prefixes.get_site_prefixes']("", salt['pillar.get']('netbox:config_context:wireguard:transfer_v6')) %}
-
+{% set interfaces = salt['pillar.get']('netbox:interfaces') %}
 python3-netifaces:
   pkg.installed
 
@@ -62,8 +60,7 @@ generate-privkey:
         - source: salt://wireguard/ebgp4.jinja2
         - template: jinja
         - defaults:
-          prefix_4: {{ transfer_prefixes4 }}
-          prefix_6: {{ transfer_prefixes6 }}
+          interfaces: {{ interfaces }}
         - watch_in:
            - cmd: bird-configure
         - require:
@@ -76,52 +73,49 @@ generate-privkey:
         - source: salt://wireguard/ebgp6.jinja2
         - template: jinja
         - defaults:
-          prefix_4: {{ transfer_prefixes4 }}
-          prefix_6: {{ transfer_prefixes6 }}
+          interfaces: {{ interfaces }}
         - watch_in:
            - cmd: bird6-configure
         - require:
            - pkg: python3-netifaces
            - pkg: python3-netaddr
 
-{% for prefix_name in transfer_prefixes4 %}
-{% set interface = prefix_name.split("@")[1] %}
+{% for interface in interfaces | sort %}
+{% if 'wg-' in interface %}
+{% set client_name = interface.split('wg-')[1] %}
 
 generate-clientkey-{{ interface }}:
     cmd.run:
-        - name: 'wg genkey | tee /etc/wireguard/keys/client-{{ interface }}-priv.key | wg pubkey > /etc/wireguard/keys/client-{{ interface }}-pub.key'
-        - unless: 'test -f /etc/wireguard/keys/client-{{ interface }}-pub.key'
+        - name: 'wg genkey | tee /etc/wireguard/keys/client-{{ client_name }}-priv.key | wg pubkey > /etc/wireguard/keys/client-{{ client_name }}-pub.key'
+        - unless: 'test -f /etc/wireguard/keys/client-{{ client_name }}-pub.key'
         - require:
            - file: /etc/wireguard/keys
 
-/etc/wireguard/wg-{{ interface }}.conf:
+/etc/wireguard/{{ interface }}.conf:
     file.managed:
-        - name: /etc/wireguard/wg-{{ interface }}.conf
+        - name: /etc/wireguard/{{ interface }}.conf
         - source: salt://wireguard/wg.jinja2
         - template: jinja
         - defaults:
           interface: {{ interface }}
-          prefix_name: {{ prefix_name }}
-          prefix_4: {{ transfer_prefixes4 }}
-          prefix_6: {{ transfer_prefixes6 }}
+          interfaces: {{ interfaces }}
+          client_name: {{ client_name }}
         - require:
            - cmd: generate-privkey
            - cmd: generate-clientkey-{{ interface }}
         - watch_in:
           - cmd: ifreload
 
-/etc/network/interfaces.d/wg-{{ interface }}:
+/etc/network/interfaces.d/{{ interface }}:
     file.managed:
-        - name: /etc/network/interfaces.d/wg-{{ interface}}
+        - name: /etc/network/interfaces.d/{{ interface}}
         - source: salt://wireguard/interface.jinja2
         - template: jinja
         - defaults:
           interface: {{ interface }}
-          prefix_name: {{ prefix_name }}
-          prefix_4: {{ transfer_prefixes4 }}
-          prefix_6: {{ transfer_prefixes6 }}
+          interfaces: {{ interfaces }}
         - watch_in:
           - cmd: ifreload
 
-
+{% endif %}
 {% endfor %}
