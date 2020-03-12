@@ -1,0 +1,36 @@
+#
+# FFHO iBGP configuration (Salt managed)
+#
+
+filter vpn_prefixes {
+        if net ~ [
+                2001:608:a01:200::/56{64,64}
+        ] then accept;
+
+        reject;
+};
+
+filter default_out {
+        if net ~ [
+                ::/0
+        ] then accept;
+
+        reject;
+};
+
+template bgp ebgp {
+        import filter vpn_prefixes;
+        export filter default_out;
+        table VPN;
+        local as AS_OWN;
+        enable route refresh yes;
+        graceful restart yes;
+}
+
+{% for prefix_name in prefix_6 %}
+{% set interface = prefix_name.split("@")[1] %}
+protocol bgp {{ interface }} from ebgp {
+        neighbor {{ salt['netaddress.list_cidr_ips_ipv6'](prefix_6[prefix_name])[-1] }} as 64512;
+        source address {{ prefix_6[prefix_name] | regex_replace('/127','') }};
+}
+{% endfor %}
