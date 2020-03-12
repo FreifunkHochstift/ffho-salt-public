@@ -17,6 +17,11 @@ netfilter-persistent:
     - enable: True
     - restart: True
 
+ifreload:
+   cmd.wait:
+     - name: ifreload -a
+     - watch: []
+
 /etc/iptables/rules.v4:
   file.managed:
     - name: /etc/iptables/rules.v4
@@ -102,6 +107,8 @@ generate-clientkey-{{ interface }}:
         - require:
            - cmd: generate-privkey
            - cmd: generate-clientkey-{{ interface }}
+        - watch_in:
+          - cmd: ifreload
 
 /etc/network/interfaces.d/wg-{{ interface }}:
     file.managed:
@@ -113,6 +120,8 @@ generate-clientkey-{{ interface }}:
           prefix_name: {{ prefix_name }}
           prefix_4: {{ transfer_prefixes4 }}
           prefix_6: {{ transfer_prefixes6 }}
+        - watch_in:
+          - cmd: ifreload
 
 
 {% endfor %}

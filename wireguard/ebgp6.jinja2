@@ -27,10 +27,10 @@ template bgp ebgp {
         graceful restart yes;
 }
 
-{% for prefix_name in prefix_6 %}
+{% for prefix_name in prefix_6 | sort %}
 {% set interface = prefix_name.split("@")[1] %}
 protocol bgp {{ interface }} from ebgp {
-        neighbor {{ salt['netaddress.list_cidr_ips_ipv6'](prefix_6[prefix_name])[-1] }} as 64512;
+        neighbor {{ salt['netaddress.list_cidr_ips_ipv6'](prefix_6[prefix_name])[-1] }} as {{ 64511 + loop.index }};
         source address {{ salt['netaddress.list_cidr_ips_ipv6'](prefix_6[prefix_name])[0] }};
 }
 {% endfor %}
