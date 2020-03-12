@@ -42,3 +42,5 @@ base:
     - respondd
   'dns01.in.ffmuc.net':
     - cloudflare
+  'vpn0*.in.ffmuc.net':
+    - wireguard
