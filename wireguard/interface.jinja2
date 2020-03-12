@@ -1,0 +1,9 @@
+
+auto wg-{{ interface }}
+iface wg-{{ interface }} inet static
+        address {{ prefix_4[prefix_name] }}
+        address {{ prefix_6[prefix_name] }}
+        mtu 1406
+        pre-up ip link add $IFACE type wireguard
+        pre-up wg setconf $IFACE /etc/wireguard/$IFACE.conf
+        post-down ip link del $IFACE
