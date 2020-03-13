@@ -1,5 +1,7 @@
 {%- set priv_key = salt.file.read('/etc/wireguard/keys/server-priv.key') %}
 {%- set pub_key = salt.file.read('/etc/wireguard/keys/client-' ~ client_name ~  '-pub.key') %}
+{%- set client_net_v4 = salt['site_prefixes.get_site_prefixes']("",salt['pillar.get']('netbox:config_context:wireguard:client_net_v4')) %}
+{%- set client_net_v6 = salt['site_prefixes.get_site_prefixes']("",salt['pillar.get']('netbox:config_context:wireguard:client_net_v6')) %}
 
 {% set port = 51820 + interfaces[interface]['ipaddresses'][0]['address'].split('.')[3]| regex_replace('/31','') | int  %}
 
@@ -11,4 +13,4 @@ ListenPort = {{ port }}
 
 [Peer]
 PublicKey = {{ pub_key }}
-AllowedIPs = {{ interfaces[interface]['ipaddresses'][0]['address'] }}, 172.20.0.0/15, {{ interfaces[interface]['ipaddresses'][1]['address'] }}, 2001:608:a01:200::/56
+AllowedIPs = {{ interfaces[interface]['ipaddresses'][0]['address'] }}, {%- for net in client_net_v4 -%}{%- if client_name in net -%}{{ client_net_v4[net] }},{%- endif -%}{%- endfor -%} {{ interfaces[interface]['ipaddresses'][1]['address'] }}{%- for net in client_net_v6 -%}{%- if client_name in net -%},{{ client_net_v6[net] }}{%- endif -%}{%- endfor -%}
