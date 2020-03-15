@@ -84,6 +84,9 @@ generate-privkey:
 {% if 'wg-' in interface %}
 {% set client_name = interface.split('wg-')[1] %}
 
+{% set wireguard_transfer_net = interfaces[interface]['ipaddresses'][0]['address'] %}
+{% set network_id = wireguard_transfer_net.split('.')[3]| regex_replace('/31','') | int %}
+
 generate-clientkey-{{ interface }}:
     cmd.run:
         - name: 'wg genkey | tee /etc/wireguard/keys/client-{{ client_name }}-priv.key | wg pubkey > /etc/wireguard/keys/client-{{ client_name }}-pub.key'
@@ -100,6 +103,7 @@ generate-clientkey-{{ interface }}:
           interface: {{ interface }}
           interfaces: {{ interfaces }}
           client_name: {{ client_name }}
+          network_id: {{ network_id }}
         - require:
            - cmd: generate-privkey
            - cmd: generate-clientkey-{{ interface }}
