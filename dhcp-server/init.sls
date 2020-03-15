@@ -2,9 +2,10 @@
 # DHCP server (for gateways)
 #
 
-
-python3-netifaces:
-  pkg.installed
+# salt started complaining as this key is present in another formula...
+python3-netifaces-dhcp:
+  pkg.installed:
+    - name: python3-netifaces
 
 python3-netaddr:
   pkg.installed
@@ -42,7 +43,7 @@ dhcpd-pools:
     - template: jinja
     - require:
       - file: /etc/systemd/system/isc-dhcp-server.service
-      - pkg: python3-netifaces
+      - pkg: python3-netifaces-dhcp
       - pkg: python3-netaddr
     - watch_in:
       - service: isc-dhcp-server
