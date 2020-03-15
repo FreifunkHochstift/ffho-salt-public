@@ -25,7 +25,7 @@ docker-pkgs:
       - containerd.io
     - require:
       - pkgrepo: docker-repo
-
+{#
 # Install docker-compose via pip *shrug*
 python-pip:
   pkg.installed
@@ -34,4 +34,5 @@ docker-compose:
   pip.installed:
     - require:
       - pkg: python-pip
+#}
 {% endif  %}

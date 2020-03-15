@@ -8,7 +8,7 @@ base:
     - console-tools
     - dns-server/auth
     - docker
-    - docker-containers
+    #- docker-containers
     - dphys-swapfile
     - graylog-sidecar
     - fail2ban
