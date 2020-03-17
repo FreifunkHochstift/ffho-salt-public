@@ -25,7 +25,7 @@ protocol device {
 
 filter vpn_prefixes {
     if net ~ [
-        172.20.0.0.15/{24,24}
+        172.20.0.0/15{24,24}
     ] then accept;
     reject;
 }
