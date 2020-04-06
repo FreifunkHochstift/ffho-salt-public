@@ -77,6 +77,7 @@ postmap_domains:
     - watch:
       - file: /etc/postfix/virtual-domains
 
+
 /etc/postfix/virtual-aliases:
   file.managed:
     - source: salt://postfix/virtual-aliases
@@ -86,6 +87,17 @@ postmap_aliases:
     - name: /usr/sbin/postmap /etc/postfix/virtual-aliases
     - watch:
       - file: /etc/postfix/virtual-aliases
+
+
+/etc/postfix/transport:
+  file.managed:
+    - source: salt://postfix/transport
+
+postmap_transport:
+  cmd.wait:
+    - name: /usr/sbin/postmap /etc/postfix/transport
+    - watch:
+      - file: /etc/postfix/transport
 
 /etc/postfix/mynetworks:
   file.managed:
