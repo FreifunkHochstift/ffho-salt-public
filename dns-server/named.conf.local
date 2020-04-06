@@ -7,18 +7,15 @@ acl slaves {
 	31.172.8.66;
 	2a01:a700:4621:866::10;
 
-	// dns.gnuzifer.de
-	78.46.242.18;
-	2a01:4f8:190:6500::12:1;
-
 	// ns.youngage.eu
 	5.9.142.19;
 	2a01:4f8:190:2105::53;
 };
 
 acl ffho-ops {
-	10.123.249.0/27;
+	10.123.249.0/24;
 };
+
 
 //
 // Public forward zones
@@ -38,7 +35,7 @@ zone "hochstift.freifunk.net" {
 
 zone "ffho.net" {
 	type master;
-	file "/etc/bind/zones/static/ffho.net.zone";
+	file "/etc/bind/zones/generated/ffho.net.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
@@ -68,7 +65,7 @@ zone "0.0.0.1.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
 // 2a03:2260:2342::/48
 zone "2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa" {
 	type master;
-	file "/etc/bind/zones/static/2a03:2260:2342::_48.ip6.arpa.zone";
+	file "/etc/bind/zones/generated/2a03:2260:2342::_48.ip6.arpa.zone";
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
@@ -80,20 +77,13 @@ zone "2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa" {
 // 10.132.0.0/16 reverse
 zone "132.10.in-addr.arpa" {
 	type master;
-	file "/etc/bind/zones/static/132.10.in-addr.arpa.db";
+	file "/etc/bind/zones/generated/132.10.in-addr.arpa.zone";
 	allow-transfer { localhost; ffho-ops; };
 };
 
 // Management reverse
 zone "30.172.in-addr.arpa" {
 	type master;
-	file "/etc/bind/zones/static/30.172.in-addr.arpa.zone";
-	allow-transfer { localhost; ffho-ops; };
-};
-
-// Legacy fdca:ffee:ff12::/48 reverse
-zone "2.1.f.f.e.e.f.f.a.c.d.f.ip6.arpa" {
-	type master;
-	file "/etc/bind/zones/static//fdca:ffce:ff12::_48.db";
+	file "/etc/bind/zones/generated/30.172.in-addr.arpa.zone";
 	allow-transfer { localhost; ffho-ops; };
 };
