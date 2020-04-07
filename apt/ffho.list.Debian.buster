@@ -1,0 +1,2 @@
+deb	http://apt.ffho.net buster contrib non-free main
+deb-src	http://apt.ffho.net buster contrib non-free main
