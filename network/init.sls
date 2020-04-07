@@ -10,8 +10,6 @@ include:
 network-pkg:
   pkg.installed:
     - pkgs:
-      - bridge-utils
-      - vlan
       - tcpdump
       - mtr-tiny
       - iperf
@@ -20,8 +18,6 @@ network-pkg:
       - ipv6calc
     - require_in:
       - file: /etc/network/interfaces
-#    - require:
-#      - APT-FFHO
 
 iproute2:
   pkg.latest
