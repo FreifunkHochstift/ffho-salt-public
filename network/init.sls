@@ -13,7 +13,6 @@ network-pkg:
       - tcpdump
       - mtr-tiny
       - iperf
-      - host
       - dnsutils
       - ipv6calc
     - require_in:
