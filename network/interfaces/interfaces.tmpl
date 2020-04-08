@@ -12,15 +12,16 @@
 {#
  # Configure any secondary IPs / router_id on loopback, if present
  #}
-{%- set lo_prefixes = ifaces['lo']['prefixes'] %}
 # The loopback network interface
 auto lo
 iface lo
-{%- for prefix in lo_prefixes %}
-  {%- set mask = '128' if ':' in prefix else '32' %}
-  {%- set prefix = prefix if '/' in prefix else prefix ~ '/' ~ mask %}
+{%- if 'lo' in ifaces %}
+  {%- for prefix in ifaces['lo']['prefixes'] %}
+    {%- set mask = '128' if ':' in prefix else '32' %}
+    {%- set prefix = prefix if '/' in prefix else prefix ~ '/' ~ mask %}
 	address {{ prefix }}
-{%- endfor %}
+  {%- endfor %}
+{%- endif %}
 
 
 {#

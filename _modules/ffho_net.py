@@ -711,6 +711,16 @@ def _generate_ffrl_gre_tunnels (ifaces):
 				pass
 
 def _generate_loopback_ips (ifaces, node_config, node_id):
+	# If this node has primary_ips set and filled there are either IPs
+	# configured on lo or IPs on another interface - possibly ones on
+	# the only interface present - are considered as primary IPs.
+	if node_config.get ('primary_ips', False):
+		return
+
+	# If no node_id was set, there's nothing to do here.
+	if not node_id:
+		return
+
 	v4_ip = "%s/32"  % get_loopback_ip (node_config, node_id, 'v4')
 	v6_ip = "%s/128" % get_loopback_ip (node_config, node_id, 'v6')
 
