@@ -3,8 +3,13 @@
 #
 {%- set roles = node_config.get ('roles', []) %}
 {%- set sites = node_config.get ('sites', []) %}
-{%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
-{%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
+{%- if node_config.get ('primary_ips', False) %}
+  {%- set address = node_config['primary_ips'].get ('v4', '') %}
+  {%- set address6 = node_config['primary_ips'].get ('v6', '') %}
+{%- else %}
+  {%- set address = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v4') %}
+  {%- set address6 = salt['ffho_net.get_loopback_ip'] (node_config, node_id, 'v6') %}
+{%- endif %}
 {%- set monitoring_config = node_config.get ('monitoring', {}) %}
 {%- set status = node_config.get ('status', 'active') %}
 
