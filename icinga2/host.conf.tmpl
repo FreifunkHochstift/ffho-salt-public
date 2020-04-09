@@ -52,8 +52,17 @@ object Host "{{ node_id }}" {
 {%- endfor %}
 	]
 
+{%- if 'host_vars' in monitoring_config %}
+
+	# Host vars for node
+  {%- for key, value in monitoring_config.get ('host_vars').items ()|sort %}
+	vars.{{ key }} = "{{ value }}"
+  {%- endfor %}
+
+{%- endif %}
 {%- if 'service_param' in monitoring_config %}
 
+	# Service params
 	vars.service_param = {
   {%- for service, params in monitoring_config.get ('service_param').items ()|sort %}
 		"{{ service }}" = {
