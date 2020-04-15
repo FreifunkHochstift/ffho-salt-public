@@ -52,6 +52,28 @@ object Host "{{ node_id }}" {
 {%- endfor %}
 	]
 
+{#- Bare-metal host #}
+{%- if node_config.get ('hardware', False) %}
+
+	# Bare metal host
+	vars.hardware = true
+	vars.manufacturer = "{{ node_config['manufacturer']|replace ('"', '\"') }}"
+	vars.model = "{{ node_config['model']|replace ('"', '\\"') }}"
+{%- endif %}
+
+{#- VM #}
+{%- if node_config.get ('virtual', False) %}
+
+	# VM
+	vars.virtual = true
+	vars.vm = {
+		"vcpus"  = {{ node_config['vm_config']['vcpus'] }},
+		"memory" = {{ node_config['vm_config']['memory'] }},
+		"disk"   = {{ node_config['vm_config']['disk'] }},
+	}
+{%- endif %}
+
+{#- Special monitoring related config for this host? #}
 {%- if 'host_vars' in monitoring_config %}
 
 	# Host vars for node
