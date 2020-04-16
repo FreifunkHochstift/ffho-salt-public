@@ -1010,6 +1010,20 @@ def get_loopback_ip (node_config, node_id, proto):
 
 	return "%s%s" % (loopback_prefix.get (proto), node_config.get ('id'))
 
+#
+# Get the primary IP(s) of the given node
+#
+# @param node_config:   Pillar node configuration (as dict)
+# @param af:		Address family
+def get_primary_ip (node_config, af = None):
+	if 'primary_ips' not in node_config:
+		return get_loopback_ip (node_config, 'legacy', af)
+
+	if af:
+		return node_config['primary_ips'].get (af)
+
+	return sorted (node_config['primary_ips'].values ())
+
 
 #
 # Get the router id (read: IPv4 Lo-IP) out of the given node config.
