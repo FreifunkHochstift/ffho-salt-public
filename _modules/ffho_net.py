@@ -185,7 +185,8 @@ def _update_batman_config (node_config, iface, sites_config):
 	iface_type = iface_config.get ('type', 'inet')
 	batman_config = {}
 
-	for item, value in iface_config.items ():
+	for item in list (iface_config.keys ()):
+		value = iface_config.get (item)
 		if item.startswith ('batman-'):
 			batman_config[item] = value
 			iface_config.pop (item)
@@ -262,7 +263,8 @@ def _update_bond_config (config):
 def _update_bridge_config (config):
 	bridge_config = default_bridge_config.copy ()
 
-	for item, value in config.items ():
+	for item in list (config.keys ()):
+		value = config.get (item)
 		if item.startswith ('bridge-'):
 			bridge_config[item] = value
 			config.pop (item)
@@ -285,7 +287,8 @@ def _update_bridge_config (config):
 def _update_vlan_config (config):
 	vlan_config = {}
 
-	for item, value in config.items ():
+	for item in list (config.keys ()):
+		value = config.get (item)
 		if item.startswith ('vlan-'):
 			vlan_config[item] = value
 			config.pop (item)
@@ -502,7 +505,8 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 
 	# Make sure there is a bridge present for every site where a mesh_breakout
 	# interface should be configured.
-	for iface, config in ifaces.items ():
+	for iface in list (ifaces.keys ()):
+		config = ifaces.get (iface)
 		iface_type = config.get ('type', 'inet')
 		if iface_type not in ['mesh_breakout', 'batman_iface']:
 			continue
@@ -574,7 +578,8 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 
 	device_no = node_config.get ('id', -1)
 
-	for iface, iface_config in ifaces.items ():
+	for iface in list (ifaces.keys ()):
+		iface_config = ifaces.get (iface)
 		batman_connect_sites = iface_config.get ('batman_connect_sites', [])
 
 		# If we got a string, convert it to a list with a single element
@@ -663,7 +668,8 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 # Generate implicitly defined VRFs according to the vrf_info dict at the top
 # of this file
 def _generate_vrfs (ifaces):
-	for iface, iface_config in ifaces.items ():
+	for iface in list (ifaces.keys ()):
+		iface_config = ifaces.get (iface)
 		vrf = iface_config.get ('vrf', None)
 		if vrf and vrf not in ifaces:
 			conf = vrf_info.get (vrf, {})
@@ -797,7 +803,8 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 
 	# Enhance ifaces configuration with some meaningful defaults for
 	# bonding, bridge and vlan interfaces, MAC address for batman ifaces, etc.
-	for interface, config in ifaces.items ():
+	for interface in list (ifaces.keys ()):
+		config = ifaces.get (interface)
 		iface_type = config.get ('type', 'inet')
 
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
