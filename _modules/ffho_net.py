@@ -502,6 +502,22 @@ def _generate_batman_interface_config (node_config, ifaces, sites_config):
 					if attr not in iface_config:
 						iface_config[attr] = iface_config_tmpl[attr]
 
+		# Configure bat_site_if to be part of br-<site>, if present
+		site_bridge = "br-%s" % site
+		if site_bridge in ifaces:
+			bridge_config = ifaces.get (site_bridge)
+			bridge_ports = bridge_config.get ('bridge-ports', None)
+			# There are bridge-ports configured already, but bat_site_if is not present
+			if bridge_ports and bat_site_if not in bridge_ports:
+				if type (bridge_ports) == list:
+					bridge_ports.append (bat_site_if)
+				else:
+					bridge_config['bridge-ports'] += ' ' + bat_site_if
+
+			# There are no bridge-ports configured
+			if not bridge_ports:
+				bridge_config['bridge-ports'] = bat_site_if
+
 
 	# Make sure there is a bridge present for every site where a mesh_breakout
 	# interface should be configured.
