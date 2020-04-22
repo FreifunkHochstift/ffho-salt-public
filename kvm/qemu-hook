@@ -27,7 +27,14 @@ if ! which xmlstarlet >/dev/null 2>/dev/null; then
 	exit 1
 fi
 
-xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", source/@bridge)'  --nl | while read iface bridge; do
+# Save domain XML which was given to us on stdin, so we can poke around in it.
+# Yes this is ugly. But I don't see another way storing the MTU for an device
+# within the libvirt domain config when NOT using a libvirt network.
+# If you happen to now a better way than specifying this within custom domain
+# metadata PLEASE let me know.
+export domain_xml="$(cat)"
+
+echo "${domain_xml}" | xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", source/@bridge)'  --nl | while read iface bridge; do
 	if [ ! -d "/sys/class/net/${bridge}/bridge" ]; then
 		logger -t "${my_name}" "Bridge \"${bridge}\" for iface \"${iface}\" doesn't exist or isn't a bridge."
 		exit 2
@@ -62,6 +69,11 @@ xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", 
 
 	# We dont' care about "no vlan filtering AND no vlan id" as well as "vlan filtering AND no vlan id"
 
+	mtu=$(echo "${domain_xml}" | xmlstarlet sel -t -m "//metadata/ffho/interface[@name='${iface}']" -v 'mtu/@size'  --nl || true)
+	if [ "${mtu}" ]; then
+		ip link set mtu "${mtu}" dev "${iface}"
+		logger -t "${my_name}" "Setting MTU of ${iface} to ${mtu}."
+	fi
 
 	# If there is an configuration stanza in /etc/network/interfaces
 	# for this interfaces, we try to get it up and running. Proceed
