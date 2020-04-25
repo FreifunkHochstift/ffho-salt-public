@@ -1,0 +1,6 @@
+#
+# /etc/resolv.conf (Salt managed)
+#
+search in.ffho.net
+nameserver 127.0.0.1
+nameserver 2a03:2260:2342:f251::53

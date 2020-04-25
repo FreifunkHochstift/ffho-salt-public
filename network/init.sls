@@ -37,5 +37,7 @@ vnstat:
 # /etc/resolv.conf
 /etc/resolv.conf:
   file.managed:
-    - source: salt://network/resolv.conf
+    - source:
+      - salt://network/resolv.conf.H_{{ grains.id }}
+      - salt://network/resolv.conf
     - template: jinja
