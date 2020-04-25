@@ -46,6 +46,7 @@ Unattended-Upgrade::Package-Blacklist {
 	"bird";
 	"fastd";
 	"batman-adv-dkms";
+	"ifupdown2";
 };
 
 // This option allows you to control if on a unclean dpkg exit
