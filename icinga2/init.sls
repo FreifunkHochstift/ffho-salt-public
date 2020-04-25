@@ -161,6 +161,7 @@ ffho-plugins:
     - user: root
     - group: root
     - clean: true
+    - template: jinja
     - require:
       - pkg: icinga2
     - watch_in:
