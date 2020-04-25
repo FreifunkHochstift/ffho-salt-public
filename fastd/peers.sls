@@ -2,10 +2,6 @@
 # FFHO Gateways specific stuff
 #
 
-# include ffho stuff (ffho.id_rsa)
-include:
-  - ffho_base
-
 # publish blacklist
 /etc/fastd/peers-blacklist:
   file.managed:
