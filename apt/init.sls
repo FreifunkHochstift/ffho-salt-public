@@ -10,14 +10,6 @@
   file.managed:
     - source: salt://apt/update_apt.cron
 
-{% if (grains.oscodename == 'jessie' or grains.oscodename == 'stretch') %}
-apt-transport-https:
-  pkg.installed
-{% endif %}
-
-python-apt:
-  pkg.installed
-
 # FFHO APT
 /etc/apt/trusted.gpg.d/ffho.gpg:
   file.managed:
