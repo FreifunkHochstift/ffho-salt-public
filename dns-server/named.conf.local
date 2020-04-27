@@ -50,13 +50,6 @@ zone "6.0.0.0.0.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
 	allow-transfer { slaves; localhost; ffho-ops; };
 };
 
-// 2a02:450:1::/60
-zone "0.0.0.1.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
-	type master;
-	file "/etc/bind/zones/static/2a02:450:1_60.ip6.arpa.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
-};
-
 
 //
 // FFRL v6 Assignments
