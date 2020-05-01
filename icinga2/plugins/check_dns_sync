@@ -5,7 +5,8 @@
 #
 
 import argparse
-from dns.resolver import Resolver, NoNameservers
+from dns.flags import to_text
+from dns.resolver import Resolver
 from ipaddress import ip_address
 import sys
 import time
@@ -55,13 +56,27 @@ def check_zone (zone):
 
 	if args.check_mode == 'serial':
 		try:
+			# Query reference NS
 			reference = reference_res.query (zone, 'SOA')
+
+			# Check is answer is authoritive
+			if not 'AA' in to_text (reference.response.flags):
+				res['state'] = CRITICAL
+				res['errors'] = "Got non-authoritive answer from reference NS: %s" % args.reference_ns
+				return res
 		except Exception as e:
 			res['errors'] = "Error while checking reference NS %s: %s" % (args.reference_ns, e)
 			return res
 
 		try:
+			# Query replica NS
 			replica = replica_res.query (zone, 'SOA')
+
+			# Check is answer is authoritive
+			if not 'AA' in to_text (replica.response.flags):
+				res['state'] = CRITICAL
+				res['errors'] = "Got non-authoritive answer from replica NS: %s" % args.replica_ns
+				return res
 		except Exception as e:
 			res['errors'] = "Error while checking replica NS %s: %s" % (args.replica_ns, e)
 			return res
