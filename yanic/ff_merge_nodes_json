@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import sys
+import time
 
 parser = argparse.ArgumentParser (description = 'Merge nodes.json files')
 parser.add_argument ('files', help = 'Path for nodes.json file(s)', nargs = '+')
@@ -27,6 +28,22 @@ for file_path in args.files:
 		sys.exit (1)
 
 	for node in nodes['nodes']:
+		node_id = node['nodeinfo']['node_id']
+
+		# If node_id has already been seen make sure to use the newer entry
+		if node_id in all_nodes:
+			try:
+				node_lastseen = time.strptime (node['lastseen'], "%Y-%m-%dT%H:%M:%S%z")
+				existing_node_lastseen = time.strptime (existing_node_lastseen['lastseen'], "%Y-%m-%dT%H:%M:%S%z")
+
+				# If the node information already stored in all_nodes is more
+				# recent than the node we just found, don't overwrite it.
+				if existing_node_lastseen > node_lastseen:
+					continue
+			except Exception:
+				# If parsing a timestamp fails just carry on
+				continue
+
 		all_nodes[node['nodeinfo']['node_id']] = node
 
 	for key in nodes.keys ():
