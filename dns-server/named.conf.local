@@ -2,81 +2,33 @@
 // Zone configuration for master name server (Salt managed)
 //
 
-acl slaves {
-	// dns01.srv.rfc2324.org
-	31.172.8.66;
-	2a01:a700:4621:866::10;
-
-	// ns.youngage.eu
-	5.9.142.19;
-	2a01:4f8:190:2105::53;
-};
-
-acl ffho-ops {
-	10.123.249.0/24;
-};
-
-
 //
-// Public forward zones
+// ACLs
 //
 
-zone "paderborn.freifunk.net" {
-	type master;
-	file "/etc/bind/zones/static/paderborn.freifunk.net.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
+{% for acl_name, acl_config in salt['pillar.get']('dns-server:acls', {}).items ()|sort %}
+acl {{ acl_name }} {
+  {%- for entry in acl_config['entries'] %}
+	{{ entry }};
+  {%- endfor %}
 };
 
-zone "hochstift.freifunk.net" {
-	type master;
-	file "/etc/bind/zones/static/hochstift.freifunk.net.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
-};
-
-zone "ffho.net" {
-	type master;
-	file "/etc/bind/zones/generated/ffho.net.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
-};
-
+{% endfor %}
 
 //
-// Vega Systems v6 reverse nets
+// Zones
 //
-// 2a02:450:0:6::/64
-zone "6.0.0.0.0.0.0.0.0.5.4.0.2.0.a.2.ip6.arpa" {
-	type master;
-	file "/etc/bind/zones/static/2a02:450:0:6_64.ip6.arpa.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
+
+{%- set defaults = salt['pillar.get']('dns-server:zone_defaults', {}) %}
+{% for zone, zone_config in salt['pillar.get']('dns-server:zones', {}).items ()|sort %}
+  {%- set allow_transfer = zone_config.get ('allow-transfer', defaults.get ('allow-transfer')) %}
+// {{ zone_config.get ('desc', zone ) }}
+zone "{{ zone }}" {
+	type {{ zone_config.get ('type', defaults.get ('type')) }};
+	file "{{ zone_config.get ('file') }}";
+  {%- if allow_transfer %}
+	allow-transfer { {{ allow_transfer }} };
+  {%- endif %}
 };
 
-
-//
-// FFRL v6 Assignments
-//
-
-// 2a03:2260:2342::/48
-zone "2.4.3.2.0.6.2.2.3.0.a.2.ip6.arpa" {
-	type master;
-	file "/etc/bind/zones/generated/2a03:2260:2342::_48.ip6.arpa.zone";
-	allow-transfer { slaves; localhost; ffho-ops; };
-};
-
-
-//
-// Internal stuff
-//
-
-// 10.132.0.0/16 reverse
-zone "132.10.in-addr.arpa" {
-	type master;
-	file "/etc/bind/zones/generated/132.10.in-addr.arpa.zone";
-	allow-transfer { localhost; ffho-ops; };
-};
-
-// Management reverse
-zone "30.172.in-addr.arpa" {
-	type master;
-	file "/etc/bind/zones/generated/30.172.in-addr.arpa.zone";
-	allow-transfer { localhost; ffho-ops; };
-};
+{% endfor %}

@@ -37,6 +37,7 @@ rndc-reload:
 /etc/bind/named.conf.local:
   file.managed:
     - source: salt://dns-server/named.conf.local
+    - template: jinja
     - require:
       - pkg: bind9
     - watch_in:
