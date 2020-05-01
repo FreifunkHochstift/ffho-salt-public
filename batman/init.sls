@@ -7,8 +7,6 @@
 # has been configured for this node.
 #
 {%- set roles = salt['pillar.get']('nodes:' ~ grains['id']  ~ ':roles', []) %}
-include:
-  - apt
 
 {%- if 'batman' in roles %}
 batctl:
@@ -59,6 +57,9 @@ batman-adv-dkms:
   pkg.purged
 
 /etc/bat-hosts:
+  file.absent
+
+/etc/modules-load.d/batman-adv.conf:
   file.absent
 
 /etc/cron.d/ff_check_gateway:
