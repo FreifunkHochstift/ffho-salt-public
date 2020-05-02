@@ -1,0 +1,38 @@
+#
+# /etc/nginx/sites-enabled/www2.ffho.net (Salt managed)
+#
+
+{%- set acme_thumbprint = salt['pillar.get']('acme:thumbprint', False) %}
+
+server {
+	listen 443;
+	listen [::]:443;
+
+	ssl on;
+	ssl_certificate /etc/ssl/certs/www2.ffho.net.cert.pem;
+	ssl_certificate_key /etc/ssl/private/www2.ffho.net.key.pem;
+
+	include /etc/nginx/ffho.d/add-headers.conf;
+
+	root /srv/www2/
+
+	server_name www2.ffho.net
+	fancyindex on;
+	fancyindex_exact_size off;
+	fancyindex_name_length 70;
+	fancyindex_header /header.html;
+	fancyindex_localtime on;
+	fancyindex_default_sort name;
+
+	location / {
+		try_files $uri $uri/ /index.html =404;
+		fancyindex_ignore header.html favicon.ico models-short.txt models.txt robots.txt scripts;
+	}
+
+  {%- if acme_thumbprint %}
+	location ~ "^/\.well-known/acme-challenge/([-_a-zA-Z0-9]+)$" {
+		default_type text/plain;
+		return 200 "$1.{{ acme_thumbprint }}";
+	}
+  {%- endif %}
+}

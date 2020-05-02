@@ -38,6 +38,17 @@ nginx-cache:
     - watch_in:
       - cmd: nginx-configtest
 
+/etc/nginx/ffho.d:
+  file.recurse:
+    - source: salt://nginx/ffho.d
+    - file_mode: 755
+    - dir_mode: 755
+    - user: root
+    - group: root
+    - clean: True
+    - watch_in:
+      - cmd: nginx-configtest
+
 # Disable default configuration
 /etc/nginx/sites-enabled/default:
   file.absent:
