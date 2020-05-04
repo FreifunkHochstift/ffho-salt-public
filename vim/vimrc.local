@@ -1,0 +1,2 @@
+" Do not load defaults ever at all
+let g:skip_defaults_vim = 1
