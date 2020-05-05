@@ -126,3 +126,8 @@ vm.swappiness:
   sysctl.present:
     - value: 1
     - config: /etc/sysctl.d/10-global.conf
+
+net.ipv4.tcp_congestion_control:
+  sysctl.present:
+    - value: bbr
+    - config: /etc/sysctl.d/10-bbr-congestion.conf
