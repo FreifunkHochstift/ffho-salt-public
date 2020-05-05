@@ -76,17 +76,6 @@ net.netfilter.nf_conntrack_max:
     - value: 16777216
     - config: /etc/sysctl.d/10-global.conf
 
-#
-# "Be conservative in what you do,
-#  be liberal in what you accept from others."
-#  If it's non-zero, we mark only out of window RST segments as INVALID.
-#  -- net/netfilter/nf_conntrack_proto_tcp.c
-#
-net.ipv4.netfilter.ip_conntrack_tcp_be_liberal:
-  sysctl.present:
-    - value: 1
-    - config: /etc/sysctl.d/10-global.conf
-
 # Disable RA
 net.ipv6.conf.default.accept_ra:
   sysctl.present:
