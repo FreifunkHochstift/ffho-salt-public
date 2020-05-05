@@ -87,21 +87,6 @@ net.ipv4.netfilter.ip_conntrack_tcp_be_liberal:
     - value: 1
     - config: /etc/sysctl.d/10-global.conf
 
-#
-# Don't filter packet passing a bridge and not being routed on this host.
-net.bridge.bridge-nf-call-iptables:
-  sysctl.present:
-    - value: 0
-    - config: /etc/sysctl.d/10-global.conf
-net.bridge.bridge-nf-call-ip6tables:
-  sysctl.present:
-    - value: 0
-    - config: /etc/sysctl.d/10-global.conf
-net.bridge.bridge-nf-call-arptables:
-  sysctl.present:
-    - value: 0
-    - config: /etc/sysctl.d/10-global.conf
-
 # Disable RA
 net.ipv6.conf.default.accept_ra:
   sysctl.present:
