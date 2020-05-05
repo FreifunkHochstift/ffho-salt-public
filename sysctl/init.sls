@@ -10,7 +10,7 @@
 include:
   - sysctl.global
 
-{% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role or 'router' in role or 'vpngw' in role %}
+{% if 'corerouter' in role or 'gateway' in role or 'master' in role or 'out_of_band_mgmt' in role or 'router' in role or 'vpngw' in role or 'docker' in role %}
 
 #
 # Activate IP Unicast Routing
