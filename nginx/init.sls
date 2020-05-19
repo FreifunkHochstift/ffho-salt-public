@@ -4,6 +4,7 @@
 
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
 {% set nginx_pkg = node_config.get('nginx:pkg', 'nginx') %}
+{% set acme_thumbprint = salt['pillar.get']('acme:thumbprint') %}
 
 nginx:
   pkg.installed:
@@ -75,6 +76,7 @@ nginx-cache:
   file.managed:
     - source: salt://nginx/{{config.file}}
     - template: jinja
+      acme_thumbprint: {{ acme_thumbprint }}
     - require:
       - pkg: nginx
     - watch_in:
