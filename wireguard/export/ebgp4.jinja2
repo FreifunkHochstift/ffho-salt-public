@@ -3,7 +3,7 @@
 
 router id 172.20.{{ (network_id / 2) | int }}.1;
 
-define FREIFUNK 1023;
+define FREIFUNK = 1023;
 filter default_in {
     if net ~ [
         0.0.0.0/0
