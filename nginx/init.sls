@@ -63,6 +63,7 @@ nginx-cache:
     - source: salt://nginx/{{website}}
     - template: jinja
       config: {{ website_config }}
+      acme_thumbprint: {{ acme_thumbprint }}
     - require:
       - pkg: nginx
     - watch_in:
