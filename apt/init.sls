@@ -21,6 +21,17 @@
     - require:
       - file: /etc/apt/trusted.gpg.d/ffho.gpg
 
+# Salt APT
+/etc/apt/trusted.gpg.d/salt.gpg:
+  file.managed:
+    - source: salt://apt/salt.gpg
+
+/etc/apt/sources.list.d/salt.list:
+  file.managed:
+    - source: salt://apt/salt.list.{{ grains.os }}.{{ grains.oscodename }}
+    - require:
+      - file: /etc/apt/trusted.gpg.d/salt.gpg
+
 
 # APT preferences
 /etc/apt/preferences.d/ffho:
