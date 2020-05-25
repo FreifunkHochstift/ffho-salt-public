@@ -2,18 +2,13 @@
 # Fastd for gateways
 #
 
+include:
+  - network.interfaces
+
 {% set sites_all = pillar.get ('sites') %}
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
 {% set sites_node = node_config.get('sites', {}) %}
 {% set device_no = node_config.get('id', -1) %}
-
-include:
-  - apt
-  - network.interfaces
-{% if 'fastd_peers' in node_config.get('roles', []) %}
-  - fastd.peers
-{% endif %}
-
 
 
 # Install fastd
@@ -37,6 +32,31 @@ fastd:
     - mode: 711
   require:
     - pkg: fastd
+
+
+#
+# Is this instance to be used by external clients?
+{% if 'fastd_peers' in node_config.get ('roles', []) %}
+# publish blacklist
+/etc/fastd/peers-blacklist:
+  file.managed:
+    - source: salt://fastd/peers-blacklist
+    - user: root
+    - group: root
+    - mode: 644
+    - require:
+      - file: /etc/fastd
+
+/etc/fastd/verify-peer.sh:
+  file.managed:
+    - source: salt://fastd/verify-peer.sh
+    - user: root
+    - group: root
+    - mode: 744
+    - require:
+      - file: /etc/fastd
+{% endif %}
+
 
 #
 # Set up fastd configuration for every network (nodes4, nodes6, intergw-vpn)
