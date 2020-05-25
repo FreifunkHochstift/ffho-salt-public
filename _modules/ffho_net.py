@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import collections
+import ipaddress
 import re
 from copy import deepcopy
 
@@ -919,8 +920,6 @@ def gen_bat_hosts (nodes_config, sites_config):
 
 # Generate eBGP session parameters for FFRL Transit from nodes pillar information.
 def get_ffrl_bgp_config (ifaces, proto):
-	from ipcalc import IP
-
 	_generate_ffrl_gre_tunnels (ifaces)
 
 	sessions = {}
@@ -940,10 +939,7 @@ def get_ffrl_bgp_config (ifaces, proto):
 				local = prefix.split ('/')[0]
 
 				# Calculate neighbor IP as <local IP> - 1
-				if proto == 'v4':
-					neighbor = str (IP (int (IP (local)) - 1, version = 4))
-				else:
-					neighbor = str (IP (int (IP (local)) - 1, version = 6))
+				neighbor = str (ipaddress.ip_address (u'%s' % local) - 1)
 
 				break
 
@@ -1205,8 +1201,6 @@ def get_te_prefixes (te_node_config, grains_id, proto):
 
 
 def generate_DNS_entries (nodes_config, sites_config):
-	import ipaddress
-
 	forward_zone_name = ""
 	forward_zone = []
 	zones = {
@@ -1305,9 +1299,7 @@ def is_subprefix (prefix, subprefix):
 
 # Return the network address of the given prefix
 def get_network_address (prefix, with_prefixlen = False):
-	from ipaddress import ip_network
-
-	net_h = ip_network (u'%s' % prefix, strict = False)
+	net_h = ipaddress.ip_network (u'%s' % prefix, strict = False)
 	network = str (net_h.network_address)
 
 	if with_prefixlen:
