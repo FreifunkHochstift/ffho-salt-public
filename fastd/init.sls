@@ -127,12 +127,6 @@ fastd@{{ instance_name }}:
 
 
 #
-# Remove old Inter-GW peers folder
-/etc/fastd/{{ site }}_intergw/gateways:
-  file.absent
-
-
-#
 # Cleanup configurations for previosly configured instances.
 # Stop fastd instance before purging the configuration.
   {% for network in networks_absent %}
