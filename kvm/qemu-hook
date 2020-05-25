@@ -69,7 +69,7 @@ echo "${domain_xml}" | xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'co
 
 	# We dont' care about "no vlan filtering AND no vlan id" as well as "vlan filtering AND no vlan id"
 
-	mtu=$(echo "${domain_xml}" | xmlstarlet sel -t -m "//metadata/ffho/interface[@name='${iface}']" -v 'mtu/@size'  --nl || true)
+	mtu=$(echo "${domain_xml}" | xmlstarlet sel -N ffho="https://ffho.net/libvirt/" -t -m "//ffho:net/interface[@name='${iface}']" -v 'mtu/@size'  --nl || true)
 	if [ "${mtu}" ]; then
 		ip link set mtu "${mtu}" dev "${iface}"
 		logger -t "${my_name}" "Setting MTU of ${iface} to ${mtu}."
