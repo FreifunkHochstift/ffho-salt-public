@@ -1077,33 +1077,6 @@ def get_node_iface_ips (node_config, iface_name, with_mask = False):
 
 
 #
-# Get the lookback IP of the given node for the given proto
-#
-# @param node_config:	Pillar node configuration (as dict)
-# @param node_id:	Minion name / Pillar node configuration key
-# @param proto:		{ 'v4', 'v6' }
-def get_loopback_ip (node_config, node_id, proto):
-	if proto not in [ 'v4', 'v6' ]:
-		raise Exception ("get_loopback_ip(): Invalid proto: \"%s\"." % proto)
-
-	if not proto in loopback_prefix:
-		raise Exception ("get_loopback_ip(): No loopback_prefix configured for IP%s in ffno_net module!" % proto)
-
-	if not 'id' in node_config:
-		raise Exception ("get_loopback_ip(): No 'id' configured in pillar for node \"%s\"!" % node_id)
-
-	# Every rule has an exception.
-	# If there is a loopback_overwrite configuration for this node, use this instead of
-	# the generated IPs.
-	if 'loopback_override' in node_config:
-		if proto not in node_config['loopback_override']:
-			raise Exception ("get_loopback_ip(): No loopback_prefix configured for IP%s in node config / loopback_override!" % proto)
-
-		return node_config['loopback_override'][proto]
-
-	return "%s%s" % (loopback_prefix.get (proto), node_config.get ('id'))
-
-#
 # Get the primary IP(s) of the given node
 #
 # @param node_config:   Pillar node configuration (as dict)
