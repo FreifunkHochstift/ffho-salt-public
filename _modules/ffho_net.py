@@ -103,11 +103,85 @@ MTU = {
 
 ################################################################################
 #                                                                              #
-#                              Internal functions                              #
+#                       Internal data types and functions                      #
 #                                                                              #
 #       Touching anything below will void any warranty you never had ;)        #
 #                                                                              #
 ################################################################################
+
+
+################################################################################
+#                                 Data types                                   #
+################################################################################
+
+class Prefix (object):
+	"""An internet address with a prefix length.
+
+	The given address is expected to be of format ip/plen in CIDR notation.
+	The IP as well as the prefix length and address family will be stored
+	in attributes.
+
+	.. code-block:: pycon
+        >>> a = Prefix ('10.132.23.42/24')
+        >>> str (a.ip)
+        '10.132.23.42'
+        >>> str (a.af)
+        '4'
+        >>> str (a.plen)
+        '24'
+        >>> str (a.netmask)
+        '255.255.255.0'
+        >>> str (a.network_address)
+        '10.132.23.0'
+	"""
+
+	def __init__ (self, prefix):
+		self.prefix = prefix
+		self.ip_network = ipaddress.ip_network (u'%s' % prefix, strict = False)
+
+
+	def __eq__ (self, other):
+		if isinstance (other, Prefix):
+			return self.ip_network == other.ip_network
+
+		return NotImplemented
+
+	def __lt__ (self, other):
+		if isinstance (other, Prefix):
+			return self.ip_network < other.ip_network
+
+		return NotImplemented
+
+
+	def __str__ (self):
+		return self.prefix
+
+
+	@property
+	def ip (self):
+		return self.prefix.split ('/')[0]
+
+	@property
+	def af (self):
+		return self.ip_network.version
+
+	@property
+	def plen (self):
+		return self.ip_network.prefixlen
+
+	@property
+	def netmask (self):
+		return self.ip_network.netmask
+
+	@property
+	def network_address (self):
+		return self.ip_network.network_address
+
+
+################################################################################
+#                                  Functions                                   #
+################################################################################
+
 
 sites = None
 
