@@ -814,8 +814,8 @@ def _generate_loopback_ips (ifaces, node_config, node_id):
 	if node_config.get ('primary_ips', False):
 		return
 
-	v4_ip = "%s/32"  % get_loopback_ip (node_config, node_id, 'v4')
-	v6_ip = "%s/128" % get_loopback_ip (node_config, node_id, 'v6')
+	v4_ip = "%s/32"  % get_primary_ip (node_config, 'v4').ip
+	v6_ip = "%s/128" % get_primary_ip (node_config, 'v6').ip
 
 	# Interface lo already present?
 	if 'lo' not in ifaces:
@@ -1108,20 +1108,18 @@ def get_loopback_ip (node_config, node_id, proto):
 #
 # @param node_config:   Pillar node configuration (as dict)
 # @param af:		Address family
-def get_primary_ip (node_config, af = None):
+def get_primary_ip (node_config, af):
+	# Compatility glue
 	if 'primary_ips' not in node_config:
-		return get_loopback_ip (node_config, 'legacy', af)
+		return Prefix ("%s%s" % (loopback_prefix[af], node_config['id']))
 
-	if af:
-		return node_config['primary_ips'].get (af)
-
-	return sorted (node_config['primary_ips'].values ())
+	return Prefix (node_config['primary_ips'][af])
 
 
 #
 # Get the router id (read: IPv4 Lo-IP) out of the given node config.
 def get_router_id (node_config, node_id):
-	return get_loopback_ip (node_config, node_id, 'v4')
+	return get_primary_ip (node_config, 'v4').ip
 
 
 
