@@ -29,7 +29,7 @@ yanic:
 
 # get loopback IPv6 for binding the webserver to it
 {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
-{% set bind_ip = salt['ffho_net.get_loopback_ip'](node_config, grains['id'], 'v6') %}
+{% set bind_ip = salt['ffho_net.get_primary_ip'](node_config, 'v6').ip %}
 
 # for each site
 {% for site in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) %}
