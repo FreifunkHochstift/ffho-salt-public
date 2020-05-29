@@ -958,6 +958,9 @@ def gen_bat_hosts (nodes_config, sites_config):
 		node_config = nodes_config.get (node_id)
 		node_name = node_id.split ('.')[0]
 
+		if 'batman' not in node_config['roles']:
+			continue
+
 		ifaces = get_interface_config (node_config, sites_config, node_id)
 		for iface in sorted (ifaces):
 			iface_config = ifaces.get (iface)
