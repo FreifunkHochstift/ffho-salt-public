@@ -51,7 +51,7 @@ addAction({'in.ffmuc.net.', 'ext.ffmuc.net'}, PoolAction("auth"))
 addAction({'bbs','chan','cyb','dns.opennic.glue','dyn','epic','geek','gopher','indy','libre','neo','null','o','opennic.glue','oss','oz','parody','pirate'}, PoolAction("auth"))
 
 -- add cache for X possible entries
-pc = newPacketCache(100000)
+pc = newPacketCache(200000)
 getPool(""):setCache(pc)
 
 {%- set dnsdist_webserver = salt["pillar.get"]("netbox:config_context:dnsdist:webserver", []) %}
