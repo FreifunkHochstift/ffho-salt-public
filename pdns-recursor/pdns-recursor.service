@@ -11,6 +11,7 @@ ExecStart=/sbin/ip vrf exec vrf_external /usr/sbin/pdns_recursor --daemon=no --w
 Type=notify
 Restart=on-failure
 StartLimitInterval=0
+RuntimeDirectory=pdns-recursor
 
 # Tuning
 LimitNOFILE=16384
