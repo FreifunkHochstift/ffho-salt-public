@@ -27,3 +27,10 @@
     - source: salt://ffinfo/list.tmpl
     - template: jinja
       list: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) }}
+
+
+# Generate /etc/freifunk/status file with the status of this node
+{% set status = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':status', 'active') %}
+/etc/freifunk/status:
+  file.managed:
+    - contents: {{ status }}
