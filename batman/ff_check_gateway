@@ -1,13 +1,32 @@
-#!/bin/bash
+#!/bin/sh
 #
-# Check if this system (still) is a gateway and update mesh mode if necessary (Salt managed)
+# Check if this system (still) should be an active B.A.T.M.A.N. gateway
+# and update gw_mode accordingly if necessary (Salt managed)
 #
-# Rewritten by: Maximilian Wilhelm <max@rfc2324.org>
+# Rewritten by: Maximilian Wilhelm <max@sdn.clinic>
 #  -- Sat, 07 Mar 2015 23:21:53 +0100
 #
 
+node_status_file="/etc/freifunk/status"
+
 # Default to "off"
 new_state="off"
+force_offline="false"
+
+#
+# If the status of this machine is not 'active', we should not
+# be an active gateway.
+if [ -f "${node_status_file}" ]; then
+	status=$(cat "${node_status_file}")
+	if [ "${status}" != "active" ]; then
+		force_offline="true"
+	fi
+
+#
+# If there is no DHCP server running here, we should not be an
+# active gateway.
+elif ! systemctl status isc-dhcp-server >/dev/null; then
+	force_offline="true"
 
 #
 # If there is a default route via an IP from our address space
@@ -15,29 +34,23 @@ new_state="off"
 # default route would be propagated in via iBGP and/or OSPF it
 # will only be present if at least one border router has an up
 # and running connection to AS201701.
-if ip route show | grep "^default via 10.132." -q; then
+elif ip route show | grep "^default via 10.132." -q; then
         new_state="server"
 fi
 
-# Make sure the following glob isn't interpreted as a literal string if there isn't
-# any meshable interface.
-shopt -s nullglob
-for mesh_int in /sys/class/net/*/mesh; do
-	ifname=$(IFS="/";set -- ${mesh_int};printf "$5\n")
+for iface in $(ip -br l | awk '/^bat-/ { print $1 }'); do
 	# Ignore any external BATMAN instance, if present
-	if echo "${ifname}" | grep -q '-ext$'; then
+	if echo "${iface}" | grep -q '-ext$'; then
 		continue
 	fi
 
-	if [ "${new_state}" == "off" -a "$(tail -n 1 /sys/kernel/debug/batman_adv/${ifname}/gateways)" == "No gateways in range ..." ] ; then
-		logger "No other B.A.T.M.A.N. gateways present, forcing gateway mode to server on ${ifname}"
-		new_state="server"
+	old_state="$(batctl -m "${iface}" gw_mode)"
+	if [ "$old_state" = "$new_state" ]; then
+		# Nothing to do here, carry on
+		continue
 	fi
 
-	old_state="$(cat ${mesh_int}/gw_mode)"
-	[ "$old_state" == "$new_state" ] && continue
-
-	echo "${new_state}"  > "${mesh_int}/gw_mode"
-	echo "54MBit/54MBit" > "${mesh_int}/gw_bandwidth"
-	logger "B.A.T.M.A.N. gateway mode changed from ${old_state} to ${new_state} on ${ifname}"
+	# Set new values
+	batctl -m "${iface}" gw_mode "${new_state}"
+	logger "B.A.T.M.A.N. gateway mode changed from ${old_state} to ${new_state} on ${iface}"
 done
