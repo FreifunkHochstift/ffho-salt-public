@@ -13,7 +13,7 @@ burp-server:
   file.managed:
     - source: salt://burp/default_burp
 
-/etc/burp/burp.conf:
+/etc/burp/burp-server.conf:
   file.managed:
     - source: salt://burp/burp-server.conf.tmpl
     - template: jinja
