@@ -272,16 +272,24 @@ bird6-configure:
 
 {% else %}
 /etc/bird/bird.d/ffrl.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird-configure
 
 /etc/bird/bird6.d/ffrl.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
 
 /etc/bird/bird.d/bogon_unreach.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird-configure
 
 /etc/bird/bird6.d/bogon_unreach.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
 {% endif %}
 
 
@@ -313,9 +321,13 @@ bird6-configure:
 
 {% else %}
 /etc/bird/bird.d/mesh_routes.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird-configure
 /etc/bird/bird6.d/mesh_routes.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
 {% endif %}
 
 
@@ -347,9 +359,13 @@ bird6-configure:
 
 {% else %}
 /etc/bird/bird.d/l3-access.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird-configure
 /etc/bird/bird6.d/l3-access.conf:
-  file.absent
+  file.absent:
+    - watch_in:
+      - cmd: bird6-configure
 {% endif %}
 
 
