@@ -15,6 +15,7 @@ salt-repo:
     - name: deb http://repo.saltstack.com/py3/debian/{{ grains.osmajorrelease }}/{{ grains.osarch }}/3000 {{ grains.oscodename }} main
     - dist: {{ grains.oscodename }}
     - file: /etc/apt/sources.list.d/saltstack.list
+    - clean_file: True
 
 /etc/cron.d/apt:
   file.managed:
