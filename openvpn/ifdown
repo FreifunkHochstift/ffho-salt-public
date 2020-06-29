@@ -1,3 +1,0 @@
-#!/bin/sh
-
-/usr/bin/flock --exclusive --wait 30 /var/lock/ff_ifupdown2 /sbin/ifdown "$1"
