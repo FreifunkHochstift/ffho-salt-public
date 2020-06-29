@@ -11,7 +11,7 @@ burp-server:
     - name: burp-server
   service.running:
     - enable: True
-    - reload: True
+    - restart: True
 
 /etc/default/burp:
   file.managed:
