@@ -56,7 +56,7 @@ getPool(""):setCache(pc)
 
 {%- set dnsdist_webserver = salt["pillar.get"]("netbox:config_context:dnsdist:webserver", []) %}
 {%- if "bind" in dnsdist_webserver %}
-webserver("{{ dnsdist_webserver["bind"] }}", "{{ dnsdist_webserver["password"] }}", "{{ dnsdist_webserver["api_token"] }}")
+webserver("127.0.0.1:8127", "{{ dnsdist_webserver["password"] }}", "{{ dnsdist_webserver["api_token"] }}")
 {%- endif -%}
 {%- set dnsdist_console = salt["pillar.get"]("netbox:config_context:dnsdist:console", []) %}
 {%- if "bind" in dnsdist_console %}
