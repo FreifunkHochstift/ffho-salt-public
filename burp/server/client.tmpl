@@ -3,6 +3,8 @@
 #
 password = {{ burp_config.get ('password') }}
 
+. incexc/common
+
 {%- for entry in burp_config.get ('include_fs') %}
 include = {{ entry }}
 {%- endfor %}

@@ -1,0 +1,40 @@
+#
+# Common options for all clients (Salt managed)
+#
+
+# If you add at least one 'include=' line, the server will override the
+# rest of the client options below, which define exactly what to backup.
+# Setting any of the other options here will then also take effect on the
+# client.
+
+include = /etc
+include = /srv
+
+# Exclude various temporary file systems.
+exclude_fs = sysfs
+exclude_fs = tmpfs
+exclude_fs = proc
+exclude_fs = devfs
+exclude_fs = devpts
+
+# exclude_ext=vdi
+# exclude_regex=/\.cache/
+
+# Exclude files from compression by extension.
+exclude_comp = bz2
+exclude_comp = gz
+exclude_comp = xz
+
+# cross_filesystem=/some/path
+cross_all_filesystems=0
+
+# split_vss=1
+# strip_vss=0
+
+# When backing up, whether to enable O_NOATIME when opening files and
+# directories. The default is atime=0, which enables O_NOATIME.
+atime = 0
+
+# When enabled, this causes problems in the phase1 scan (such as an 'include'
+# being missing) to be treated as fatal errors. The default is 0.
+scan_problem_raises_error = 0
