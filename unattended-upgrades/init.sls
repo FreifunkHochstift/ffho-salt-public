@@ -12,4 +12,7 @@ unattended-upgrades:
 
 /etc/apt/apt.conf.d/50unattended-upgrades:
   file.managed:
-    - source: salt://unattended-upgrades/50unattended-upgrades.{{ grains.os }}.{{ grains.oscodename }}
+    - source:
+       - salt://unattended-upgrades/50unattended-upgrades.{{ grains.os }}.{{ grains.oscodename }}
+       - salt://unattended-upgrades/50unattended-upgrades
+    - template: jinja

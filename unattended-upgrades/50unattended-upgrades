@@ -8,13 +8,13 @@ Unattended-Upgrade::Origins-Pattern {
         // Note that this will silently match a different release after
         // migration to the specified archive (e.g. testing becomes the
         // new stable).
-        "o=Raspbian,n=stretch";
-        "o=Raspbian,n=stretch,a=stable-updates";
-        "o=Raspbian,n=stretch,a=proposed-updates";
-        "o=Raspbian,n=stretch,l=Raspbian-Security";
-        "o=Raspbian Backports,n=stretch-backports,l=Raspbian Backports";
-        "origin=Raspbian,archive=stable,label=Raspbian-Security";
-        "origin=Raspbian,archive=oldstable,label=Raspbian-Security";
+        "o={{ grains.os }},n={{ grains.oscodename }}";
+        "o={{ grains.os }},n={{ grains.oscodename }},a=stable-updates";
+        "o={{ grains.os }},n={{ grains.oscodename }},a=proposed-updates";
+        "o={{ grains.os }},n={{ grains.oscodename }},l={{ grains.os }}-Security";
+        "o={{ grains.os }} Backports,n={{ grains.oscodename }}-backports,l={{ grains.os }} Backports";
+        "origin={{ grains.os }},archive=stable,label={{ grains.os }}-Security";
+        "origin={{ grains.os }},archive=oldstable,label={{ grains.os }}-Security";
 };
 
 // List of packages to not update
@@ -25,7 +25,6 @@ Unattended-Upgrade::Package-Blacklist {
 	"bird";
 	"fastd";
 	"batman-adv-dkms";
-	"pdns-recursor";
 };
 
 // This option allows you to control if on a unclean dpkg exit
