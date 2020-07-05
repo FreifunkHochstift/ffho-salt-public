@@ -3,6 +3,7 @@
 #
 
 {%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{%- set status = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':status', 'active') %}
 
 include:
   - network.interfaces
@@ -372,7 +373,7 @@ bird6-configure:
 #
 # RAdvd (for B.A.T.M.A.N. Gateways / L3-Access)
 #
-{% if 'radv' in roles or 'l3-access' in roles or ('batman_gw' in roles and grains.id.startswith('gw')) %}
+{% if status == 'active' and ('radv' in roles or 'l3-access' in roles or ('batman_gw' in roles and grains.id.startswith('gw'))) %}
 /etc/bird/bird6.d/radv.conf:
   file.managed:
     - source: salt://bird/radv.conf
