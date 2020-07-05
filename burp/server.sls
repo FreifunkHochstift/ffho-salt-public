@@ -52,6 +52,4 @@ burp-server:
     - context:
       node: {{ node }}
       burp_config: {{ node_config.get ('burp') }}
-    - watch_in:
-      - service: burp-server
 {% endfor %}
