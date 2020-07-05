@@ -8,10 +8,6 @@
 include:
   - network.interfaces
 
-bird-repo:
-  file.absent:
-    - name: /etc/apt/sources.list.d/bird.list
-
 bird-pkg:
   pkg.installed:
     - name: bird
