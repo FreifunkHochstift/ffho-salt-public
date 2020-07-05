@@ -3,6 +3,7 @@
 #
 
 {% set roles = salt['pillar.get'] ('nodes:' ~ grains['id'] ~ ':roles') %}
+{% set logserver = salt['pillar.get'] ('logging:syslog:logserver') %}
 
 rsyslog:
   pkg.installed:
@@ -31,6 +32,8 @@ rsyslog:
     - source: salt://rsyslog/rsyslog.conf.logserver
 {% else %}
     - source: salt://rsyslog/rsyslog.conf
+    - template: jinja
+      logserver: {{ logserver }}
 {% endif %}
 
 #
