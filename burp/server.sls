@@ -44,7 +44,7 @@ burp-server:
       - service: burp-server
 
 {% set nodes = salt['pillar.get']('nodes') %}
-{% for node, node_config in nodes.items()|sort if 'burp' in node_config %}
+{% for node, node_config in nodes.items()|sort if 'burp' in node_config and node_config['burp'].get ('password', False) %}
 /etc/burp/clientconfdir/{{ node }}:
   file.managed:
     - source: salt://burp/server/client.tmpl
