@@ -121,12 +121,6 @@ bird6-configure:
     - require_in:
       - service: bird6
 
-/etc/bird/bird.d/external.conf:
-  file.absent
-/etc/bird/bird6.d/external.conf:
-  file.absent
-
-
 #
 # IGP / OSPF
 #
@@ -153,12 +147,6 @@ bird6-configure:
       - file: /etc/bird/bird6.d
     - require_in:
       - service: bird6
-
-# Compatibility glue
-/etc/bird/bird6.d/IGP6.conf:
-  file.absent:
-    - watch_in:
-      - cmd: bird-configure
 
 
 #
