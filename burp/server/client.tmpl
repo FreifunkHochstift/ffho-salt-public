@@ -1,10 +1,18 @@
 #
 # Client specific configuration for {{ node }}
 #
-password = {{ burp_config.get ('password') }}
 
+# Include common values for all clients
 . incexc/common
 
-{%- for entry in burp_config.get ('include_fs') %}
-include = {{ entry }}
-{%- endfor %}
+{% for keyword in burp_config|sort %}
+  {%- set argument = burp_config.get (keyword) %}
+  {%- if argument is none %}
+  {%- elif argument is string or argument is number %}
+{{ keyword }} = {{ argument }}
+  {%- else %}
+    {%- for item in argument %}
+{{ keyword }} = {{ item }}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
