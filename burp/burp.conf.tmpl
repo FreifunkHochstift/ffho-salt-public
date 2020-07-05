@@ -6,7 +6,7 @@ mode = client
 port = 4971
 status_port = 4972
 
-server = 10.132.251.71
+server = {{ burp_server_name }}
 
 password = {{ burp_password }}
 cname = {{ grains.id }}
@@ -15,7 +15,7 @@ cname = {{ grains.id }}
 ssl_cert_ca = /etc/ssl/certs/ffho-cacert.pem
 ssl_cert = /etc/ssl/certs/{{ grains.id }}.cert.pem
 ssl_key = /etc/ssl/private/{{ grains.id }}.key.pem
-ssl_dhfile = /etc/ssl/dhfile.pem
+ssl_dhfile = /etc/ssl/dhparam.pem
 
 ssl_peer_cn = {{ burp_server_name }}
 
