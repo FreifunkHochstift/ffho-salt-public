@@ -1,15 +1,27 @@
 #!/bin/sh -e
 #
-# Libvirt qemu hook to magically connect VM bridge interfaces to desired untagged Vlan
+# Libvirt qemu hook to magically connect VM bridge interfaces to desired untagged VLAN and set MTU
 #
 #  IF
 #   * the VM interface if configured to be connected to a bridge,
 #   * the bridge is configured to be vlan aware (vlan_filtering = 1)
 #   * the VM interface name ends with _vXXXX with XXXX being a one to four
 #     digit number
-#  the interface will be configured as an untagged port connected to vlan XXXX.
+#  the interface will be configured as an untagged port connected to VLAN XXXX.
 #
 #  See <man bridge> for more details about vlan aware bridges.
+#
+#
+# It's also possible to set the MTU of a VM interface to a specific value.
+# As the <mtu/> attribute on interfaces does sadly not work when not uing a
+# libvirt <network/> and any given <mtu/> value is silently discared in the
+# current version we are running, we work around that by using <metadata/>:
+#
+#  <metadata>
+#    <ffho:mtu xmlns:ffho="http://ffho.net/libvirt/">
+#      <interface name="gw02_v1205">1610</interface>
+#    </ffho:mtu>
+#  </metadata>
 #
 # Maximilian Wilhelm <max@sdn.clinic>
 #  -- Wed, 31 Aug 2016 20:48:02 +0200
@@ -28,10 +40,6 @@ if ! which xmlstarlet >/dev/null 2>/dev/null; then
 fi
 
 # Save domain XML which was given to us on stdin, so we can poke around in it.
-# Yes this is ugly. But I don't see another way storing the MTU for an device
-# within the libvirt domain config when NOT using a libvirt network.
-# If you happen to now a better way than specifying this within custom domain
-# metadata PLEASE let me know.
 export domain_xml="$(cat)"
 
 echo "${domain_xml}" | xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'concat(target/@dev, " ", source/@bridge)'  --nl | while read iface bridge; do
