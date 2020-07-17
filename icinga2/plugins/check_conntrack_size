@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Nagios plugin to check netfilter conntrack size
 #
@@ -15,8 +15,8 @@ msg = ""
 
 parser = argparse.ArgumentParser (description = 'check netfilter conntrack table size')
 
-parser.add_argument ('--warn', '-w', help = "Warning conntrack table usage (percent)", default = "70")
-parser.add_argument ('--crit', '-c', help = "Critical conntrack table usage (percent)", default = "85")
+parser.add_argument ('--warn', '-w', help = "Warning conntrack table usage (percent)", default = "70", type = int)
+parser.add_argument ('--crit', '-c', help = "Critical conntrack table usage (percent)", default = "85", type = int)
 parser.add_argument ('--no-conntrack', help = "Return code when no conntrack is loaded.", default = "ok", choices = [ "ok", "warn", "crit", "unkn" ])
 
 args = parser.parse_args ()
@@ -35,7 +35,7 @@ def read_int (path):
 	except ValueError as v:
 		return -1
 	except IOError as i:
-		print "conntrack seems not to be loaded."
+		print ("conntrack seems not to be loaded.")
 		sys.exit (ret_map[args.no_conntrack])
 
 num_entries = read_int ("/proc/sys/net/netfilter/nf_conntrack_count")
@@ -46,19 +46,19 @@ usage = num_entries / max_entries * 100
 
 if usage >= args.crit:
 	code = 2
-	msg = "Conntrack pool usage over %s%%: %d (%d / %d)" % (args.crit, usage, num_entries, max_entries)
+	msg = "Conntrack pool usage over %d%%: %d (%d / %d)" % (args.crit, usage, num_entries, max_entries)
 
 elif usage >= args.warn:
 	code = 1
-	msg = "Conntrack pool usage over %s%%: %d (%d/ %d)" % (args.warn, usage, num_entries, max_entries)
+	msg = "Conntrack pool usage over %d%%: %d (%d/ %d)" % (args.warn, usage, num_entries, max_entries)
 
 elif usage < args.warn:
 	code = 0
-	msg = "Conntrack pool usage as at %d%% (%d / %d)" % (usage, num_entries, max_entries)
+	msg = "Conntrack pool usage at %d%% (%d / %d)" % (usage, num_entries, max_entries)
 
 else:
 	code = 3
 	msg = "WTF? Please examinte the situation manually and kinly do the needful!"
 
-print msg
+print (msg)
 sys.exit (code)
