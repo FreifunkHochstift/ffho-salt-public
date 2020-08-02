@@ -6,6 +6,7 @@
 include:
   - apt
   - sudo
+  - needrestart
 
 
 # Install icinga2 package
