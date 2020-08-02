@@ -11,6 +11,7 @@ base:
     - locales
     - mosh
     - motd
+    - needrestart
     - network
     - ntp
     - postfix
