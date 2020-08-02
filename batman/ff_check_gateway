@@ -21,12 +21,14 @@ if [ -f "${node_status_file}" ]; then
 	if [ "${status}" != "active" ]; then
 		force_offline="true"
 	fi
+fi
 
 #
 # If there is no DHCP server running here, we should not be an
 # active gateway.
-elif ! systemctl status isc-dhcp-server >/dev/null; then
+if ! systemctl status isc-dhcp-server >/dev/null; then
 	force_offline="true"
+fi
 
 #
 # If there is a default route via an IP from our address space
@@ -34,23 +36,40 @@ elif ! systemctl status isc-dhcp-server >/dev/null; then
 # default route would be propagated in via iBGP and/or OSPF it
 # will only be present if at least one border router has an up
 # and running connection to AS201701.
-elif ip route show | grep "^default via 10.132." -q; then
+if ip route show | grep "^default via 10.132." -q; then
         new_state="server"
 fi
 
+#
+# Forcefully offline?
+if [ "${force_offline}" = "true" ]; then
+	new_state="off"
+fi
+
+#
+# Compatiblity glue: Newer versions of batctl print a deprecation
+# warning when called with -m <batif>. Avoid spamming the log and
+# producting SPAM by silently handling this here.
+mesh_if_param="-m"
+if batctl -h 2>&1 | grep -q "meshif"; then
+	mesh_if_param="meshif"
+fi
+
+#
+# Let's check the interfaces
 for iface in $(ip -br l | awk '/^bat-/ { print $1 }'); do
 	# Ignore any external BATMAN instance, if present
 	if echo "${iface}" | grep -q '-ext$'; then
 		continue
 	fi
 
-	old_state="$(batctl -m "${iface}" gw_mode)"
+	old_state="$(batctl "${mesh_if_param}" "${iface}" gw_mode | awk '{ print $1 }')"
 	if [ "$old_state" = "$new_state" ]; then
 		# Nothing to do here, carry on
 		continue
 	fi
 
 	# Set new values
-	batctl -m "${iface}" gw_mode "${new_state}"
+	batctl "${mesh_if_param}" "${iface}" gw_mode "${new_state}"
 	logger "B.A.T.M.A.N. gateway mode changed from ${old_state} to ${new_state} on ${iface}"
 done
