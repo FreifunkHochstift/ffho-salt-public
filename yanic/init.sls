@@ -25,7 +25,7 @@ yanic:
       - file: yanic
 
 # the internal webserver should be enabled
-{% set webserver = "true" %}
+{% set webserver = "false" %}
 
 # get loopback IPv6 for binding the webserver to it
 {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
