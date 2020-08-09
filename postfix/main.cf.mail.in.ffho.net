@@ -1,10 +1,14 @@
-# See /usr/share/postfix/main.cf.dist for a commented, more complete version
+#
+# /etc/postfix/main.cf (Salt managed)
+#
 
 
 # Debian specific:  Specifying a file name will cause the first
 # line of that file to be used as the name.  The Debian default
 # is /etc/mailname.
 #myorigin = /etc/mailname
+
+compatibility_level=2
 
 smtpd_banner = $myhostname ESMTP $mail_name (Debian/GNU)
 biff = no
@@ -23,8 +27,8 @@ smtpd_tls_key_file=/etc/ssl/private/mail.ffho.net.key.pem
 smtpd_use_tls=yes
 smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-smtpd_tls_mandatory_protocols = TLSv1.2 TLSv1.1 !TLSv1 !SSLv2 !SSLv3
-smtp_tls_mandatory_protocols = TLSv1.2 TLSv1.1 !TLSv1 !SSLv2 !SSLv3
+smtpd_tls_mandatory_protocols = TLSv1.3 TLSv1.2 TLSv1.1 !TLSv1 !SSLv2 !SSLv3
+smtp_tls_mandatory_protocols = TLSv1.3 TLSv1.2 TLSv1.1 !TLSv1 !SSLv2 !SSLv3
 smtp_tls_protocols = !SSLv2, !SSLv3
 smtpd_tls_protocols = !SSLv2 !SSLv3
 smtpd_tls_exclude_ciphers = RC4, aNULL
@@ -45,17 +49,12 @@ alias_maps = hash:/etc/aliases, hash:/var/lib/mailman/data/aliases
 alias_database = hash:/etc/aliases
 virtual_alias_domains = hash:/etc/postfix/virtual-domains
 virtual_alias_maps = hash:/etc/postfix/virtual-aliases
-#, hash:/var/lib/mailman/data/virtual-mailman
+
 myorigin = /etc/mailname
 mydestination = ffho.net, mail.in.ffho.net, mail.ffho.net, lists.ffho.net, localhost
 relayhost = 
-# TAKE CARE! If using postfix-to-mailman.py:
-# never ever put a (sub)domain into $relay_domains AND $virtual_alias_domains
-#relay_domains = lists.ffho.net
-#relay_recipient_maps = hash:/var/lib/mailman/data/virtual-mailman
-#transport_maps = hash:/etc/postfix/transport
-#mailman_destination_recipient_limit = 1
-#mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
+
+# Read mynetworks from file
 mynetworks = /etc/postfix/mynetworks
 mailbox_command = procmail -a "$EXTENSION"
 mailbox_size_limit = 0
@@ -74,14 +73,23 @@ smtpd_recipient_restrictions =  check_recipient_access hash:/etc/postfix/access_
                                 permit_sasl_authenticated,
                                 reject_unauth_destination, 
                                 reject_unauth_pipelining,
-                                #Local Whitelist to override greylisting and RBL checks
-                                check_client_access hash:/etc/postfix/rbl_override,
-                                #embed policyd-weight daemon: RBL quorum instead of termination by vote of only ONE RBL
-                                check_policy_service inet:127.0.0.1:12525,
-                                #greylisting by greyfix:
+                                # Local Whitelist to override greylisting
+                                check_client_access hash:/etc/postfix/greylist_override,
+                                # greylisting by greyfix:
 				check_policy_service unix:private/greyfix,
 				permit
 
-#insert MailScanner checks
-header_checks = regexp:/etc/postfix/header_checks
+# switched from policyd-weight to postscreen on buster (policyd-weight didn't work anymore)
+postscreen_access_list = permit_mynetworks cidr:/etc/postfix/postscreen_access.cidr
+postscreen_blacklist_action = drop
+postscreen_greet_action = enforce
+postscreen_dnsbl_threshold = 3
+postscreen_dnsbl_action = enforce
+postscreen_dnsbl_sites =
+			pbl.spamhaus.org*2
+			sbl-xbl.spamhaus.org*3
+			bl.spamcop.net*2
+			ix.dnsbl.manitu.net*3
 
+# MailScanner checks
+header_checks = regexp:/etc/postfix/header_checks
