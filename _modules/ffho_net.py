@@ -937,6 +937,11 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		for key in [ 'automtu', 'batman_connect_sites', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans' ]:
 			if key in config:
 				config.pop (key)
+
+		# Remove route metric on non-router nodes
+		if 'metric' in config and not 'router' in node_config.get ('roles', []):
+			config.pop ('metric')
+
 	# This leaves 'auto', 'prefixes' and 'desc' as keys which should not be directly
 	# printed into the remaining configuration. These are handled within the jinja
 	# interface template.
