@@ -16,7 +16,7 @@ update_ca_certificates:
 
 generate-dhparam:
   cmd.run:
-    - name: openssl dhparam -out /etc/ssl/dhparam.pem 4096
+    - name: openssl dhparam -out /etc/ssl/dhparam.pem 2048
     - creates: /etc/ssl/dhparam.pem
 
 # Install FFHO internal CA into Debian CA certificate mangling mechanism so
