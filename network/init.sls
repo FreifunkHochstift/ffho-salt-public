@@ -44,7 +44,7 @@ vnstat:
 
 # Systemd link files?
 {%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
-{% if grains['oscodename'] == 'stretch' %}
+{% if grains['oscodename'] == 'stretch' or grains['oscodename'] == 'buster' %}
   {% for iface in interfaces |sort %}
     {% if interfaces[iface]['mac_address'] is not none %}
 /etc/systemd/network/42-{{ iface }}.link:

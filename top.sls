@@ -5,7 +5,6 @@ base:
     - bash
     - burp
     - certs
-    - console-tools
     - dns-server/auth
     - docker
     #- docker-containers
