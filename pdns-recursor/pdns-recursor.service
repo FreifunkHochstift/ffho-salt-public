@@ -7,7 +7,11 @@ Before=nss-lookup.target
 After=network-online.target
 
 [Service]
+{% if 'vrf_external' in salt['grains.get']('ip_interfaces') %}
 ExecStart=/sbin/ip vrf exec vrf_external /usr/sbin/pdns_recursor --daemon=no --write-pid=no --disable-syslog --log-timestamp=no
+{% else %}
+ExecStart=/usr/sbin/pdns_recursor --daemon=no --write-pid=no --disable-syslog --log-timestamp=no
+{% endif %}
 Type=notify
 Restart=on-failure
 StartLimitInterval=0

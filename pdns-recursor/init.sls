@@ -39,7 +39,9 @@ pdns-recursor-service-override:
 /etc/systemd/system/pdns-recursor.service:
   file.managed:
     - source: salt://pdns-recursor/pdns-recursor.service
+    - template: jinja
 
 /etc/powerdns/recursor.conf:
   file.managed:
     - source: salt://pdns-recursor/recursor.conf
+    - template: jinja
