@@ -4,9 +4,9 @@
 influxdb:
   pkgrepo.managed:
     - humanname: InfluxDB-Repo
-    - name: deb https://repos.influxdata.com/debian jessie stable
+    - name: deb https://repos.influxdata.com/debian buster stable
     - key_url:  https://repos.influxdata.com/influxdb.key
-    - dist: jessie
+    - dist: buster
     - file: /etc/apt/sources.list.d/influxdb.list
   pkg.installed:
     - name: influxdb

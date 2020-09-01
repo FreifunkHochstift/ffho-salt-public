@@ -8,15 +8,15 @@ grafana:
 # add Grafana Repo
   pkgrepo.managed:
     - humanname: Grafana Repo
-    - name: deb https://packagecloud.io/grafana/stable/debian/ jessie main
+    - name: deb https://packages.grafana.com/oss/deb stable main
     - file: /etc/apt/sources.list.d/grafana.list
-    - key_url: https://packagecloud.io/grafana/stable/gpgkey
+    - key_url: https://packages.grafana.com/gpg.key 
 # install grafana
   pkg.installed:
     - name: grafana
     - require:
       - pkgrepo: grafana
-      - pkgrepo: grafana-src
+#      - pkgrepo: grafana-src
   service.running:
     - name: grafana-server
     - enable: True
@@ -38,12 +38,12 @@ grafana:
       - pkg: grafana
 
 # add Grafana src-Repo
-grafana-src:
-  pkgrepo.managed:
-    - humanname: Grafana Repo
-    - name: deb-src https://packagecloud.io/grafana/stable/debian/ jessie main
-    - file: /etc/apt/sources.list.d/grafana.list
-    - key_url: https://packagecloud.io/grafana/stable/gpgkey
+#grafana-src:
+#  pkgrepo.managed:
+#    - humanname: Grafana Repo
+#    - name: deb-src https://packages.grafana.com/oss/deb stable main
+#    - file: /etc/apt/sources.list.d/grafana.list
+#    - key_url: https://packages.grafana.com/gpg.key 
 
 # copy custom config
 /etc/grafana/grafana.ini:
@@ -77,3 +77,37 @@ grafana-piechart:
     - creates: /var/lib/grafana/plugins/grafana-piechart-panel
     - watch_in:
       - service: grafana
+
+grafana-imagerenderer-deps:
+  pkg.installed:
+    - pkgs:
+      - libxdamage1 
+      - libxext6 
+      - libxi6 
+      - libxtst6 
+      - libnss3 
+      - libnss3 
+      - libcups2 
+      - libxss1 
+      - libxrandr2 
+      - libasound2 
+      - libatk1.0-0 
+      - libatk-bridge2.0-0 
+      - libpangocairo-1.0-0 
+      - libpango-1.0-0 
+      - libcairo2 
+      - libatspi2.0-0 
+      - libgtk3.0-cil 
+      - libgdk3.0-cil 
+      - libx11-xcb-dev
+
+grafana-imagerenderer:
+  cmd.run:
+    - name: grafana-cli plugins install grafana-image-renderer
+    - creates: /var/lib/grafana/plugins/grafana-image-renderer
+    - watch_in:
+      - service: grafana
+    - require:
+      - pkg: grafana-imagerenderer-deps
+
+
