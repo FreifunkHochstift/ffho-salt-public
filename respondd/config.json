@@ -5,7 +5,11 @@
   {%- else %}
   "bridge": "br-{{ site }}",
   {%- endif %}
+  {%- if 'nextgen-gateway' in salt['pillar.get']('netbox:role:name') %}
+  "mesh-vpn": [ "fastd-{{ site }}", "vx-{{ site }}" ],
+  {%-else %}
   "mesh-vpn": [ "fastd-{{ site }}" ],
+  {%- endif %}
   "wan": "vlan3",
   "rate_limit": 30,
   "rate_limit_burst": 10
