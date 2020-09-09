@@ -34,3 +34,15 @@ influxdb:
     - template: jinja
     - require:
       - pkg: influxdb
+
+/usr/local/sbin/backup-influx.sh:
+  file.managed:
+    - source: salt://influxdb/backup.sh
+    - mode: 700
+    - owner: influxdb
+
+/etc/cron.d/backup-influx:
+  file.managed:
+    - contents: "0 22 * * * * 	influxdb 	[ -f /usr/local/sbin/backup-influx.sh ] && /usr/local/sbin/backup-influx.sh"
+    - require:
+      - file: /usr/local/sbin/backup-influx.sh
