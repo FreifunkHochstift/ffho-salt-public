@@ -43,6 +43,6 @@ influxdb:
 
 /etc/cron.d/backup-influx:
   file.managed:
-    - contents: "0 22 * * * * 	influxdb 	[ -f /usr/local/sbin/backup-influx.sh ] && /usr/local/sbin/backup-influx.sh"
+    - contents: "0 22 * * * 	influxdb 	[ -f /usr/local/sbin/backup-influx.sh ] && /usr/local/sbin/backup-influx.sh"
     - require:
       - file: /usr/local/sbin/backup-influx.sh
