@@ -8,6 +8,8 @@
 # client.
 
 include = /etc
+include = /root
+include = /usr/local
 include = /srv
 
 # Exclude various temporary file systems.
