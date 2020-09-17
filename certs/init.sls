@@ -62,6 +62,9 @@ generate-dhparam:
 # Are there any cert defined or referenced for this node or roles of this node?
 {% set node_roles = node_config.get ('roles', []) %}
 {% for cn, cert_config in salt['pillar.get']('cert', {}).items () %}
+  {% if grains['id'] in cert_config.get ('apply', {}).get ('node', []) %}
+    {% do certs.update ({ cn : 'cert:' ~ cn }) %}
+  {% endif %}
   {% for role in cert_config.get ('apply', {}).get ('roles', []) %}
     {% if role in node_roles %}
       {% do certs.update ({ cn : 'cert:' ~ cn }) %}
