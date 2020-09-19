@@ -165,7 +165,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     interface_ids = []
     ret['netbox']['interfaces'] = {}
     for ipaddress in ipaddresses:
-        interface_id = ipaddress['interface']['id']
+        interface_id = ipaddress['assigned_object_id']
         app = 'dcim'
         if 'vcpus' in ret['netbox']:
             app = 'virtualization'
