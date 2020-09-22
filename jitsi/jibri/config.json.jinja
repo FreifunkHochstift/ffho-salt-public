@@ -1,0 +1,31 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+{
+    "recording_directory":"{{ jitsi.jibri.recording_directory }}",
+    "finalize_recording_script_path": "{{ jitsi.jibri.finalize_recording_script_path }}",
+    "xmpp_environments": [
+        {
+            "name": "{{ jitsi.jibri.xmpp.environment_name }}",
+            "xmpp_server_hosts": [
+                "{{ jitsi.xmpp.server_host }}"
+            ],
+            "xmpp_domain": "{{ jitsi.xmpp.xmpp_domain }}",
+            "control_login": {
+                "domain": "{{ jitsi.jibri.xmpp.control_login.domain }}",
+                "username": "{{ jitsi.jibri.xmpp.control_login.username }}",
+                "password": "{{ jitsi.jibri.xmpp.control_login.password }}"
+            },
+            "control_muc": {
+                "domain": "{{ jitsi.jibri.xmpp.control_muc.domain }}",
+                "room_name": "{{ jitsi.jibri.xmpp.control_muc.room_name }}",
+                "nickname": "{{ jitsi.jibri.xmpp.control_muc.nickname }}"
+            },
+            "call_login": {
+                "domain": "{{ jitsi.jibri.xmpp.call_login.domain }}",
+                "username": "{{ jitsi.jibri.xmpp.call_login.username }}",
+                "password": "{{ jitsi.jibri.xmpp.call_login.password }}"
+            },
+            "room_jid_domain_string_to_strip_from_start": "conference.",
+            "usage_timeout": "0"
+        }
+    ]
+}

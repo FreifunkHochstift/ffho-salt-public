@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+jitsi:
+  xmpp:
+    server_host: localhost
+    xmpp_domain: example.com
+    auth_domain: auth.example.com
+    username: "component-user"
+    password: "THIS_IS_SUPER_SECRET"
+    secret: "THIS_IS_A_LEGACY_SECRET"
+    port: 5347
+
+  videobridge_brewery: JvbBrewery@internal.auth.meet.ffmuc.net
+  jibri_brewery: JibriBrewery@internal.auth.meet.ffmuc.net
+
+  jicofo:
+    enabled: false
+    opts: ""
+    bridge_selection_strategy: IntraRegionBridgeSelectionStrategy
+
+  videobridge:
+    enabled: false
+    subdomain: jvbXX
+    octo:
+      enabled: false
+      ip: 127.0.0.1
+      port: 4096
+      region: ffmuc-de1
+
+  jibri:
+    enabled: false
+    recording_directory: /tmp/recordings
+    finalize_recording_script_path: /bin/true
+    chromedriver_version: 85.0.4183.87
+    xmpp:
+      environment_name: ffmuc_environment
+      control_login:
+        domain: "auth.meet.ffmuc.net"
+        username: "jibri-unnamed"
+        password: "THIS_IS_SUPER_SECRET"
+      control_muc:
+        domain: "internal.auth.meet.ffmuc.net"
+        room_name: "JibriBrewery"
+        nickname: "jibri-unnamed"
+      call_login:
+        domain: "recorder.meet.ffmuc.net"
+        username: "recorder-unnamed"
+        password: "THIS_IS_SUPER_SECRET"

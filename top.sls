@@ -40,6 +40,17 @@ base:
     - pdns-recursor
     - radvd
     - respondd
+  'jvb*':
+    - nebula
+    - telegraf
+    - jitsi.base
+    - jitsi.videobridge
+    - jitsi.jicofo
+  'jibri*':
+    - nebula
+    - telegraf
+    - jitsi.base
+    - jitsi.jibri
   'dns01.in.ffmuc.net':
     - cloudflare
   'vpn0*.in.ffmuc.net':

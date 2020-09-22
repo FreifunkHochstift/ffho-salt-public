@@ -1,0 +1,29 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+{# Until we find the correct name for focus ...
+#org.jitsi.videobridge.AUTHORIZED_SOURCE_REGEXP=focus@auth.meet.ffmuc.net/.* #}
+org.jitsi.videobridge.ENABLE_STATISTICS=true
+org.jitsi.videobridge.STATISTICS_INTERVAL=1000
+org.jitsi.videobridge.STATISTICS_TRANSPORT=muc,colibri
+
+org.jitsi.videobridge.xmpp.user.shard1.HOSTNAME={{ jitsi.xmpp.server_host }}
+org.jitsi.videobridge.xmpp.user.shard1.DOMAIN={{ jitsi.xmpp.auth_domain }}
+org.jitsi.videobridge.xmpp.user.shard1.USERNAME={{ jitsi.videobridge.subdomain }}.{{ jitsi.xmpp.auth_domain }}
+org.jitsi.videobridge.xmpp.user.shard1.PASSWORD={{ jitsi.xmpp.password }}
+org.jitsi.videobridge.xmpp.user.shard1.MUC_JIDS={{ jitsi.videobridge_brewery }}
+org.jitsi.videobridge.xmpp.user.shard1.MUC_NICKNAME={{ jitsi.videobridge.subdomain }}.{{ jitsi.xmpp.auth_domain }}
+org.jitsi.videobridge.xmpp.user.shard1.DISABLE_CERTIFICATE_VERIFICATION=true
+
+{% if jitsi.videobridge.octo.enabled %}
+org.jitsi.videobridge.octo.BIND_ADDRESS={{ jitsi.videobridge.octo.ip }}
+org.jitsi.videobridge.octo.BIND_PORT={{ jitsi.videobridge.octo.port }}
+org.jitsi.videobridge.REGION={{ jitsi.videobridge.octo.region }}
+{% endif -%}
+
+# enable stats collecting only for localhost
+org.jitsi.videobridge.rest.private.jetty.host=127.0.0.1
+
+org.jitsi.videobridge.rest.COLIBRI_WS_DISABLE=false
+org.jitsi.videobridge.rest.COLIBRI_WS_DOMAIN=meet.ffmuc.net:443
+org.jitsi.videobridge.rest.COLIBRI_WS_SERVER_ID={{ jitsi.videobridge.subdomain }}
+org.jitsi.videobridge.rest.jetty.port=9090
+org.jitsi.videobridge.rest.COLIBRI_WS_TLS=true

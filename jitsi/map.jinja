@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+
+{%- import_yaml "jitsi/defaults.yaml" as default_settings %}
+
+{#- Retrieve the config dict only once #}
+{%- set _config = salt['pillar.get']("netbox:config_context:jitsi", default={}) %}
+
+{% set jitsi = salt['grains.filter_by'](
+    default_settings,
+    default='jitsi',
+    merge=_config,
+)
+%}
