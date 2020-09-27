@@ -2,11 +2,10 @@
 # Postfix
 #
 
-# Force installation of bsd-mailx as it's not installed anymore in Debian Jessie..
+# Make sure 'mail' is present
 bsd-mailx:
   pkg.installed:
     - name: bsd-mailx
-
 
 postfix:
   pkg.installed:

@@ -16,9 +16,6 @@ gogs-repo:
 postgresql:
   pkg.installed:
     - name: postgresql
-  {% if grains.oscodename == "jessie" %}
-    - fromrepo: jessie-backports
-  {% endif %}
 
   service.running:
     - name: postgresql

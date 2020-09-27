@@ -9,9 +9,6 @@
 nginx:
   pkg.installed:
     - name: {{nginx_pkg}}
-{% if grains.oscodename in ['jessie'] %}
-    - fromrepo: {{ grains.oscodename }}-backports
-{% endif %}
   service.running:
     - enable: TRUE
     - reload: TRUE
