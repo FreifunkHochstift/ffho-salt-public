@@ -150,3 +150,30 @@ Cleanup /etc/openvpn/{{ netname }}:
     {% endif %}
   {% endif %}
 {% endfor %}
+
+
+#
+# OPS VPN?
+#
+{% if 'ops-vpn' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', [])  %}
+/etc/pam.d/openvpn:
+  file.managed:
+    - source: salt://openvpn/ldap-auth/openvpn.pam.d
+
+/etc/ldap/ldap.conf:
+  file.managed:
+    - source: salt://openvpn/ldap-auth/ldap.conf.tmpl
+    - template: jinja
+    - context:
+      server_uri: {{ salt['pillar.get']('ldap:global:server_uri') }}
+      base_dn: {{ salt['pillar.get']('ldap:global:base_dn') }}
+      bind_dn: {{ salt['pillar.get']('ldap:openvpn:bind_dn') }}
+      bind_pw: {{ salt['pillar.get']('ldap:openvpn:bind_pw') }}
+{% else %}
+
+/etc/pam.d/openvpn:
+  file.absent
+
+/etc/ldap/ldap.conf:
+  file.absent
+{% endif %}
