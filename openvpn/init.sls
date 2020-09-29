@@ -77,7 +77,7 @@ openvpn:
     {% set host_config = host_stanza.get ('config', {}) %}
     {# Merge network_config and host_config with host_config inheriting network_config an overwriting options #}
     {% set config = {} %}
-    {% for keyword, net_argument in network_config.iteritems () if keyword[0] != '_' %}
+    {% for keyword, net_argument in network_config.items () if keyword[0] != '_' %}
       {% do config.update ({ keyword : net_argument }) %}
     {% endfor %}
     {#- If there's a "config:" entry in host YAML without any content it will
