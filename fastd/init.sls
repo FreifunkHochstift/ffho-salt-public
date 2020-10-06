@@ -3,7 +3,7 @@
 #
 
 include:
-  - network.interfaces
+  - network
 
 {% set sites_all = pillar.get ('sites') %}
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
