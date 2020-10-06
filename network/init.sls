@@ -10,6 +10,7 @@ include:
 network-pkg:
   pkg.installed:
     - pkgs:
+      - iproute2
       - tcpdump
       - mtr-tiny
       - iperf
@@ -17,10 +18,6 @@ network-pkg:
       - ipv6calc
     - require_in:
       - file: /etc/network/interfaces
-
-iproute2:
-  pkg.latest
-
 
 vnstat:
   pkg.installed:
