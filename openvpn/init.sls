@@ -4,7 +4,7 @@
 
 include:
   - certs
-  - network.interfaces
+  - network
 
 
 openvpn:

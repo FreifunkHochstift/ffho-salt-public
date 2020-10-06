@@ -2,14 +2,20 @@
 # Networking
 #
 
+# Which networ suite to configure?
+{% set default_suite = salt['pillar.get']('network:suite', 'ifupdown2') %}
+{% set suite = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':network:suite', default_suite) %}
+
 include:
-  - apt
   - network.link
+  - network.{{ suite }}
   - network.interfaces
+  - network.{{ suite }}.reload
 
 network-pkg:
   pkg.installed:
     - pkgs:
+      - iproute2
       - tcpdump
       - mtr-tiny
       - iperf
@@ -17,10 +23,6 @@ network-pkg:
       - ipv6calc
     - require_in:
       - file: /etc/network/interfaces
-
-iproute2:
-  pkg.latest
-
 
 vnstat:
   pkg.installed:
