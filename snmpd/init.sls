@@ -3,7 +3,7 @@
 #
 
 include:
-  - network.interfaces
+  - network
 
 #
 # Install and start SNMPd
