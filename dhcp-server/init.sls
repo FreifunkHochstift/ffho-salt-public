@@ -3,7 +3,7 @@
 #
 
 include:
-  - network.interfaces
+  - network
 
 isc-dhcp-server:
   pkg.installed:
