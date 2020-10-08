@@ -28,6 +28,7 @@ base:
     - ssh
     - sudo
     - sysctl
+    - telegraf
     - timezone
     - tmux
     - unattended-upgrades
