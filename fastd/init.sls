@@ -8,8 +8,6 @@
 
 {% set fastd_key = salt['pillar.get']('netbox:config_context:fastd:secret_key') %}
 
-{% set roles = salt['pillar.get']('netbox:config_context:roles') %}
-
 include:
   - apt
 
