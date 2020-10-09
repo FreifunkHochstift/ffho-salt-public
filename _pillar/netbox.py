@@ -139,8 +139,15 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         return ret
 
     ret['netbox'] = device_results['dict']
-    site_id = ret['netbox']['site']['id']
-    site_name = ret['netbox']['site']['name']
+    site_id = 0
+    site_name = ""
+    if not ret['netbox']['site']:
+        # eg virtual maschine in multi-site cluster
+        site_details = False
+        site_prefixes = False
+    else:
+        site_id = ret['netbox']['site']['id']
+        site_name = ret['netbox']['site']['name']
     service_url = '{api_url}/{app}/{endpoint}'.format(api_url=api_url,
                                                       app='ipam',
                                                       endpoint='services')
