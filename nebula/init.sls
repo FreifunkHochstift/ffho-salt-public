@@ -2,6 +2,8 @@
 # nebula
 ###
 
+{% if "nebula" in salt["pillar.get"]("netbox:config_context", {}) %}
+
 {% set nebula_version = salt["pillar.get"]("netbox:config_context:nebula:version", "1.3.0") %}
 nebula-tmp-bin:
   archive.extracted:
@@ -82,3 +84,5 @@ nebula-service:
         - file: nebula-symlink
     - watch:
         - file: /etc/nebula/config.yml
+
+{% endif %}

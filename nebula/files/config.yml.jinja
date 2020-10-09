@@ -62,8 +62,8 @@ firewall:
   - port: 4505-4506
     proto: tcp
     host: any
-{% endif %}
-{% if "stats.in.ffmuc.net" == grains["id"] %}
+{% endif -%}
+{% if "stats.in.ffmuc.net" == grains["id"] -%}
   # Allow stats
   - port: 8086
     proto: tcp
