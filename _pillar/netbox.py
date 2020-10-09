@@ -108,6 +108,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         log.error(search_results['error'])
         return ret
     # Assign results from API call to "netbox" key
+    if len(search_results['dict']['results']) == 0:
+        log.error('No device found for "%s"', minion_id)
+        return ret
     if len(search_results['dict']['results']) > 1:
         log.error('More than one device found for "%s"', minion_id)
         return ret
