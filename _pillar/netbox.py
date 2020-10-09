@@ -50,10 +50,14 @@ site_prefixes: ``True``
 
 from __future__ import absolute_import, print_function, unicode_literals
 import logging
+import six
 
 # Import Salt libs
 import salt.utils.http
-import salt.ext.ipaddress as ipaddress
+if six.PY3:
+    import ipaddress
+else:
+    import salt.ext.ipaddress as ipaddress
 
 log = logging.getLogger(__name__)
 
