@@ -63,3 +63,19 @@ firewall:
     proto: tcp
     host: any
 {% endif %}
+{% if "stats.in.ffmuc.net" == grains["id"] %}
+  # Allow stats
+  - port: 8086
+    proto: tcp
+    groups:
+      - jvb
+  # Allow stats
+  - port: 8086
+    proto: tcp
+    groups:
+      - jibri
+  # Allow stats
+  - port: 8086
+    proto: tcp
+    host: jvb0.int.meet.ffmuc.net
+{% endif %}
