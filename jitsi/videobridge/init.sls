@@ -43,6 +43,7 @@ videobridge-system-config:
 /usr/share/jitsi-videobridge/lib/videobridge.rc:
   file.managed:
     - source: jitsi/videobridge/videobridge.rc
+    - template: jinja
 
 /etc/systemd/system/jitsi-videobridge2.service.d/override.conf:
   file.managed:

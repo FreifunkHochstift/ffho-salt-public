@@ -2,7 +2,7 @@
 # Use the format that is in use for java's -Xmx switch
 # The default is 3072m
 # Only effective on linux, 64 bit
-VIDEOBRIDGE_MAX_MEMORY=$(awk "BEGIN {printf \"%i\", ${SYSTEM_MEM_MB} * 0.8}")m
+VIDEOBRIDGE_MAX_MEMORY={{ grains.mem_total * 0.8 | rount }}m
 
 # Uncomment the next line to enable the remote debugging of the video bridge
 # VIDEOBRIDGE_DEBUG_OPTIONS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
