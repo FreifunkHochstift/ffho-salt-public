@@ -273,7 +273,11 @@ record-CNAME-{{ cname }}:
 {% endfor %}
 
 # Create extra DNS entries for devices not in pillars
-{%- set extra_dns_entries = salt['extra_dns_entries.get_extra_dns_entries'](salt['pillar.get']('netbox:config_context:dns_zones:netbox_token'), salt['pillar.get']('netbox:config_context:dns_zones:netbox_url')) %}
+{%- set extra_dns_entries = salt['extra_dns_entries.get_extra_dns_entries'](
+  salt['pillar.get']('netbox:config_context:netbox:api_url'),
+  salt['pillar.get']('netbox:config_context:dns_zones:netbox_token'),
+  salt['pillar.get']('netbox:config_context:dns_zones:netbox_filter')
+) %}
 {% for dns_entry in extra_dns_entries %}
 {% if extra_dns_entries[dns_entry]['address'] != '' %}
 record-A-extra-{{ dns_entry }}:
