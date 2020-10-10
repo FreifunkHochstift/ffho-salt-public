@@ -279,7 +279,8 @@ record-CNAME-{{ cname }}:
   salt['pillar.get']('netbox:config_context:dns_zones:netbox_filter')
 ) %}
 {% for dns_entry in extra_dns_entries %}
-{% if extra_dns_entries[dns_entry]['address'] != '' %}
+
+{% if extra_dns_entries[dns_entry].get('address') %}
 record-A-extra-{{ dns_entry }}:
   ddns.present:
     - name: {{ dns_entry }}.
@@ -297,7 +298,7 @@ record-A-extra-{{ dns_entry }}:
 
 {% endif %}
 
-{% if extra_dns_entries[dns_entry]['address6'] %}
+{% if extra_dns_entries[dns_entry].get('address6') %}
 
 record-AAAA-extra-{{ dns_entry }}:
   ddns.present:
@@ -317,4 +318,3 @@ record-AAAA-extra-{{ dns_entry }}:
 
 {% endfor %}
 {% endif %}
-
