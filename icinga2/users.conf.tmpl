@@ -1,0 +1,18 @@
+{% set users = salt['pillar.get']("monitoring:users", {}) %}
+{% for user,params in users.items()|sort %}
+object User "{{ user }}" {
+        import "generic-user"
+
+  {%- if "display_name" in params %}
+        display_name = "{{ params['display_name'] }}"
+  {%- endif %}
+
+  {%- if "email" in params %}
+        email = "{{ params['email'] }}"
+  {%- endif %}
+
+  {%- if "telegram_chat_id" in params %}
+        vars.telegram_chat_id = "{{ params['telegram_chat_id'] }}"
+  {%- endif %}
+}
+{% endfor %}

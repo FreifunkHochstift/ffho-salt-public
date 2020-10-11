@@ -6,6 +6,7 @@
 {%- set address = salt['ffho_net.get_primary_ip'] (node_config, 'v4').ip %}
 {%- set address6 = salt['ffho_net.get_primary_ip'] (node_config, 'v6').ip %}
 {%- set monitoring_config = node_config.get ('monitoring', {}) %}
+{%- set location = node_config.get ('location', {}) %}
 {%- set status = node_config.get ('status', 'active') %}
 
 {%- if 'icinga2server' not in roles %}
@@ -65,6 +66,26 @@ object Host "{{ node_id }}" {
 		"vcpus"  = {{ node_config['vm_config']['vcpus'] }},
 		"memory" = {{ node_config['vm_config']['memory'] }},
 		"disk"   = {{ node_config['vm_config']['disk'] }},
+	}
+{%- endif %}
+
+{#- Location #}
+{%- if location %}
+
+	# Location
+	vars.location = {
+  {%- if "region" in location %}
+		"region" = {
+			"code"  = "{{ location['region'].get("code") }}",
+			"name"  = "{{ location['region'].get("name") }}",
+		},
+  {%- endif %}
+  {%- if "site" in location %}
+		"site" = {
+			"code"  = "{{ location['site'].get("code") }}",
+			"desc"  = "{{ location['site'].get("desc") }}",
+		}
+  {%- endif %}
 	}
 {%- endif %}
 

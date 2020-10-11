@@ -1,0 +1,117 @@
+################################################################################
+#                              Notification commands                           #
+################################################################################
+
+object NotificationCommand "telegram-notification-command" {
+        import "plugin-notification-command"
+
+	command = [ SysconfDir + "/icinga2/scripts/telegram-notification.py" ]
+	env = {
+		TELEGRAM_BOT_TOKEN = "{{ salt['pillar.get']('monitoring:private:telegram_bot_token') }}"
+		TELEGRAM_CHAT_ID = "$user.vars.telegram_chat_id$"
+		NOTIFICATION_TYPE = "$notification.type$"
+		MESSAGE = "$telegram_message$"
+		ACKNOWLEDGE_CALLBACK = "$acknowledge_callback$"
+	}
+}
+
+object NotificationCommand "telegram-host-notification" {
+	import "telegram-notification-command"
+
+	vars.telegram_message = "$notification.type$ - $host.display_name$ is $host.state$"
+	vars.acknowledge_callback = "HOST!$host.name$"
+}
+
+object NotificationCommand "telegram-service-notification" {
+	import "telegram-notification-command"
+
+	vars.telegram_message = "$notification.type$ $service.display_name$ auf $host.display_name$ $service.output$"
+	vars.acknowledge_callback = "SERVICE!$host.name$!$service.name$"
+}
+
+
+################################################################################
+#                           Notification Templates                             #
+################################################################################
+
+template Notification "telegram-host-notification" {
+	command = "telegram-host-notification"
+	states = [ Up, Down ]
+	types = [ Problem, Acknowledgement, Recovery, Custom,
+	          FlappingStart, FlappingEnd,
+	]
+
+	period = "24x7"
+	interval = 0
+}
+
+template Notification "telegram-service-notification" {
+	command = "telegram-service-notification"
+
+	states = [ OK, Warning, Critical, Unknown ]
+	types = [ Problem, Acknowledgement, Recovery, Custom,
+	          FlappingStart, FlappingEnd,
+	]
+
+	period = "24x7"
+	interval = 0
+}
+				  
+
+
+################################################################################
+#                                  Notifications                               #
+################################################################################
+
+apply Notification "notify_host_ffho_ops_by_telegram" to Host {
+	import "telegram-host-notification"
+
+	users = [ "ffho-ops" ]
+	period = "24x7"
+	
+	times.begin = 2m
+
+	assign where host.address
+}
+
+apply Notification "notify_service_ffho_ops_telegram" to Service {
+	import "telegram-service-notification"
+
+	users = [ "ffho-ops" ]
+	period = "24x7"
+
+	times.begin = 2m
+
+	assign where host.address
+	ignore where service.name == "apt-Updates"
+	ignore where service.name == "libs"
+	ignore where service.name == "running_kernel"
+	ignore where service.name == "salt"
+}
+
+
+apply Notification "notify_host_ffho_dek_by_telegram" to Host {
+	import "telegram-host-notification"
+
+	users = [ "ffho-dek" ]
+	period = "24x7"
+	
+	times.begin = 2m
+
+	assign where host.vars.location.region.code == "ffho_dek"
+}
+
+apply Notification "notify_service_ffho_dek_telegram" to Service {
+	import "telegram-service-notification"
+
+	users = [ "ffho-dek" ]
+	period = "24x7"
+
+	times.begin = 2m
+
+	assign where host.vars.location.region.code == "ffho_dek"
+	ignore where service.name == "apt-Updates"
+	ignore where service.name == "libs"
+	ignore where service.name == "running_kernel"
+	ignore where service.name == "salt"
+}

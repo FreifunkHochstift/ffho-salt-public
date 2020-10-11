@@ -153,6 +153,25 @@ ffho-plugins:
 ################################################################################
 {% if 'icinga2server' in roles %}
 
+# Users and Notifications
+/etc/icinga2/ffho-conf.d/users.conf:
+  file.managed:
+    - source: salt://icinga2/users.conf.tmpl
+    - template: jinja
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
+
+/etc/icinga2/ffho-conf.d/notifications.conf:
+  file.managed:
+    - source: salt://icinga2/notifications.conf.tmpl
+    - template: jinja
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
+
 # Install command definitions
 /etc/icinga2/ffho-conf.d/services:
   file.recurse:
