@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Copyright (C) 2016 Mohamed El Morabity <melmorabity@fedoraproject.com>
+#
+# This module is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This software is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+PLUGINDIR=/usr/lib/nagios/plugins/
+. $PLUGINDIR/utils.sh
+
+
+status=$(systemctl list-units --failed --no-legend --plain | cut -f1 -d" " |xargs)
+r=$?
+
+while getopts "w" opt; do
+	case $opt in
+	w)
+		# Whitelist einlesen
+		readarray -t units < /etc/icinga2/service_whitelist
+	esac
+	status=( $(systemctl list-units --failed --no-legend --plain ${units[*]}| cut -f1 -d" " |xargs) )
+	r=$?
+done
+
+if [ $r -ne 0 ]; then
+	echo "UNKNOWN: Check command failed."
+	exit $STATE_UNKNOWN
+fi
+
+if [ -z "$status" ]; then
+	echo "OK: No Failed Units."
+	exit $STATE_OK
+else
+	echo "CRITICAL: Some units failed. ${status[*]}."
+	exit $STATE_CRITICAL
+fi
+
+echo "OK: service $service is running"
+exit $STATE_OK
+
