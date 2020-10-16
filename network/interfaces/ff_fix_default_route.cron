@@ -1,8 +1,0 @@
-#
-# Check if a default route within vrf_external is configured and if it's active
-#
-SHELL=/bin/bash
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=hilfe@ffmuc.net
-
-* * * * *       root    /usr/local/sbin/ff_fix_default_route

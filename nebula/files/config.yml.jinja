@@ -1,7 +1,7 @@
 pki:
   ca: /etc/nebula/ca.crt
-  cert: /etc/nebula/{{ grains.fqdn }}.crt
-  key: /etc/nebula/{{ grains.fqdn }}.key
+  cert: /etc/nebula/{{ grains.id }}.crt
+  key: /etc/nebula/{{ grains.id }}.key
 
 static_host_map:
   "{{ salt['pillar.get']('netbox:config_context:nebula:lighthouse:private_ip','192.168.110.1') }}":

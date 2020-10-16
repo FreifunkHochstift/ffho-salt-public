@@ -21,7 +21,6 @@ base:
     - kvm
     - mosh
     - motd
-    - network
     - ntp
     - screen
     - snmpd

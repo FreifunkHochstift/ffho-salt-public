@@ -48,16 +48,6 @@ telegraf:
     - watch_in:
           service: telegraf
 
-/etc/telegraf/telegraf.d/in-powerdns-recursor.conf:
-{%- if 'gateway' in salt['pillar.get']('netbox:role:name') or 'nextgen-gateway' in salt['pillar.get']('netbox:role:name') %}
-  file.managed:
-    - source: salt://telegraf/files/in_powerdns_recursor.conf
-{% else %}
-  file.absent:
-{% endif %}
-    - watch_in:
-          service: telegraf
-
 /etc/telegraf/telegraf.d/in-jvb-stats.conf:
 {% if salt['pillar.get']('netbox:config_context:videobridge:enabled', False) %}
   file.managed:
