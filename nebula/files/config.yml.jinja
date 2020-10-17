@@ -3,15 +3,20 @@ pki:
   cert: /etc/nebula/{{ grains.id }}.crt
   key: /etc/nebula/{{ grains.id }}.key
 
+{% set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
 static_host_map:
-  "{{ salt['pillar.get']('netbox:config_context:nebula:lighthouse:private_ip','192.168.110.1') }}":
-    - "{{ salt['pillar.get']('netbox:config_context:nebula:lighthouse:public_addr','127.0.0.1:1234') }}"
-
+{%- for lighthouse, public_addrs in lighthouses.items() %}
+  "{{ lighthouse }}": {{ public_addrs }}
+{% endfor %}
 lighthouse:
-  am_lighthouse: false
+  am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) }}
   interval: 60
+{% if not salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) %}
   hosts:
-    - {{ salt['pillar.get']('netbox:config_context:nebula:lighthouse:private_ip','192.168.110.1') }}
+{%- for lighthouse in lighthouses %}
+    - {{ lighthouse }}
+{% endfor %}
+{% endif %}
 
 listen:
   host: 0.0.0.0
@@ -23,7 +28,7 @@ punchy:
 local_range: "{{ salt['pillar.get']('netbox:config_context:nebula:local_range','192.168.110.1') }}"
 
 tun:
-  dev: nebula1
+  dev: nebula0
   # Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
   drop_local_broadcast: true
   # Toggles forwarding of multicast packets

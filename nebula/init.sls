@@ -3,13 +3,16 @@
 ###
 
 {% if "nebula" in salt["pillar.get"]("netbox:config_context", {}) %}
-
 {% set nebula_version = salt["pillar.get"]("netbox:config_context:nebula:version", "1.3.0") %}
 nebula-tmp-bin:
   archive.extracted:
     - name: /var/cache/salt/nebula
     - if_missing: /usr/local/bin/nebula
+    {% if grains.osarch == "armhf" %}
+    - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula_version }}/nebula-linux-arm-7.tar.gz
+    {% else %}
     - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula_version }}/nebula-linux-{{ grains.osarch }}.tar.gz
+    {% endif %}
     - makedirs: True
     - archive_format: tar
     - user: root
@@ -30,7 +33,7 @@ nebula-symlink:
 
 /etc/nebula/ca.crt:
   file.managed:
-    - source: salt://nebula/cert/ca.crt
+    - source: salt://nebula/cert/ca-ffmuc.crt
 
 /etc/nebula/{{ grains['id'] }}.crt:
   file.managed:
