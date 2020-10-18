@@ -56,6 +56,12 @@ firewall:
   - port: any
     proto: icmp
     host: any
+  - port: 22
+    proto: tcp
+    host: any
+  - port: 443
+    proto: tcp
+    host: any
 {% if "graylog" in salt["pillar.get"]("netbox:config_context:docker") -%}
     # Allow pushing to graylog via filebeat
   - port: 5044

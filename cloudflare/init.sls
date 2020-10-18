@@ -62,6 +62,12 @@ ffmuc.net:
                   content: {{ cnames[cname] }} 
                   salt_managed: True
                   type: CNAME
+{%- else %}
+{%- set target = cname | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
+                - name: {{ target[0] ~ '.ov.ffmuc.net' }}
+                  content: {{ cnames[cname] }} 
+                  salt_managed: True
+                  type: CNAME
 {%- endif %}
 {%- endfor %}{# cname in cnames #}
 
