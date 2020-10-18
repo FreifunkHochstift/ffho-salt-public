@@ -1,6 +1,6 @@
 $ORIGIN .
 $TTL 604800	; 1 week
-in.ffmuc.net		IN SOA	guardian.ffmuc.net. hostmaster.in.ffmuc.net. (
+in.ffmuc.net		IN SOA	guardian.ffmuc.net. hostmaster.ffmuc.net. (
 				2019020580 ; serial
 				300        ; refresh (5 minutes)
 				100        ; retry (1 minute 40 seconds)

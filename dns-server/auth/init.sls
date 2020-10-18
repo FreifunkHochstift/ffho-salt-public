@@ -2,17 +2,14 @@
 # Authoritive FFHO DNS Server configuration (dns01/dns02 anycast)
 #
 
-{% if salt['pillar.get']('netbox:role:name') %}
-{%- set role = salt['pillar.get']('netbox:role:name') %}
-{% else %}
-{%- set role = salt['pillar.get']('netbox:device_role:name') %}
-{% endif %}
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
+{% if 'dnsserver' in role %}
 
 # Get all nodes for DNS records
 {% set nodes = salt['mine.get']('netbox:platform:slug:linux', 'minion_id', tgt_type='pillar') %}
 {% set cnames = salt['pillar.get']('netbox:config_context:dns_zones:cnames') %}
+{%- set node_has_overlay = [] %}{# List of node[0] #}
 
-{% if 'dnsserver' in role %}
 include:
   - dns-server
 
@@ -47,12 +44,24 @@ python-dnspython:
     - require:
       - pkg: bind9
 
-  
 
 {% if not salt['file.file_exists' ]('/etc/bind/zones/db.in.ffmuc.net') %}
 /etc/bind/zones/db.in.ffmuc.net:
   file.managed:
     - source: salt://dns-server/auth/db.in.ffmuc.net
+    - user: bind
+    - group: bind
+    - mode: 775
+    - require:
+      - file: /etc/bind/zones
+    - watch_in:
+      - cmd: rndc-reload
+{% endif %}
+
+{% if not salt['file.file_exists' ]('/etc/bind/zones/db.ov.ffmuc.net') %}
+/etc/bind/zones/db.ov.ffmuc.net:
+  file.managed:
+    - source: salt://dns-server/auth/db.ov.ffmuc.net
     - user: bind
     - group: bind
     - mode: 775
@@ -113,16 +122,16 @@ dns-key:
     - require:
       - pkg: bind9
 
-
 # Create DNS records for each node
 {% for node_id in nodes %}
-{%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
-{%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
+  {%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
+  {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
+  {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
+  {%- set overlay_address = salt['mine.get'](node_id,'minion_nebula_address', tgt_type='glob') %}
+  {%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
+  {%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
 
-{%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
-{%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
-
-{% if 'mine_interval' not in address %}
+  {% if 'mine_interval' not in address %}
 record-A-{{ node_id }}:
   ddns.present:
     - name: {{ node_id }}.
@@ -153,10 +162,9 @@ record-PTR-{{ node_id }}:
       - pkg: python-dnspython
       - file: dns-key
 
+  {% endif %}
 
-{% endif %}
-
-{% if 'mine_interval' not in address6 %}
+  {% if 'mine_interval' not in address6 %}
 record-AAAA-{{ node_id }}:
   ddns.present:
     - name: {{ node_id }}.
@@ -187,14 +195,31 @@ record-PTR6-{{ node_id }}:
       - pkg: python-dnspython
       - file: dns-key
 
+  {%- endif %}
 
-{% endif %}
+# Create Entries in ov.ffmuc.net for each device with external IPs
+  {%- if overlay_address and overlay_address[node_id] | length > 0 and not '__data__' in overlay_address[node_id] %}
+    {%- do node_has_overlay.append(node[0]) %}
+record-A-overlay-{{ node_id }}:
+  ddns.present:
+    - name: {{ node[0] }}.ov.ffmuc.net.
+    - zone: ov.ffmuc.net
+    - ttl: 60
+    - data: {{ overlay_address[node_id] | regex_replace('/\d+$','') }}
+    - rdtype: A
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - replace_on_change: True
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+  {% endif %}
 
 # Create Entries in ext.ffmuc.net for each device with external IPs
-{% if external_address and external_address[node_id] | length > 0 and not '__data__' in external_address[node_id] %}
+  {% if external_address and external_address[node_id] | length > 0 and not '__data__' in external_address[node_id] %}
 record-A-external-{{ node_id }}:
   ddns.present:
-    {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
@@ -207,13 +232,11 @@ record-A-external-{{ node_id }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
-{% endif %}
+  {%- endif -%}
 
-{% if external_address6 and external_address[node_id] | length > 0 and not '__data__' in external_address6[node_id] %}
-
+  {%- if external_address6 and external_address[node_id] | length > 0 and not '__data__' in external_address6[node_id] %}
 record-AAAA-external-{{ node_id }}:
   ddns.present:
-    {% set node = node_id | regex_search('(^\w+(\d+)?)') %}
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
@@ -227,39 +250,48 @@ record-AAAA-external-{{ node_id }}:
       - pkg: python-dnspython
       - file: dns-key
 
-{% endif %}
-{% endfor %}
+  {%- endif %}
+{%- endfor %}{# for node_id in nodes #}
 
 # Create CNAMES as defined in netbox:config_context:dns_zones:cnames or netbox:services (cnames field needs to be set to true)
-{% set services = salt['pillar.get']('netbox:services') %}
-{% for service in services %}
-{% if services[service]['custom_fields']['cname'] %}
-{% if services[service]['virtual_machine'] %}
-{% if services[service]['custom_fields']['public'] %}
-{% set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
-{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-{% else %}
-{% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
-{% endif %}
-{% else %}
-{% if services[service]['custom_fields']['public'] %}
-{% set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
-{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-{% else %}
-{% do cnames.update({service: services[service]['device']['name'] }) %}
-{% endif %}
-{% endif %}
-{% endif %}
-{% endfor %}
-{% for cname in cnames %}
+{%- set services = salt['pillar.get']('netbox:services') %}
+{%- for service in services %}
+  {%- if services[service]['custom_fields']['cname'] %}
+    {%- if services[service]['virtual_machine'] %}
+      {%- set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
+      {%- if services[service]['custom_fields']['public'] %}
+        {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+      {%- else %}
+        {%- if target[0] in node_has_overlay %}
+          {%- do cnames.update({service: target[0] ~ '.ov.ffmuc.net' }) %}
+        {%- else %}
+          {%- do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
+        {%- endif %}
+      {%- endif %}
+    {%- else %}
+      {%- set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
+      {%- if services[service]['custom_fields']['public'] %}
+        {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+      {%- else %}
+        {%- if target[0] in node_has_overlay %}
+          {%- do cnames.update({service: target[0] ~ '.ov.ffmuc.net' }) %}
+        {%- else %}
+          {%- do cnames.update({service: services[service]['device']['name'] }) %}
+        {%- endif %}
+      {%- endif %}
+    {%- endif %}
+  {%- endif %}
+{%- endfor %}
+
+{%- for cname in cnames %}
 record-CNAME-{{ cname }}:
   ddns.present:
     - name: {{ cname }}.
-    {% if 'ext.ffmuc.net' in cname  %}
+    {%- if 'ext.ffmuc.net' in cname  %}
     - zone: ext.ffmuc.net
-    {% else %}
-    - zone: in.ffmuc.net
-    {% endif %}
+    {%- else %}
+    - zone: ov.ffmuc.net
+    {%- endif %}
     - ttl: 60
     - data: {{ cnames[cname] }}.
     - rdtype: CNAME
@@ -270,7 +302,7 @@ record-CNAME-{{ cname }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
-{% endfor %}
+{%- endfor %}{# for cname in cnames #}
 
 # Create extra DNS entries for devices not in pillars
 {%- set extra_dns_entries = salt['extra_dns_entries.get_extra_dns_entries'](
@@ -278,9 +310,9 @@ record-CNAME-{{ cname }}:
   salt['pillar.get']('netbox:config_context:dns_zones:netbox_token'),
   salt['pillar.get']('netbox:config_context:dns_zones:netbox_filter')
 ) %}
-{% for dns_entry in extra_dns_entries %}
 
-{% if extra_dns_entries[dns_entry].get('address') %}
+{%- for dns_entry in extra_dns_entries %}
+  {%- if extra_dns_entries[dns_entry].get('address') %}
 record-A-extra-{{ dns_entry }}:
   ddns.present:
     - name: {{ dns_entry }}.
@@ -296,10 +328,9 @@ record-A-extra-{{ dns_entry }}:
       - pkg: python-dnspython
       - file: dns-key
 
-{% endif %}
+  {%- endif %}
 
-{% if extra_dns_entries[dns_entry].get('address6') %}
-
+  {%- if extra_dns_entries[dns_entry].get('address6') %}
 record-AAAA-extra-{{ dns_entry }}:
   ddns.present:
     - name: {{ dns_entry }}.
@@ -314,7 +345,7 @@ record-AAAA-extra-{{ dns_entry }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
-{% endif %}
+  {%- endif %}
 
-{% endfor %}
-{% endif %}
+{%- endfor %}{# for dns_entry in extra_dns_entries #}
+{%- endif %}{# if 'dnsserver' in role #}
