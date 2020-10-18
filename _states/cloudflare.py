@@ -250,13 +250,13 @@ class Zone(object):
         self.records = zone["records"]
         self.exclude = zone.get('exclude', [])
 
-        if not self.api_token and (not self.auth_email or not slef.auth_key):
+        if not self.api_token and not (self.auth_email and self.auth_key):
             raise Exception("Either api_token or auth_email and auth_key must be provided")
 
     def _request(self, uri, method="GET", json=None):
         if self.api_token:
-            headers = {"Authorization": "Bearer " + self.api_token}
-        else :
+            headers = {"Authorization": "Bearer {0}".format(self.api_token)}
+        else:
             headers = {"X-Auth-Email": self.auth_email, "X-Auth-Key": self.auth_key}
 
         logger.info("Sending request: {0} {1} data: {2}".format(method, uri, json))
