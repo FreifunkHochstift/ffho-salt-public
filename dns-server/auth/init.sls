@@ -254,34 +254,26 @@ record-AAAA-external-{{ node_id }}:
 {%- endfor %}{# for node_id in nodes #}
 
 # Create CNAMES as defined in netbox:config_context:dns_zones:cnames or netbox:services (cnames field needs to be set to true)
-{%- set services = salt['pillar.get']('netbox:services') %}
-{%- for service in services %}
-  {%- if services[service]['custom_fields']['cname'] %}
-    {%- if services[service]['virtual_machine'] %}
-      {%- set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
-      {%- if services[service]['custom_fields']['public'] %}
-        {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-      {%- else %}
-        {%- if target[0] in node_has_overlay %}
-          {%- do cnames.update({service: target[0] ~ '.ov.ffmuc.net' }) %}
-        {%- else %}
-          {%- do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
-        {%- endif %}
-      {%- endif %}
-    {%- else %}
-      {%- set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
-      {%- if services[service]['custom_fields']['public'] %}
-        {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-      {%- else %}
-        {%- if target[0] in node_has_overlay %}
-          {%- do cnames.update({service: target[0] ~ '.ov.ffmuc.net' }) %}
-        {%- else %}
-          {%- do cnames.update({service: services[service]['device']['name'] }) %}
-        {%- endif %}
-      {%- endif %}
-    {%- endif %}
-  {%- endif %}
-{%- endfor %}
+{% set services = salt['pillar.get']('netbox:services') %}
+{% for service in services %}
+{% if services[service]['custom_fields']['cname'] %}
+{% if services[service]['virtual_machine'] %}
+{% if services[service]['custom_fields']['public'] %}
+{% set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
+{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+{% else %}
+{% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
+{% endif %}
+{% else %}
+{% if services[service]['custom_fields']['public'] %}
+{% set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
+{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+{% else %}
+{% do cnames.update({service: services[service]['device']['name'] }) %}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
 
 {%- for cname in cnames %}
 record-CNAME-{{ cname }}:
@@ -289,8 +281,8 @@ record-CNAME-{{ cname }}:
     - name: {{ cname }}.
     {%- if 'ext.ffmuc.net' in cname  %}
     - zone: ext.ffmuc.net
-    {%- else %}
-    - zone: ov.ffmuc.net
+    {%- elif 'in.ffmuc.net' in cname  %}
+    - zone: in.ffmuc.net
     {%- endif %}
     - ttl: 60
     - data: {{ cnames[cname] }}.
@@ -302,7 +294,31 @@ record-CNAME-{{ cname }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
+
+# we create a cname ov.ffmuc.net entry for each in.ffmuc.net entry
+{% if 'in.ffmuc.net' in cname  %}
+{% set data = cname | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
+{% set cname_ov = data[0] ~ '.ov.ffmuc.net' %}
+{% set target  = cnames[cname] | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
+{% set target_ov = target[0] ~ '.ov.ffmuc.net' %}
+record-CNAME-{{ cname_ov }}:
+  ddns.present:
+    - name: {{ cname_ov }}.
+    - zone: ov.ffmuc.net
+    - ttl: 60
+    - data: {{ target_ov }}.
+    - rdtype: CNAME
+    - nameserver: 127.0.0.1
+    - keyfile: /etc/bind/salt-master.key
+    - keyalgorithm: hmac-sha512
+    - replace_on_change: True
+    - require:
+      - pkg: python-dnspython
+      - file: dns-key
+{% endif %}
+
 {%- endfor %}{# for cname in cnames #}
+
 
 # Create extra DNS entries for devices not in pillars
 {%- set extra_dns_entries = salt['extra_dns_entries.get_extra_dns_entries'](
