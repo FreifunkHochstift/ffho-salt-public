@@ -1,0 +1,4 @@
+#
+# /etc/apt/sources.list (Salt managed)
+#
+deb http://debian.bio.lmu.de/raspbian/raspbian/ buster main contrib non-free rpi

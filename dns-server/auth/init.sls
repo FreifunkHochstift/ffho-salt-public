@@ -124,14 +124,14 @@ dns-key:
 
 # Create DNS records for each node
 {% for node_id in nodes %}
-  {%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
+  {%- set node = node_id | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
   {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
   {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
   {%- set overlay_address = salt['mine.get'](node_id,'minion_overlay_address', tgt_type='glob') %}
   {%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
   {%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
 
-  {% if 'mine_interval' not in address %}
+  {% if 'mine_interval' not in address and address %}
 record-A-{{ node_id }}:
   ddns.present:
     - name: {{ node_id }}.
@@ -164,7 +164,7 @@ record-PTR-{{ node_id }}:
 
   {% endif %}
 
-  {% if 'mine_interval' not in address6 %}
+  {% if 'mine_interval' not in address6 and address6 %}
 record-AAAA-{{ node_id }}:
   ddns.present:
     - name: {{ node_id }}.

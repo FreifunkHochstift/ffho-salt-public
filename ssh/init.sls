@@ -54,7 +54,7 @@ ssh-{{ user }}:
       - nogroup
     - system: True
     {% else %}
-    - gid_from_name: True
+    - usergroup: False
     - system: False
     {%- endif -%}
     {%- if 'admins' in group %}
