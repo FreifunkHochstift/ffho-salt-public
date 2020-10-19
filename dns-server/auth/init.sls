@@ -127,7 +127,7 @@ dns-key:
   {%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
   {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
   {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
-  {%- set overlay_address = salt['mine.get'](node_id,'minion_nebula_address', tgt_type='glob') %}
+  {%- set overlay_address = salt['mine.get'](node_id,'minion_overlay_address', tgt_type='glob') %}
   {%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
   {%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
 
@@ -199,7 +199,6 @@ record-PTR6-{{ node_id }}:
 
 # Create Entries in ov.ffmuc.net for each device with external IPs
   {%- if overlay_address and overlay_address[node_id] | length > 0 and not '__data__' in overlay_address[node_id] %}
-    {%- do node_has_overlay.append(node[0]) %}
 record-A-overlay-{{ node_id }}:
   ddns.present:
     - name: {{ node[0] }}.ov.ffmuc.net.
