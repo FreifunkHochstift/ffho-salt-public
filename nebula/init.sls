@@ -34,6 +34,8 @@ nebula-symlink:
 /etc/nebula/ca.crt:
   file.managed:
     - source: salt://nebula/cert/ca-ffmuc.crt
+    - require:
+        - file: /etc/nebula/config.yml
 
 /etc/nebula/{{ grains['id'] }}.crt:
   file.managed:

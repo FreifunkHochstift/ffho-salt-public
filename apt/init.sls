@@ -11,8 +11,12 @@
 
 salt-repo:
   pkgrepo.managed:
-    - humanname: SaltStack-Repo
-    - name: deb http://repo.saltstack.com/py3/debian/{{ grains.osmajorrelease }}/{{ grains.osarch }}/3000 {{ grains.oscodename }} main
+    - humanname: SaltStack-
+    {% if 'Ubuntu' in grains.lsb_distrib_id %}
+    - name: deb http://repo.saltstack.com/py3/{{ grains.lsb_distrib_id | lower }}/{{ grains.osrelease }}/{{ grains.osarch }}/latest {{ grains.oscodename }} main
+    {% else %}
+    - name: deb http://repo.saltstack.com/py3/{{ grains.lsb_distrib_id | lower }}/{{ grains.osmajorrelease }}/{{ grains.osarch }}/3000 {{ grains.oscodename }} main
+    {% endif %}
     - dist: {{ grains.oscodename }}
     - file: /etc/apt/sources.list.d/saltstack.list
     - clean_file: True
@@ -27,26 +31,6 @@ apt-transport-https:
 python-apt:
   pkg.installed
 
-{% if grains.oscodename != "buster" %}
-ffho-repo:
-  pkgrepo.managed:
-    - comments:
-      - "# FFHO APT repo"
-    - human_name: FFHO repository
-    - name: deb http://apt.ffho.net/ {{ grains.oscodename }} main contrib non-free
-    - clean_file: True
-    - dist: {{ grains.oscodename }}
-    - file: /etc/apt/sources.list.d/ffho.list
-    - keyserver: keys.gnupg.net
-{% if grains.oscodename == "jessie" %}
-    - keyid: 40FC1CE2
-{% else %}
-    - keyid: EB88A4D5
-{% endif %}
-    - require:
-      - pkg: python-apt
-{% endif %}
-
 # Purge old stuff
 /etc/apt/sources.list.d/raspi.list:
   file.absent
@@ -54,18 +38,9 @@ ffho-repo:
 /etc/apt/sources.list.d/universe-factory.list:
   file.absent
 
-# APT preferences
-/etc/apt/preferences.d/ffho:
-  file.managed:
-    - source: salt://apt/ffho.preferences
-
 /etc/apt/preferences.d/libluajit:
   file.managed:
     - contents: |
         Package: libluajit-5.1-2
         Pin: origin deb.debian.org
         Pin-Priority: 1001
-
-/etc/apt/apt.conf.d/ffho:
-  file.managed:
-    - source: salt://apt/ffho.apt.conf

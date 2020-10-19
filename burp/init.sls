@@ -13,6 +13,8 @@ include:
  {%- elif 'backup_client' in salt['pillar.get']('netbox:config_context:roles')  %}
  - burp.client
  {%- endif %}
+
+{% if 'Ubuntu' not in  grains.lsb_distrib_id%}
 burp-repo:
   pkgrepo.managed:
     - name: deb http://ziirish.info/repos/debian/{{ grains.oscodename }}/ zi-latest main
@@ -20,3 +22,4 @@ burp-repo:
     - file: /etc/apt/sources.list.d/burp.list
     - keyserver: keys.gnupg.net
     - keyid: A1718780C58CD6E3
+{% endif %}
