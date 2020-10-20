@@ -1,5 +1,5 @@
 //
-// Do any local configuration here
+// Do not change any configuration here. This file is managed by salt
 //
 
 // Consider adding the 1918 zones here, if they are not used in your
@@ -9,23 +9,22 @@
 {%- set zones = salt['pillar.get']('netbox:config_context:dns_zones:zones') %}
 
 
-
-{% for zone_key in update_keys %}
+{%- for zone_key in update_keys | sort %}
 key "{{ zone_key }}" {
   algorithm hmac-sha512;
   secret "{{ update_keys[zone_key]['key'] }}";
 };
-{% endfor %}
+{%- endfor %}
 
 
-{% for zone in zones %}
+{%- for zone in zones %}
 zone "{{ zone }}" {
 	type master;
 	file "/etc/bind/zones/db.{{ zone }}";
         update-policy  { 
-	{% for zone_key in update_keys %}
+	{%- for zone_key in update_keys | sort %}
 		grant {{ zone_key }} zonesub {{ update_keys[zone_key]['type'] }}; 
-	{% endfor %}
+	{%- endfor %}
 	};
 };
-{% endfor %}
+{%- endfor %}
