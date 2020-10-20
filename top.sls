@@ -21,6 +21,7 @@ base:
     - kvm
     - mosh
     - motd
+    - nebula
     - ntp
     - screen
     - snmpd

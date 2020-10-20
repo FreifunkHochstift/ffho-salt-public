@@ -54,7 +54,11 @@ ssh-{{ user }}:
       - nogroup
     - system: True
     {% else %}
+    {% if 'Ubuntu' in grains.lsb_distrib_id %}
     - usergroup: False
+    {% else %}
+    - gid_from_name: True
+    {% endif %}
     - system: False
     {%- endif -%}
     {%- if 'admins' in group %}

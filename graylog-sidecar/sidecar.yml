@@ -1,5 +1,5 @@
 # The URL to the Graylog server API.
-server_url: "https://log.in.ffmuc.net/api"
+server_url: "https://log.ov.ffmuc.net/api"
 
 # The API token to use to authenticate against the Graylog server API.
 # This field is mandatory

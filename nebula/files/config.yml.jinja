@@ -2,7 +2,7 @@ pki:
   ca: /etc/nebula/ca.crt
   cert: /etc/nebula/{{ grains.id }}.crt
   key: /etc/nebula/{{ grains.id }}.key
-
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
 {% set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
 static_host_map:
 {%- for lighthouse, public_addrs in lighthouses.items() %}
@@ -20,7 +20,7 @@ lighthouse:
 
 listen:
   host: 0.0.0.0
-  port: 4242
+  port: 4243
 
 punchy:
   punch: true
@@ -64,6 +64,10 @@ firewall:
   - port: 443
     proto: tcp
     host: any
+    # SNMP
+  - port: 161
+    proto: udp
+    host: librenms.in.ffmuc.net
     # mosh
   - port: 60001-60010
     proto: udp
@@ -84,15 +88,13 @@ firewall:
   # Allow stats
   - port: 8086
     proto: tcp
-    groups:
-      - jvb
-  # Allow stats
-  - port: 8086
+    host: any
+{% endif %}
+{% if "dnsserver" == role %}
+  - port: 53
+    proto: udp
+    host: any
+  - port: 53
     proto: tcp
-    groups:
-      - jibri
-  # Allow stats
-  - port: 8086
-    proto: tcp
-    host: jvb0.int.meet.ffmuc.net
+    host: any
 {% endif %}
