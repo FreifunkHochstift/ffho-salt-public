@@ -1,11 +1,7 @@
 #
 # Setup docker.io
 #
-{% if salt['pillar.get']('netbox:role:name') %}
-{%- set role = salt['pillar.get']('netbox:role:name') %}
-{% else %}
-{%- set role = salt['pillar.get']('netbox:device_role:name') %}
-{% endif %}
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
 
 {% if 'docker' in role or 'mailserver' in role %}
 docker-repo:
@@ -25,6 +21,18 @@ docker-pkgs:
       - containerd.io
     - require:
       - pkgrepo: docker-repo
+
+{# limit log-file-size #}
+/etc/docker/daemon.json:
+  file.managed:
+    - contents: |
+        {
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "10m",
+            "max-file": "3"
+          }
+        }
 {#
 # Install docker-compose via pip *shrug*
 python-pip:
