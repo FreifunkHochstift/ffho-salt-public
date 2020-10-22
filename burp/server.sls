@@ -5,7 +5,6 @@
 include:
  - burp
 
-
 burp-server:
   pkg.latest:
     - refresh: True
