@@ -36,6 +36,7 @@ nebula-symlink:
     - source: salt://nebula/cert/ca-ffmuc.crt
     - require:
         - file: /etc/nebula/config.yml
+        - file: /etc/nebula/{{ grains['id'] }}.crt
 
 /etc/nebula/{{ grains['id'] }}.crt:
   file.managed:
@@ -63,6 +64,8 @@ nebula-symlink:
     - user: root
     - group: root
     - mode: 644
+    - require:
+        - file: /etc/nebula/{{ grains['id'] }}.crt
 
 systemd-reload:
   cmd.run:
@@ -74,6 +77,8 @@ nebula-service-file:
   file.managed:
     - source: salt://nebula/files/nebula.service
     - name: /etc/systemd/system/nebula.service
+    - require:
+        - file: /etc/nebula/{{ grains['id'] }}.crt
 
 nebula-service:
   service.running:
