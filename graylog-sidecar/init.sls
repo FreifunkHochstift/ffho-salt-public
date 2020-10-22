@@ -2,13 +2,13 @@ graylog-sidecar-pkg:
 {% if grains.osfullname in 'Raspbian' %}
   pkg.installed:
     - sources:
-      - graylog-sidecar: https://apt.ffmuc.net/graylog-sidecar_1.1.0-0.SNAPSHOT_armhf.deb 
+      - graylog-sidecar: https://github.com/Graylog2/collector-sidecar/releases/download/1.0.2/graylog-sidecar_1.0.2-1_armv7.deb
       - filebeat: https://apt.ffmuc.net/filebeat-oss-8.0.0-SNAPSHOT-armhf.deb
 {% else %}
   pkg.installed:
     - sources:
-      - graylog-sidecar: https://github.com/Graylog2/collector-sidecar/releases/download/1.0.1/graylog-sidecar_1.0.1-1_amd64.deb
-      - filebeat: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.6.1-amd64.deb
+      - graylog-sidecar: https://github.com/Graylog2/collector-sidecar/releases/download/1.0.2/graylog-sidecar_1.0.2-1_amd64.deb
+      - filebeat: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.9.3-amd64.deb
 {% endif %}
 
 {% if not salt['file.file_exists']('/etc/systemd/system/graylog-sidecar.service') %}
