@@ -1,0 +1,100 @@
+pki:
+  ca: /etc/nebula/meet-ca.crt
+  cert: /etc/nebula/meet-{{ grains.id }}.crt
+  key: /etc/nebula/meet-{{ grains.id }}.key
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
+{% set lighthouses = salt['pillar.get']('netbox:config_context:nebula-meet:lighthouses')  %}
+static_host_map:
+{%- for lighthouse, public_addrs in lighthouses.items() %}
+  "{{ lighthouse }}": {{ public_addrs }}
+{% endfor %}
+lighthouse:
+  am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula-meet:am_lighthouse', False) }}
+  interval: 60
+{% if not salt['pillar.get']('netbox:config_context:nebula-meet:am_lighthouse', False) %}
+  hosts:
+{%- for lighthouse in lighthouses %}
+    - {{ lighthouse }}
+{% endfor %}
+{% endif %}
+
+listen:
+  host: 0.0.0.0
+  port: 4243
+
+punchy:
+  punch: true
+
+local_range: "{{ salt['pillar.get']('netbox:config_context:nebula-meet:local_range','192.168.110.1') }}"
+
+tun:
+  dev: nebula1
+  # Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
+  drop_local_broadcast: true
+  # Toggles forwarding of multicast packets
+  drop_multicast: true
+  tx_queue: 500
+  mtu: 1300
+
+logging:
+  level: info
+  format: text
+
+firewall:
+  conntrack:
+    tcp_timeout: 120h
+    udp_timeout: 3m
+    default_timeout: 10m
+    max_connections: 100000
+
+  outbound:
+  - port: any
+    proto: any
+    host: any
+
+  inbound:
+  - port: any
+    proto: icmp
+    host: any
+    # SSH
+  - port: 22
+    proto: tcp
+    host: any
+    # HTTPS
+  - port: 443
+    proto: tcp
+    host: any
+    # SNMP
+  - port: 161
+    proto: udp
+    host: librenms.in.ffmuc.net
+    # mosh
+  - port: 60001-60010
+    proto: udp
+    host: any
+{% if "graylog" in salt["pillar.get"]("netbox:config_context:docker") -%}
+    # Allow pushing to graylog via filebeat
+  - port: 5044
+    proto: tcp
+    host: any
+{% endif -%}
+{% if "salt_master" in salt["pillar.get"]("netbox:config_context:roles") -%}
+    # Allow salt access for any host in the network
+  - port: 4505-4506
+    proto: tcp
+    host: any
+{% endif -%}
+{% if "stats.in.ffmuc.net" == grains["id"] -%}
+  # Allow stats
+  - port: 8086
+    proto: tcp
+    host: any
+{% endif %}
+{% if "dnsserver" == role %}
+  - port: 53
+    proto: udp
+    host: any
+  - port: 53
+    proto: tcp
+    host: any
+{% endif %}

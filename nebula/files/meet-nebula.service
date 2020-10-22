@@ -1,0 +1,15 @@
+[Unit]
+Description=nebula-meet
+Wants=basic.target network.target
+After=basic.target network.target
+
+[Service]
+SyslogIdentifier=nebula-meet
+StandardOutput=syslog
+StandardError=syslog
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/local/bin/nebula -config /etc/nebula/meet-config.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

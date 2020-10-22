@@ -41,13 +41,13 @@ base:
     - radvd
     - respondd
   'jvb*':
-    - nebula
+    - nebula.meet
     - telegraf
     - jitsi.base
     - jitsi.videobridge
     - jitsi.jicofo
   'jibri*':
-    - nebula
+    - nebula.meet
     - telegraf
     - jitsi.base
     - jitsi.jibri
