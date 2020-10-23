@@ -34,7 +34,7 @@ knot-resolver:
       - file: /etc/knot-resolver/kresd.conf
       - cmd: systemd-reload
 
-systemd-reload:
+systemd-reload-knot-res:
   cmd.run:
    - name: systemctl --system daemon-reload
    - onchanges:

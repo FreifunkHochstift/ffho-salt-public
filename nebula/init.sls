@@ -67,7 +67,7 @@ nebula-symlink:
     - require:
         - file: /etc/nebula/{{ grains['id'] }}.crt
 
-systemd-reload:
+systemd-reload-nebula:
   cmd.run:
    - name: systemctl --system daemon-reload
    - onchanges:  

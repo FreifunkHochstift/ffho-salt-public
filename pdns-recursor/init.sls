@@ -23,7 +23,7 @@ pdns-recursor:
     - watch:
       - file: /etc/powerdns/recursor.conf
 
-systemd-reload:
+systemd-reload-pdns-rec:
   cmd.run:
    - name: systemctl --system daemon-reload
    - onchanges:
