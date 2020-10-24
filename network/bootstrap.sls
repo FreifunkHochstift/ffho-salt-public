@@ -11,5 +11,5 @@
 
 include:
  - network.link
- - network.{{ suite }}
  - network.interfaces
+ - network.{{ suite }}
