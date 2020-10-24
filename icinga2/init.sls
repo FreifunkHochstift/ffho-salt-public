@@ -25,6 +25,7 @@ monitoring-plugin-pkgs:
       - nagios-plugins-contrib
       - libyaml-syck-perl
       - libmonitoring-plugin-perl
+      - curl
       - lsof
       - python3-dnspython
     - watch_in:
