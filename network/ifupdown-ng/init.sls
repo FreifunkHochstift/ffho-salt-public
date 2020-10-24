@@ -12,8 +12,8 @@ ifupdown-ng:
       - salt://network/ifupdown-ng/ifupdown-ng.conf
 
 # Remove workaround for ifupdown2
-remove-ifupdown2-workarounds:
-  file.absent:
-    - name:
-      - /usr/local/sbin/ff_fix_default_route
-      - /etc/cron.d/ff_fix_default_route
+/usr/local/sbin/ff_fix_default_route:
+  file.absent
+
+/etc/cron.d/ff_fix_default_route:
+  file.absent
