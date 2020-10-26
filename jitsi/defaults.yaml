@@ -2,6 +2,7 @@
 # vim: ft=yaml
 ---
 jitsi:
+  public_domain: example.com
   xmpp:
     server_host: localhost
     xmpp_domain: example.com

@@ -5,6 +5,9 @@
 
 {% if jitsi.videobridge.enabled %}
 
+include:
+  - jitsi.base
+
 jitsi-videobridge2:
   pkg.installed:
     - require:
@@ -30,23 +33,28 @@ videobridge-system-config:
     - nisdomain: "{{jitsi.videobridge.jicofo.hostname}}"
     - apply_hostname: True
 
-/etc/jitsi/videobridge/config.json:
+/etc/jitsi/videobridge/config:
   file.managed:
-    - source: jitsi/videobridge/config.json.jinja
+    - source: salt://jitsi/videobridge/config.jinja
+    - template: jinja
+
+/etc/jitsi/videobridge/jvb.conf:
+  file.managed:
+    - source: salt://jitsi/videobridge/jvb.conf.jinja
     - template: jinja
 
 /etc/jitsi/videobridge/sip-communicator.properties:
   file.managed:
-    - source: jitsi/videobridge/sip-communicator.properties.jinja
+    - source: salt://jitsi/videobridge/sip-communicator.properties.jinja
     - template: jinja
 
 /usr/share/jitsi-videobridge/lib/videobridge.rc:
   file.managed:
-    - source: jitsi/videobridge/videobridge.rc
+    - source: salt://jitsi/videobridge/videobridge.rc
     - template: jinja
 
 /etc/systemd/system/jitsi-videobridge2.service.d/override.conf:
   file.managed:
-    - source: jitsi/videobridge/systemd-override.conf
+    - source: salt://jitsi/videobridge/systemd-override.conf
 
 {% endif %}
