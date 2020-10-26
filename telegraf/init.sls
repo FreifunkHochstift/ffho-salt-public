@@ -24,6 +24,9 @@ telegraf:
 /etc/telegraf/telegraf.conf:
   file.managed:
     - source: salt://telegraf/files/telegraf.conf
+    - template: jinja
+    - watch_in:
+          service: telegraf
 
 /etc/telegraf/telegraf.d/in-dhcpd-pool-stats.conf:
 {% if 'gateway' in role or 'nextgen-gateway' in role %}
