@@ -70,7 +70,7 @@ telegraf:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-gateway-modules.conf:
-{% if 'gateway' in role or 'nextgen-gateway' in role %}
+{% if 'gateway' in role or 'nextgen-gateway' in role or 'vpngw' in role %}
   file.managed:
     - source: salt://telegraf/files/in_gateway-modules.conf
 {% else %}
