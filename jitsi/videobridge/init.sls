@@ -26,7 +26,7 @@ jicofo-and-xmpp-ip:
 videobridge-system-config:
   network.system:
     - enabled: True
-    - hostname: "{{jitsi.videobridge.subdomain}}.{{jitsi.videobridge.jicofo.hostname}}"
+    - hostname: "{{ grains.id.split('.')[0] }}.{{jitsi.videobridge.jicofo.hostname}}"
     - nisdomain: "{{jitsi.videobridge.jicofo.hostname}}"
     - apply_hostname: True
 

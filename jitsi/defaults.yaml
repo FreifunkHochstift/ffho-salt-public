@@ -17,16 +17,15 @@ jitsi:
   jicofo:
     enabled: false
     opts: ""
-    bridge_selection_strategy: IntraRegionBridgeSelectionStrategy
+    bridge_selection_strategy: SplitBridgeSelectionStrategy
 
   videobridge:
     enabled: false
-    subdomain: jvbXX
     octo:
       enabled: false
       ip: 127.0.0.1
       port: 4096
-      region: ffmuc-de1
+      region: my-region
 
   jibri:
     enabled: false
@@ -36,14 +35,14 @@ jitsi:
     xmpp:
       environment_name: ffmuc_environment
       control_login:
-        domain: "auth.meet.ffmuc.net"
+        domain: "auth.example.com"
         username: "jibri-unnamed"
         password: "THIS_IS_SUPER_SECRET"
       control_muc:
-        domain: "internal.auth.meet.ffmuc.net"
+        domain: "internal.auth.example.com"
         room_name: "JibriBrewery"
         nickname: "jibri-unnamed"
       call_login:
-        domain: "recorder.meet.ffmuc.net"
+        domain: "recorder.example.com"
         username: "recorder-unnamed"
         password: "THIS_IS_SUPER_SECRET"
