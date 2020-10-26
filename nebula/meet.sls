@@ -8,7 +8,7 @@ include:
 
 /etc/nebula/meet-ca.crt:
   file.managed:
-    - source: salt://nebula/cert-meet/ca-ffmuc.crt
+    - source: salt://nebula/cert-meet/ca.crt
     - require:
         - file: /etc/nebula/meet-config.yml
 
@@ -61,7 +61,7 @@ nebula-meet-service:
     - reload: True
     - name: nebula-meet
     - require:
-        - file: nebula-service-file
+        - file: nebula-meet-service-file
         - file: /etc/nebula/meet-config.yml
         - file: /etc/nebula/meet-{{ grains['id'] }}.crt
         - file: /etc/nebula/meet-{{ grains['id'] }}.key

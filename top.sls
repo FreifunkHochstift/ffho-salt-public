@@ -41,13 +41,11 @@ base:
     - radvd
     - respondd
   'jvb*':
-    - nebula.meet
     - telegraf
     - jitsi.base
     - jitsi.videobridge
     - jitsi.jicofo
   'jibri*':
-    - nebula.meet
     - telegraf
     - jitsi.base
     - jitsi.jibri
@@ -55,3 +53,5 @@ base:
     - cloudflare
   'vpn0*.in.ffmuc.net':
     - wireguard
+  '*.meet.ffmuc.net':
+    - nebula.meet
