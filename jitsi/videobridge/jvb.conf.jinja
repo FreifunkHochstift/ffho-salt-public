@@ -1,0 +1,48 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+videobridge {
+    apis {
+        xmpp-client {
+            shard1 {
+                hostname = "{{ jitsi.xmpp.server_host }}"
+                domain = "{{ jitsi.xmpp.auth_domain }}"
+                username = "{{ jitsi.xmpp.username }}"
+                password = "{{ jitsi.xmpp.password }}"
+                muc-jids = "{{ jitsi.videobridge_brewery }}"
+                muc_nickname = "{{ jitsi.xmpp.muc_nickname }}"
+                disable_certificate_verification = true
+            }
+        }
+    }
+    http-servers {
+        public {
+            port = 9090
+        }
+    }
+    ice {
+        tcp {
+            enabled = true
+        }
+    }
+    {%- if jitsi.videobridge.octo.enabled %}
+    octo {
+        enabled = true
+        bind-address = "{{ jitsi.videobridge.octo.ip_addr }}"
+        bind-port = {{ jitsi.videobridge.octo.port }}
+        region = "{{ jitsi.videobridge.octo.region }}"
+    }
+    {% endif -%}
+    stats {
+        enabled = true
+        interval = 10 seconds
+        transports = [
+            { type = "muc" },
+            { type = "colibri" }
+        ]
+    }
+    websockets {
+        enabled = true
+        domain = "{{jitsi.public_domain}}:443"
+        server-id = "{{ grains.id.split('.')[0] }}"
+        tls = true
+    }
+}

@@ -1,0 +1,10 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+org.jitsi.jicofo.BRIDGE_MUC={{ jitsi.videobridge_brewery }}
+
+org.jitsi.jicofo.jibri.BREWERY={{ jitsi.jibri_brewery }}
+org.jitsi.jicofo.jibri.PENDING_TIMEOUT=90
+
+{# increase report timeout for stats (by jvb's) from 15 to 30 seconds #}
+org.jitsi.jicofo.MAX_STATS_REPORT_AGE=30000
+{# Enable octo #}
+org.jitsi.jicofo.BridgeSelector.BRIDGE_SELECTION_STRATEGY={{ jitsi.jicofo.bridge_selection_strategy }}

@@ -1,51 +1,40 @@
 pki:
-  ca: /etc/nebula/ca.crt
-  cert: /etc/nebula/{{ grains.id }}.crt
-  key: /etc/nebula/{{ grains.id }}.key
+  ca: /etc/nebula/meet-ca.crt
+  cert: /etc/nebula/meet-{{ grains.id }}.crt
+  key: /etc/nebula/meet-{{ grains.id }}.key
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{% set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
+{% set lighthouses = salt['pillar.get']('netbox:config_context:nebula-meet:lighthouses')  %}
 static_host_map:
 {%- for lighthouse, public_addrs in lighthouses.items() %}
   "{{ lighthouse }}": {{ public_addrs }}
-{%- endfor %}
+{% endfor %}
 lighthouse:
-  am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) }}
+  am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula-meet:am_lighthouse', False) }}
   interval: 60
-{% if not salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) %}
+{% if not salt['pillar.get']('netbox:config_context:nebula-meet:am_lighthouse', False) %}
   hosts:
 {%- for lighthouse in lighthouses %}
     - {{ lighthouse }}
-{%- endfor %}
-listen:
-  host: 0.0.0.0
-  port: 0
-{% else %}
-listen:
-  host: 0.0.0.0
-  port: 4243
+{% endfor %}
 {% endif %}
+
+listen:
+  host: 0.0.0.0
+  port: 4242
 
 punchy:
   punch: true
-  respond: true
-  delay: 1s
 
-local_range: "{{ salt['pillar.get']('netbox:config_context:nebula:local_range','192.168.110.1') }}"
+local_range: "{{ salt['pillar.get']('netbox:config_context:nebula-meet:local_range','192.168.110.1') }}"
 
 tun:
-  dev: nebula0
+  dev: nebula1
   # Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
   drop_local_broadcast: true
   # Toggles forwarding of multicast packets
   drop_multicast: true
   tx_queue: 500
   mtu: 1300
-
-handshakes:
-  try_interval: 100ms
-  retries: 20
-  wait_rotation: 5
-  trigger_buffer: 64
 
 logging:
   level: info

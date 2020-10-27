@@ -1,0 +1,26 @@
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+
+{%- import_yaml "jitsi/defaults.yaml" as default_settings %}
+
+{#- Retrieve the config dict only once #}
+{%- set _config = salt['pillar.get']("netbox:config_context:jitsi", default={}) %}
+
+{% set jitsi = salt['grains.filter_by'](
+    default_settings,
+    default='jitsi',
+    merge=_config,
+)
+%}
+{# some fallbacks #}
+{% if "component-user" == jitsi.xmpp.username %}
+{% do jitsi.xmpp.update({'username' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}
+{% endif %}
+
+{% if not jitsi.xmpp.get('muc_nickname') %}
+{% do jitsi.xmpp.update({'muc_nickname' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}
+{% endif %}
+
+{% if jitsi.videobridge.octo.enabled and not jitsi.videobridge.octo.get('ip_addr') and jitsi.videobridge.octo.get('interface') %}
+{% do jitsi.videobridge.octo.update({'ip_addr' : salt['network.interfaces']()[jitsi.videobridge.octo.interface]['inet'][0]['address'] }) %}
+{% endif %}

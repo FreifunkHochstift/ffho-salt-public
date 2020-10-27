@@ -22,16 +22,16 @@ base:
     - mosh
     - motd
     - nebula
-    - ntp
+    #- ntp
     - screen
-    - snmpd
+    #- snmpd
     - ssh
     - sudo
     - sysctl
     - telegraf
     - timezone
     - tmux
-    - unattended-upgrades
+    #- unattended-upgrades
     - vim
   'gw*':
     - fastd
@@ -40,7 +40,18 @@ base:
     - pdns-recursor
     - radvd
     - respondd
+  'jvb*':
+    - telegraf
+    - jitsi.base
+    - jitsi.videobridge
+    - jitsi.jicofo
+  'jibri*':
+    - telegraf
+    - jitsi.base
+    - jitsi.jibri
   'dns01.in.ffmuc.net':
     - cloudflare
   'vpn0*.in.ffmuc.net':
     - wireguard
+  '*.meet.ffmuc.net':
+    - nebula.meet
