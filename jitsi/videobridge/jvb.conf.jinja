@@ -26,7 +26,7 @@ videobridge {
     {%- if jitsi.videobridge.octo.enabled %}
     octo {
         enabled = true
-        bind-address = "{{ jitsi.videobridge.octo.ip }}"
+        bind-address = "{{ jitsi.videobridge.octo.ip_addr }}"
         bind-port = {{ jitsi.videobridge.octo.port }}
         region = "{{ jitsi.videobridge.octo.region }}"
     }

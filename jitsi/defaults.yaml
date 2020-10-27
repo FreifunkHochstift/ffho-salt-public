@@ -24,7 +24,7 @@ jitsi:
     enabled: false
     octo:
       enabled: false
-      ip: 127.0.0.1
+      interface: tun0 # or "ip_addr: 127.0.0.1"
       port: 4096
       region: my-region
 
