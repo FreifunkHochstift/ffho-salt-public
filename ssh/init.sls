@@ -26,7 +26,7 @@ ssh:
     - watch_in:
       - service: ssh
 
-
+{#
 {% for group in user_groups|sort %}
 {% for user in user_groups[group]|sort %}
   {% if user not in user_home %}
@@ -112,6 +112,7 @@ ssh-{{ user }}:
     - mode: 0644
     - require:
       - file: /root/.ssh
+#}
 
 /root/.ssh/authorized_keys2:
   file.absent

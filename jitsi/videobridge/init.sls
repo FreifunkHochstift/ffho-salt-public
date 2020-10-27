@@ -19,18 +19,18 @@ jitsi-videobridge2:
 stats.in.ffmuc.net:
   host.present:
     - ip: 10.111.0.254
-jicofo-and-xmpp-ip:
-  host.present:
-    - names:
-       - {{ jitsi.videobridge.jicofo.hostname }}
-    - ip: 10.111.0.1
-
-videobridge-system-config:
-  network.system:
-    - enabled: True
-    - hostname: "{{ grains.id.split('.')[0] }}.{{jitsi.videobridge.jicofo.hostname}}"
-    - nisdomain: "{{jitsi.videobridge.jicofo.hostname}}"
-    - apply_hostname: True
+#jicofo-and-xmpp-ip:
+#  host.present:
+#    - names:
+#       - {{ jitsi.videobridge.jicofo.hostname }}
+#    - ip: 10.111.0.1
+#
+#videobridge-system-config:
+#  network.system:
+#    - enabled: True
+#    - hostname: "{{ grains.id.split('.')[0] }}.{{jitsi.videobridge.jicofo.hostname}}"
+#    - nisdomain: "{{jitsi.videobridge.jicofo.hostname}}"
+#    - apply_hostname: True
 
 /etc/jitsi/videobridge/config:
   file.managed:

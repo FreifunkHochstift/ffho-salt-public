@@ -45,7 +45,7 @@ include:
 systemd-reload-nebula:
   cmd.run:
    - name: systemctl --system daemon-reload
-   - onchanges:
+   - onchanges:  
      - file: nebula-service-file
 
 nebula-service-file:

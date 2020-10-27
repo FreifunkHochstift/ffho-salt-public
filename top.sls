@@ -22,16 +22,16 @@ base:
     - mosh
     - motd
     - nebula
-    - ntp
+    #- ntp
     - screen
-    - snmpd
+    #- snmpd
     - ssh
     - sudo
     - sysctl
     - telegraf
     - timezone
     - tmux
-    - unattended-upgrades
+    #- unattended-upgrades
     - vim
   'gw*':
     - fastd

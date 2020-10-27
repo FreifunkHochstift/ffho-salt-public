@@ -7,7 +7,7 @@ pki:
 static_host_map:
 {%- for lighthouse, public_addrs in lighthouses.items() %}
   "{{ lighthouse }}": {{ public_addrs }}
-{% endfor %}
+{%- endfor %}
 lighthouse:
   am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) }}
   interval: 60
@@ -40,6 +40,12 @@ tun:
   drop_multicast: true
   tx_queue: 500
   mtu: 1300
+
+handshakes:
+  try_interval: 100ms
+  retries: 20
+  wait_rotation: 5
+  trigger_buffer: 64
 
 logging:
   level: info
