@@ -1,9 +1,11 @@
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
+{%- set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
+
 pki:
   ca: /etc/nebula/ca.crt
   cert: /etc/nebula/{{ grains.id }}.crt
   key: /etc/nebula/{{ grains.id }}.key
-{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{% set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
+
 static_host_map:
 {%- for lighthouse, public_addrs in lighthouses.items() %}
   "{{ lighthouse }}": {{ public_addrs }}
@@ -11,19 +13,14 @@ static_host_map:
 lighthouse:
   am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) }}
   interval: 60
-{% if not salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) %}
   hosts:
 {%- for lighthouse in lighthouses %}
     - {{ lighthouse }}
-{%- endfor %}
+{% endfor %}
+
 listen:
-  host: 0.0.0.0
-  port: 0
-{% else %}
-listen:
-  host: 0.0.0.0
-  port: 4243
-{% endif %}
+  host: {{ salt['pillar.get']('netbox:config_context:nebula:listen:host', "0.0.0.0") }}
+  port: {{ salt['pillar.get']('netbox:config_context:nebula:listen:port', 0) }}
 
 punchy:
   punch: true
