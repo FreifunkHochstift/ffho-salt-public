@@ -2,7 +2,9 @@
 # nebula
 ###
 
-{% if "nebula" in salt["pillar.get"]("netbox:config_context", {}) %}
+{%- from "nebula/map.jinja" import nebula with context %}
+{% if nebula.enabled %}
+
 include:
   - nebula.install
 

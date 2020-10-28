@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+---
+nebula:
+    enabled: false
+    version: 1.3.0
+
+    am_lighthouse: false
+    lighthouses:
+        127.0.0.1:
+        - 192.168.42.42:4242
+
+    interface: nebula0
+    listen:
+        host: 0.0.0.0
+        port: 0
+
+    local_range: 127.0.0.1/8

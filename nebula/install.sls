@@ -2,15 +2,16 @@
 # install nebula
 ###
 
-{% set nebula_version = salt["pillar.get"]("netbox:config_context:nebula:version", "1.3.0") %}
+{%- from "nebula/map.jinja" import nebula with context %}
+
 nebula-tmp-bin:
   archive.extracted:
     - name: /var/cache/salt/nebula
     - if_missing: /usr/local/bin/nebula
     {% if grains.osarch == "armhf" %}
-    - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula_version }}/nebula-linux-arm-7.tar.gz
+    - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula.version }}/nebula-linux-arm-7.tar.gz
     {% else %}
-    - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula_version }}/nebula-linux-{{ grains.osarch }}.tar.gz
+    - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula.version }}/nebula-linux-{{ grains.osarch }}.tar.gz
     {% endif %}
     - makedirs: True
     - archive_format: tar

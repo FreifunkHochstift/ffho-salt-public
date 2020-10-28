@@ -1,5 +1,6 @@
+{%- from "nebula/map.jinja" import nebula with context %}
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{%- set lighthouses = salt['pillar.get']('netbox:config_context:nebula:lighthouses')  %}
+{%- set roles = salt['pillar.get']('netbox:config_context:roles', []) %}
 
 pki:
   ca: /etc/nebula/ca.crt
@@ -7,30 +8,30 @@ pki:
   key: /etc/nebula/{{ grains.id }}.key
 
 static_host_map:
-{%- for lighthouse, public_addrs in lighthouses.items() %}
+{%- for lighthouse, public_addrs in nebula.lighthouses.items() %}
   "{{ lighthouse }}": {{ public_addrs }}
 {%- endfor %}
 lighthouse:
-  am_lighthouse: {{ salt['pillar.get']('netbox:config_context:nebula:am_lighthouse', False) }}
+  am_lighthouse: {{ nebula.am_lighthouse }}
   interval: 60
   hosts:
-{%- for lighthouse in lighthouses %}
+{%- for lighthouse in nebula.lighthouses %}
     - {{ lighthouse }}
-{% endfor %}
+{%- endfor %}
 
 listen:
-  host: {{ salt['pillar.get']('netbox:config_context:nebula:listen:host', "0.0.0.0") }}
-  port: {{ salt['pillar.get']('netbox:config_context:nebula:listen:port', 0) }}
+  host: {{ nebula.listen.host }}
+  port: {{ nebula.listen.port }}
 
 punchy:
   punch: true
   respond: true
   delay: 1s
 
-local_range: "{{ salt['pillar.get']('netbox:config_context:nebula:local_range','192.168.110.1') }}"
+local_range: "{{ nebula.local_range }}"
 
 tun:
-  dev: nebula0
+  dev: {{ nebula.interface }}
   # Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
   drop_local_broadcast: true
   # Toggles forwarding of multicast packets
@@ -86,7 +87,7 @@ firewall:
     proto: tcp
     host: any
 {% endif -%}
-{% if "salt_master" in salt["pillar.get"]("netbox:config_context:roles") -%}
+{% if "salt_master" in roles -%}
     # Allow salt access for any host in the network
   - port: 4505-4506
     proto: tcp
