@@ -1,0 +1,18 @@
+#
+# {{ interface }} / {{ desc }}
+#
+
+[Match]
+Name={{ interface }}
+
+[Network]
+VLAN={{ interface }}
+{%- for ipaddress in ipaddresses %}
+Address={{ ipaddress['address'] }}
+{%- endfor %}
+{% if interface in gateway %}
+{% for gw in gateway[interface] %}
+Gateway={{ gw }}
+{% endfor %}
+{% endif %}
+DNS=1.1.1.1

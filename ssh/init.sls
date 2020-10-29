@@ -26,7 +26,7 @@ ssh:
     - watch_in:
       - service: ssh
 
-{#
+
 {% for group in user_groups|sort %}
 {% for user in user_groups[group]|sort %}
   {% if user not in user_home %}

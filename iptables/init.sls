@@ -19,30 +19,33 @@ iptables_pkgs:
 {% if own_location == node_location[node] %}
 
 {%- set overlay_address = salt['mine.get'](node,'minion_overlay_address', tgt_type='glob') %}
+{%- set minion_address = salt['mine.get'](node,'minion_address', tgt_type='glob')[node] %}
 
 {% set nebula_internal_ip_split = overlay_address[node].split('/')[0].split('.') %}
 {% set n1 = nebula_internal_ip_split[2] | int %}
 {% set n2 = nebula_internal_ip_split[3] | int %}
 
 {{ node }}_{{ own_location }}_nebula_dnat:
-  iptables.append:
+  iptables.insert:
     - table: nat
+    - position: 1
     - family: ipv4
     - chain: PREROUTING
     - protocol: udp
     - destination: {{ nat_ip }}
     - jump: DNAT
     - dport: {{ 20000 + n1 * 256 + n2  }}
-    - to-destination: {{ salt['dig.A'](node)[0] }}
+    - to-destination: {{ minion_address.split('/')[0] }}
     - save: True
 
 {{ node }}_{{ own_location }}_nebula_snat:
-  iptables.append:
+  iptables.insert:
     - table: nat
+    - position: 1
     - family: ipv4
     - chain: POSTROUTING
     - protocol: udp
-    - source: {{ salt['dig.A'](node)[0] }}
+    - source: {{ minion_address.split('/')[0] }}
     - jump: SNAT
     - sport: {{ 20000 + n1 * 256 + n2  }}
     - to: {{ nat_ip }}:{{ 20000 + n1 * 256 + n2  }}
