@@ -1,0 +1,83 @@
+{%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
+{%- set uplink_vlan = salt['pillar.get']('netbox:config_context:network:uplink_vlan') %}
+
+log syslog all;
+
+protocol device {
+}
+
+protocol direct {
+        ipv4;                   # Connect to default IPv4 table
+        ipv6;                   # ... and to default IPv6 table
+}
+
+{%- for iface in interfaces|sort %}
+{%- if iface == 'dummy0' %}
+{%- for ipaddress in interfaces[iface]['ipaddresses']%}
+{%- if ipaddress['family']['value'] == 4 %}
+protocol kernel {
+        ipv4 {                  # Connect protocol to IPv4 table by channel
+              import all;       # Import to table, default is import all
+              export filter {
+                        if net ~ [ 0.0.0.0/0] then {
+                            krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
+                        accept;
+                        }
+                        };
+        };
+}
+
+filter EXTERNAL_OUT {
+  if net ~ [ {{ ipaddress['address'] }}{32,32} ] then {
+    accept;
+  }
+  reject;
+} 
+
+{%- else %}
+protocol kernel {
+        ipv6 {
+
+              import all;       # Import to table, default is import all
+              export filter {
+                        krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
+                        accept;
+                        };
+         };
+}
+
+filter EXTERNAL6_OUT {
+  if net ~ [ {{ ipaddress['address'] }}{128,128} ] then {
+    accept;
+  }
+  reject;
+}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+
+{%- if iface == uplink_vlan['interface'] %}
+{%- for ipaddress in interfaces[iface]['ipaddresses'] %}
+{%- if ipaddress['family']['value'] == 4 %}
+protocol bgp {{ iface }}_v4 {
+        description "Uplink";
+        local {{ ipaddress['address'].split('/')[0] }} as {{ uplink_vlan['local_asn'] }};
+        neighbor {{ uplink_vlan['neighbor_v4'] }} as {{ uplink_vlan['remote_asn'] }};
+        ipv4 {
+                import all;
+                export filter EXTERNAL_OUT;
+        };
+}
+{%- else %}
+protocol bgp {{ iface }}_v6 {
+        local {{ ipaddress['address'].split('/')[0] }} as {{ uplink_vlan['local_asn'] }};
+        neighbor {{ uplink_vlan['neighbor_v6'] }} as {{ uplink_vlan['remote_asn'] }};
+        ipv6 {  
+                import all;
+                export filter EXTERNAL6_OUT;
+        };
+}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
