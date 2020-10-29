@@ -18,6 +18,7 @@ generate_initrd:
 {%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
 {%- set gateway = salt['pillar.get']('netbox:config_context:network:gateway') %}
 {% for iface in interfaces |sort %}
+{% if "nebula" not in iface %}
 {% if interfaces[iface]['mac_address'] is not none %}
 /etc/systemd/network/42-{{ iface }}.link:
   file.managed:
@@ -28,7 +29,7 @@ generate_initrd:
       desc: {{ interfaces[iface]['description'] }}
     - watch_in:
           cmd: generate_initrd
-
+{% endif %}
 # Generate network files for each interface we have in netbox
 /etc/systemd/network/50-{{ iface }}.network:
   file.managed:
@@ -39,6 +40,16 @@ generate_initrd:
       ipaddresses: {{ interfaces[iface]['ipaddresses'] }}
       gateway: {{ gateway }}
 
+# Are we creating a dummy interface? So we also need a netdev file
+{% if "dummy" in iface %}
+/etc/systemd/network/50-{{ iface }}.netdev:
+  file.managed:
+    - source: salt://systemd-networkd/files/systemd-netdev.jinja2
+    - template: jinja
+      interface: {{ iface }}
+      desc: {{ interfaces[iface]['description'] }}
+      kind: "dummy"
+{% endif %}
 {% endif %}
 {% endfor %}
 
