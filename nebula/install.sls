@@ -21,12 +21,12 @@ nebula-tmp-bin:
     - skip_verify: True
     - enforce_toplevel: False
 
-nebula-symlink:
-  file.symlink:
+nebula-binary:
+  file.copy:
     - name:   /usr/local/bin/nebula
-    - target: /var/cache/salt/nebula/nebula
+    - source: /var/cache/salt/nebula/nebula
     - user: root
     - group: root
-    - force: True # for migration where it was a file instead of a symlink
+    - force: True
     - require:
         - archive: nebula-tmp-bin

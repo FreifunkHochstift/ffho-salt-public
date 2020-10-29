@@ -17,11 +17,10 @@
 
 {# some fallbacks #}
 {% if 0 == nebula.listen.port %}
-{% set nebula_internal_ip = salt["pillar.get"]("netbox:interfaces:"+nebula.interface+":ipaddresses", [])[0] %}
-{% if nebula_internal_ip %}
-{% set nebula_internal_ip_split = nebula_internal_ip["address"].split('/')[0].split('.') %}
-{% set n1 = nebula_internal_ip_split[2] | int %}
-{% set n2 = nebula_internal_ip_split[3] | int %}
-{% do nebula.listen.update({'port' : 20000 + n1 * 256 + n2 }) %}
-{% endif %}
+    {% set nebula_internal_ip = salt["pillar.get"]("netbox:interfaces:"+nebula.interface+":ipaddresses", [])[0] %}
+    {% if nebula_internal_ip %}
+        {% set nebula_internal_ip_split = nebula_internal_ip["address"].split('/')[0].split('.') %}
+        {% set n1 = nebula_internal_ip_split[2] | int %} {% set n2 = nebula_internal_ip_split[3] | int %}
+        {% do nebula.listen.update({'port' : 20000 + n1 * 256 + n2 }) %}
+    {% endif %}
 {% endif %}

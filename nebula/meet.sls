@@ -65,7 +65,7 @@ nebula-meet-service:
         - file: /etc/nebula/meet-config.yml
         - file: /etc/nebula/meet-{{ grains['id'] }}.crt
         - file: /etc/nebula/meet-{{ grains['id'] }}.key
-        - file: nebula-symlink
+        - file: nebula-binary
     - watch:
         - file: /etc/nebula/meet-config.yml
 

@@ -68,7 +68,7 @@ nebula-service:
         - file: /etc/nebula/config.yml
         - file: /etc/nebula/{{ grains['id'] }}.crt
         - file: /etc/nebula/{{ grains['id'] }}.key
-        - file: nebula-symlink
+        - file: nebula-binary
     - watch:
         - file: /etc/nebula/config.yml
 
