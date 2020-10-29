@@ -112,7 +112,6 @@ ssh-{{ user }}:
     - mode: 0644
     - require:
       - file: /root/.ssh
-#}
 
 /root/.ssh/authorized_keys2:
   file.absent

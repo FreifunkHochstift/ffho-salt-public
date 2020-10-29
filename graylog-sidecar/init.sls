@@ -35,7 +35,7 @@ graylog-sidecar-install-service:
   cmd.run:
     - name: "graylog-sidecar -service install"
     - onchanges:
-      - pkg: graylog-sidecar-pkg
+      - pkg: graylog-sidecar
 {% endif %}
 
 graylog-sidecar-config:
@@ -51,5 +51,8 @@ graylog-sidecar-service:
     - name: graylog-sidecar
     - enable: true
     - require:
+      - pkg: graylog-sidecar
+      - file: graylog-sidecar-config
+    - watch:
       - pkg: graylog-sidecar
       - file: graylog-sidecar-config

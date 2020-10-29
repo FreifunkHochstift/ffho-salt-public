@@ -1,15 +1,9 @@
 #
 # sysctl
 #
-{% if salt['pillar.get']('netbox:role:name') %}
-{%- set role = salt['pillar.get']('netbox:role:name') %}
-{% else %}
-{%- set role = salt['pillar.get']('netbox:device_role:name') %}
-{% endif %}
 
 include:
   - sysctl.global
-
 
 #
 # Activate IP Unicast Routing
