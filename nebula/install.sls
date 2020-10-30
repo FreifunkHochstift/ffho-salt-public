@@ -27,6 +27,5 @@ nebula-binary:
     - source: /var/cache/salt/nebula/nebula
     - user: root
     - group: root
-    - force: True
     - require:
         - archive: nebula-tmp-bin

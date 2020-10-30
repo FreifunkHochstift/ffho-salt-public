@@ -1,6 +1,7 @@
 {%- set interfaces = salt['pillar.get']('netbox:interfaces') %}
 {%- set uplink_vlan = salt['pillar.get']('netbox:config_context:network:uplink_vlan') %}
-
+{%- set prefixes_v4 = [] %}
+{%- set prefixes_v6 = [] %}
 log syslog all;
 
 protocol device {
@@ -12,9 +13,10 @@ protocol direct {
 }
 
 {%- for iface in interfaces|sort %}
-{%- if iface == 'dummy0' %}
+{%- if 'dummy' in iface %}
 {%- for ipaddress in interfaces[iface]['ipaddresses']%}
 {%- if ipaddress['family']['value'] == 4 %}
+{%- if iface == 'dummy0' %}
 protocol kernel {
         ipv4 {                  # Connect protocol to IPv4 table by channel
               import all;       # Import to table, default is import all
@@ -26,15 +28,10 @@ protocol kernel {
                         };
         };
 }
-
-filter EXTERNAL_OUT {
-  if net ~ [ {{ ipaddress['address'] }}{32,32} ] then {
-    accept;
-  }
-  reject;
-} 
-
+{%- endif %}
+{% do prefixes_v4.append(ipaddress['address']) %}
 {%- else %}
+{%- if iface == 'dummy0' %}
 protocol kernel {
         ipv6 {
 
@@ -45,17 +42,30 @@ protocol kernel {
                         };
          };
 }
+{%- endif %}
+{% do prefixes_v6.append(ipaddress['address']) %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{% endfor %}
 
-filter EXTERNAL6_OUT {
-  if net ~ [ {{ ipaddress['address'] }}{128,128} ] then {
+filter EXTERNAL_OUT {
+  if net ~ {{ prefixes_v4 | string | regex_replace('\'','') }} then {
     accept;
   }
   reject;
 }
-{%- endif %}
-{%- endfor %}
-{%- endif %}
 
+
+
+filter EXTERNAL6_OUT {
+  if net ~ {{ prefixes_v6 | string | regex_replace('\'','') }} then 
+  {
+    accept;
+  }
+  reject;
+}
+{%- for iface in interfaces|sort %}
 {%- if iface == uplink_vlan['interface'] %}
 {%- for ipaddress in interfaces[iface]['ipaddresses'] %}
 {%- if ipaddress['family']['value'] == 4 %}
