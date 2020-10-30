@@ -11,8 +11,8 @@ graylog-sidecar-pkg:
 graylog-repo:
     pkgrepo.managed:
     - humanname: Graylog-Repo
-    - name: deb https://packages.graylog2.org/repo/{ grains.lsb_distrib_id | lower }} / sidecar-stable 1.0
-    - key_url:  https://packages.graylog2.org/repo/{ grains.lsb_distrib_id | lower }} /pubkey.gpg
+    - name: deb https://packages.graylog2.org/repo/{{ grains.lsb_distrib_id | lower }}/ sidecar-stable 1.0
+    - key_url:  https://packages.graylog2.org/repo/{{ grains.lsb_distrib_id | lower }}/pubkey.gpg
     - file: /etc/apt/sources.list.d/graylog-sidecar.list
 
 filebeat-repo:
