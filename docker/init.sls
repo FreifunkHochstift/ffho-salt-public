@@ -8,10 +8,10 @@ docker-repo:
   pkgrepo.managed:
     - comments: "# Docker.io"
     - human_name: Docker.io repository
-    - name: "deb https://download.docker.com/linux/debian {{ grains.oscodename }} stable"
+    - name: "deb https://download.docker.com/linux/{{ grains.lsb_distrib_id | lower }}  {{ grains.oscodename }} stable"
     - dist: {{ grains.oscodename }}
     - file: /etc/apt/sources.list.d/docker.list
-    - key_url: https://download.docker.com/linux/debian/gpg
+    - key_url: https://download.docker.com/linux/{{ grains.lsb_distrib_id | lower }}/gpg
 
 docker-pkgs:
   pkg.latest:

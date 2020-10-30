@@ -6,7 +6,7 @@
 
 nebula-tmp-bin:
   archive.extracted:
-    - name: /var/cache/salt/nebula
+    - name: /tmp/nebula
     - if_missing: /usr/local/bin/nebula
     {% if grains.osarch == "armhf" %}
     - source: https://github.com/slackhq/nebula/releases/download/v{{ nebula.version }}/nebula-linux-arm-7.tar.gz
@@ -23,8 +23,8 @@ nebula-tmp-bin:
 
 nebula-binary:
   file.copy:
-    - name:   /usr/local/bin/nebula
-    - source: /var/cache/salt/nebula/nebula
+    - name:  /usr/local/bin/nebula
+    - source: /tmp/nebula/nebula
     - user: root
     - group: root
     - require:

@@ -5,7 +5,6 @@ disable_netplan:
 
 systemd-networkd:
     service.running:
-        - name: systemd-networkd
         - enable: True
         - running: True
 
