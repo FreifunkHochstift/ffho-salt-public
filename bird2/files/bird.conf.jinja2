@@ -59,12 +59,12 @@ filter EXTERNAL_OUT {
 
 
 filter EXTERNAL6_OUT {
-  if net ~ {{ prefixes_v6 | string | regex_replace('\'','') }} then 
-  {
+  if net ~ {{ prefixes_v6 | string | regex_replace('\'','') }} then  {
     accept;
   }
   reject;
 }
+
 {%- for iface in interfaces|sort %}
 {%- if iface == uplink_vlan['interface'] %}
 {%- for ipaddress in interfaces[iface]['ipaddresses'] %}
