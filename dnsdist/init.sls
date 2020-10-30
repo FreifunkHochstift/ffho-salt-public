@@ -5,7 +5,7 @@
 
 dnsdist-repo:
   pkgrepo.managed:
-    - name: deb [arch=amd64] http://repo.powerdns.com/debian {{ grains.oscodename }}-dnsdist-15 main
+    - name: deb [arch=amd64] http://repo.powerdns.com/{{ grains.lsb_distrib_id | lower }} {{ grains.oscodename }}-dnsdist-15 main
     - clean_file: True
     - key_url: https://repo.powerdns.com/FD380FBB-pub.asc
     - file: /etc/apt/sources.list.d/dnsdist.list
