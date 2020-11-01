@@ -1,6 +1,6 @@
 [Unit]
 Description=Simple Network Management Protocol (SNMP) Daemon.
-After=network-online.target
+After=network-online.target {% if salt["service.enabled"]("nebula") %}nebula.service{% endif %}
 ConditionPathExists=/etc/snmp/snmpd.conf
 
 [Service]
