@@ -33,6 +33,13 @@ burp-server:
   file.directory:
     - mode: 700
 
+/etc/systemd/system/burp-server.service.d/override.conf:
+  file.managed:
+    - contents: |
+        [Unit]
+        After=network.target
+    - makedirs: True
+
 {% for node,data in salt['mine.get']('netbox:config_context:roles:backup_client', 'minion_id', tgt_type='pillar').items() %}
 /etc/burp/clientconfdir/{{ node }}:
    file.managed:
