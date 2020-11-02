@@ -36,7 +36,7 @@ nginx-configtest:
       - cmd: nginx-configtest
 
 {% if salt["service.available"]("nginx") %}
-{% set nginx_version = salt["pkg.info_installed"]("nginx").get("version","").split("-")[0] %}
+{% set nginx_version = salt["pkg.info_installed"]("nginx").get("nginx", {}).get("version","").split("-")[0] %}
 {% else %}
 {% set nginx_version = "1.18.0" %}{# current on 02.11.2020 #}
 {% endif %}
@@ -54,6 +54,7 @@ nginx-module-{{module}}:
 /etc/nginx/nginx.conf:
   file.managed:
     - source: salt://nginx/files/nginx.conf
+    - template: jinja
     - require:
       - pkg: nginx
     - watch_in:
@@ -97,5 +98,14 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 
 {% endfor %}
+
+/etc/nginx/streams-enabled/unifi.conf:
+  file.managed:
+    - source: salt://nginx/files/unifi_stream.conf
+    - makedirs: True
+    - require:
+      - pkg: nginx
+    - watch_in:
+      - cmd: nginx-configtest
 
 {% endif %}{# webserver in role #}
