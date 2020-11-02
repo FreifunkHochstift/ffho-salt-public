@@ -23,6 +23,10 @@ pdns-recursor:
     - watch:
       - file: /etc/powerdns/recursor.conf
 
+systemd-resolved:
+  service.dead:
+    - enabled: False
+
 systemd-reload-pdns-rec:
   cmd.run:
    - name: systemctl --system daemon-reload

@@ -16,8 +16,9 @@ setACL({'0.0.0.0/0', '::/0'})
 addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
 addAction(RegexRule(".*.(10|168.192|(1[6-9]|2[0-9]|3[0-1]).172).in-addr.arpa$"), DropAction())
 
-addLocal("127.0.0.1")
 {% if site_id == 1 -%}
+addLocal("127.0.0.1")
+
 ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
 {%- else %}
