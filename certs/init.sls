@@ -58,3 +58,47 @@ generate-dhparam:
     - require:
       - pkg: ssl-cert
 {% endif %}
+
+{% set cloudflare_token = salt['pillar.get']('netbox:config_context:cloudflare:api_token', "unknown") %}
+{% if "webserver-external" in role and cloudflare_token %}
+
+certbot:
+  pkg.installed
+
+python3-pip:
+  pkg.installed
+
+acme-client:
+  pip.installed:
+    - name: acme>=1.8.0
+    - require:
+      - pkg: python3-pip
+
+certbot-dns-cloudflare:
+  pip.installed:
+    - require:
+      - pkg: python3-pip
+
+dns_credentials:
+  file.managed:
+    - name: /var/lib/cache/salt/dns_plugin_credentials.ini
+    - makedirs: True
+    - contents: "dns_cloudflare_api_token = {{ cloudflare_token}}"
+    - mode: 600
+
+ffmuc-wildcard-cert:
+  acme.cert:
+    - name: ffmuc.net
+    - aliases:
+        - "*.ffmuc.net"
+        - "*.ext.ffmuc.net"
+    - email: hilfe@ffmuc.net
+    - dns_plugin: cloudflare
+    - dns_plugin_credentials: /var/lib/cache/salt/dns_plugin_credentials.ini
+    - require:
+        - pkg: certbot
+        - pip: certbot-dns-cloudflare
+        - pip: acme-client
+        - file: dns_credentials
+
+{% endif %}
