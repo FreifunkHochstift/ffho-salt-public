@@ -17,9 +17,13 @@ addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
 addAction(RegexRule(".*.(10|168.192|(1[6-9]|2[0-9]|3[0-1]).172).in-addr.arpa$"), DropAction())
 
 addLocal("127.0.0.1")
-
+{% if site_id == 1 -%}
 ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
+{%- else %}
+ssl_cert="/etc/letsencrypt/live/ffmuc.net/fullchain.pem"
+ssl_key="/etc/letsencrypt/live/ffmuc.net/privkey.pem"
+{%- endif %}
 
 -- listen for DoT on external interface
 addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { reusePort=true{{ additional_listener_config }}, tcpFastOpenQueueSize=20, minTLSVersion="tls1.1" })
@@ -47,6 +51,7 @@ addDNSCryptBind("[::]:8443", "2.dnscrypt-cert.ffmuc.net", "/run/dnsdist/resolver
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(OrRule({makeRule("127.0.0.1"), makeRule("::1")}))}), DropAction())
 
+{%- if site_id == 1 %}
 {%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
 {%- if ipaddress.family.value == 6 %}
 newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
@@ -54,6 +59,10 @@ newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["addres
 newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
 {%- endif %}
 {% endfor %}
+{%- else %}
+newServer({address="10.8.0.29", name="web03", weight=3, retries=2})
+newServer({address="10.8.0.30", name="web04", weight=3, retries=2})
+{%- endif %}
 
 setServerPolicy(whashed)
 
@@ -62,7 +71,7 @@ setServerPolicy(whashed)
 newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
 {%- else %}
 -- just a dummy for now; will be done later
-newServer({address="::1", name="localhost", pool="auth"})
+newServer({address="2001:608:a01::25", name="guardian", pool="auth"})
 {%- endif %}
 addAction({'in.ffmuc.net.', 'ov.ffmuc.net'}, PoolAction("auth"))
 addAction({'ext.ffmuc.net'}, PoolAction("auth"))
