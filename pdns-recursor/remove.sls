@@ -16,5 +16,8 @@ pdns-recursor:
 /etc/systemd/system/pdns-recursor.service:
   file.absent
 
+/etc/systemd/system/pdns-recursor.d:
+  file.absent
+
 /etc/powerdns/recursor.conf:
   file.absent
