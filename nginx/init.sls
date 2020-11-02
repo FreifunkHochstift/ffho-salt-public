@@ -35,15 +35,29 @@ nginx-configtest:
     - watch_in:
       - cmd: nginx-configtest
 
+{% if salt["service.available"]("nginx") %}
 {% set nginx_version = salt["pkg.info_installed"]("nginx").get("version","").split("-")[0] %}
+{% else %}
+{% set nginx_version = "1.18.0" %}{# current on 02.11.2020 #}
+{% endif %}
+
 {% for module in ["http_brotli_filter_module", "http_brotli_static_module", "http_fancyindex_module"] %}
 nginx-module-{{module}}:
   file.managed:
     - name: /usr/lib/nginx/modules/ngx_{{ module }}.so
     - source: https://mirror.krombel.de/nginx-{{ nginx_version }}/ngx_{{ module }}.so
+    - skip_verify: True
     - watch_in:
       - cmd: nginx-configtest
 {% endfor %}
+
+/etc/nginx/nginx.conf:
+  file.managed:
+    - source: salt://nginx/files/nginx.conf
+    - require:
+      - pkg: nginx
+    - watch_in:
+      - cmd: nginx-configtest
 
 /etc/nginx/sites-enabled/zz-default.conf:
   file.managed:
@@ -83,3 +97,5 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 
 {% endfor %}
+
+{% endif %}{# webserver in role #}
