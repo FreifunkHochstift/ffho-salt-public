@@ -99,7 +99,7 @@ firewall:
     proto: tcp
     host: any
 {% endif %}
-{% if "dnsserver" == role %}
+{% if "dnsserver" == role or "dnsdist" in roles %}
   - port: 53
     proto: udp
     host: any
