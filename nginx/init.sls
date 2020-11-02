@@ -39,11 +39,11 @@ nginx-configtest:
 {% for module in ["http_brotli_filter_module", "http_brotli_static_module", "http_fancyindex_module"] %}
 nginx-module-{{module}}:
   file.managed:
-    - name: /usr/lib/nginx/modules/ngx_{{service}}.so
-    - source: https://mirror.krombel.de/nginx-{{nginx_version}}/ngx_{{module}}.so
+    - name: /usr/lib/nginx/modules/ngx_{{ module }}.so
+    - source: https://mirror.krombel.de/nginx-{{ nginx_version }}/ngx_{{ module }}.so
     - watch_in:
       - cmd: nginx-configtest
-{% endif %}
+{% endfor %}
 
 /etc/nginx/sites-enabled/zz-default.conf:
   file.managed:
@@ -55,11 +55,23 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 
 # TODO: Make dynamic
-{% for domain in ["test.ffmuc.net"] %}
-/etc/nginx/sites-enabled/{{domain}}.conf:
+{% for domain in [
+    "ffmuc.net",
+    "byro.ffmuc.net",
+    "chat.ffmuc.net",
+    "cloud.ffmuc.net",
+    "doh.ffmuc.net",
+    "map.ffmuc.net",
+    "stats.ffmuc.net",
+    "tiles.ffmuc.net",
+    "tickets.ffmuc.net",
+    "unifi.ffmuc.net",
+    "stub_status"
+] %}
+/etc/nginx/sites-enabled/{{ domain }}.conf:
   file.managed:
     - sources:
-        - salt://nginx/files/{{domain}}.conf
+        - salt://nginx/domains/{{ domain }}.conf
         - salt://nginx/files/nginx_vhost.jinja2
     - makedirs: True
     - defaults:
@@ -70,5 +82,4 @@ nginx-module-{{module}}:
     - watch_in:
       - cmd: nginx-configtest
 
-
-      site: {{ site }}
+{% endfor %}

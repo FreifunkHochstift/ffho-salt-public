@@ -3,15 +3,19 @@
 ###
 
 server {
-        listen 80;
-        listen 443 ssl http2;
+    listen 80;
+    listen 443 ssl http2;
 
-        server_name {{ domain }};
+    server_name {{ domain }};
 
-        ssl_certificate     /etc/letsencrypt/live/ffmuc.net/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/ffmuc.net/fullchain.pem;
-        ssl_stapling off;
+    ssl_stapling on;
 
-        root /srv/www/{{ domain }};
-        index index.html;
+    root /srv/www/{{ domain }};
+    index index.html;
+
+    ssl_certificate     /etc/letsencrypt/live/ffmuc.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ffmuc.net/privkey.pem;
+
+    access_log /var/log/nginx/{{ domain }}_access.log;
+    error_log  /var/log/nginx/{{ domain }}_error.log;
 }

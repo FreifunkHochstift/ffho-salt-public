@@ -1,0 +1,14 @@
+server {
+	listen 8012;
+	listen [::]:8012;
+	server_name _;
+	location /server_status {
+		allow 127.0.0.1/32;
+		allow ::1/128;
+		deny all;
+		stub_status;
+	}
+	location / {
+		return 301 https://$host$request_uri;
+	}
+}
