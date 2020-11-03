@@ -107,3 +107,8 @@ firewall:
     proto: tcp
     host: any
 {% endif %}
+{%- if "dnsdist" in roles %}
+  - port: 8083
+    proto: tcp
+    host: any
+{%- endif %}

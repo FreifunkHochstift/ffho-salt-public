@@ -18,37 +18,43 @@ pdns-recursor:
     - enable: True
     - restart: True
     - require:
-      - file: /etc/systemd/system/pdns-recursor.d/override.conf
+      - file: /etc/systemd/system/pdns-recursor.service
       - file: /etc/powerdns/recursor.conf
     - watch:
       - file: /etc/powerdns/recursor.conf
 
 systemd-resolved:
   service.dead:
-    - enabled: False
+    - enable: False
 
 systemd-reload-pdns-rec:
   cmd.run:
-   - name: systemctl --system daemon-reload
-   - onchanges:
-     - file: /etc/systemd/system/pdns-recursor.d/override.conf
-     - file: /etc/systemd/system/pdns-recursor.service
+    - name: systemctl --system daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/pdns-recursor.service.d/override.conf
+      - file: /etc/systemd/system/pdns-recursor.service
+    - watch_in:
+      - service: pdns-recursor
 
-/etc/systemd/system/pdns-recursor.d/override.conf:
+/etc/systemd/system/pdns-recursor.service.d/override.conf:
+{#{% if 'vrf_external' in salt['grains.get']('ip_interfaces') %}
+#  file.managed:
+#    - name: /etc/systemd/system/pdns-recursor.service.d/override.conf
+#    - source: salt://pdns-recursor/pdns-recursor.override.service
+#    - template: jinja
+#    - makedirs: True
+#{% else %}#}
+  file.absent
+{#% endif %#}
+
+/etc/systemd/system/pdns-recursor.service:
 {% if 'vrf_external' in salt['grains.get']('ip_interfaces') %}
   file.managed:
-    - name: /etc/systemd/system/pdns-recursor.d/override.conf
-    - source: salt://pdns-recursor/pdns-recursor.override.service
+    - source: salt://pdns-recursor/pdns-recursor.service
     - template: jinja
-    - makedirs: True
 {% else %}
   file.absent
 {% endif %}
-
-/etc/systemd/system/pdns-recursor.service:
-  file.absent
-#    - source: salt://pdns-recursor/pdns-recursor.service
-#    - template: jinja
 
 /etc/powerdns/recursor.conf:
   file.managed:

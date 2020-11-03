@@ -85,7 +85,7 @@ nginx-module-{{module}}:
 ] %}
 /etc/nginx/sites-enabled/{{ domain }}.conf:
   file.managed:
-    - sources:
+    - source:
         - salt://nginx/domains/{{ domain }}.conf
         - salt://nginx/files/nginx_vhost.jinja2
     - makedirs: True

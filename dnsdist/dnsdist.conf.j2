@@ -55,16 +55,18 @@ addAction(AndRule({MaxQPSIPRule(300), NotRule(OrRule({makeRule("127.0.0.1"), mak
 {%- if site_id == 1 %}
 {%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
 {%- if ipaddress.family.value == 6 %}
-newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
-newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
-newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2})
+newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="4de3b70f-9c66-4c39-a724-f7da1232525d"})
+newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="59ffd03f-fd80-494f-b010-b6b211567874"})
+newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="8b2362c3-15aa-4090-bb35-913a24063ee5"})
+newServer({address="2001:608:a01::1",  name="gw03", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=1, retries=2, id="ad1b2876-54f2-454f-b7f3-2206ea7f4de2"})
 {%- endif %}
 {% endfor %}
 {%- else %}
-newServer({address="10.8.0.29", name="web03", weight=3, retries=2})
-newServer({address="10.8.0.30", name="web04", weight=3, retries=2})
+newServer({address="10.8.0.29", name="web03", weight=3, retries=2, id="23b0121d-91c5-4338-8c5a-cc8ba6f2ca8d"})
+newServer({address="10.8.0.30", name="web04", weight=3, retries=2, id="0ed35651-7766-492c-ab44-562e76d395b6"})
 {%- endif %}
 
+setWHashedPertubation(3962345)
 setServerPolicy(whashed)
 
 -- ask authorative servers for ffmuc.net directly
@@ -72,7 +74,7 @@ setServerPolicy(whashed)
 newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
 {%- else %}
 -- just a dummy for now; will be done later
-newServer({address="2001:608:a01::25", name="guardian", pool="auth"})
+newServer({address="10.8.0.10", name="dns01", pool="auth", id="d0e8196c-c418-4286-86e6-b7c05200b592"})
 {%- endif %}
 addAction({'in.ffmuc.net.', 'ov.ffmuc.net'}, PoolAction("auth"))
 addAction({'ext.ffmuc.net'}, PoolAction("auth"))

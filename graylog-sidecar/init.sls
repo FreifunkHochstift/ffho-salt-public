@@ -3,7 +3,7 @@
 graylog-sidecar-pkg:
   pkg.installed:
     - sources:
-      - graylog-sidecar: https://github.com/Graylog2/collector-sidecar/releases/download/1.0.2/graylog-sidecar_1.0.2-1_armv7.deb
+      - graylog-sidecar: http://apt.ffmuc.net/graylog-sidecar_1.1.0-0.SNAPSHOT_armhf.deb
       - filebeat: https://apt.ffmuc.net/filebeat-oss-8.0.0-SNAPSHOT-armhf.deb
 
 {% else %}{# if grains.osfullname in 'Raspbian' #}

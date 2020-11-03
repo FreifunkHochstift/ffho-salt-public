@@ -59,7 +59,8 @@ generate-dhparam:
       - pkg: ssl-cert
 {% endif %}
 
-{% set cloudflare_token = salt['pillar.get']('netbox:config_context:cloudflare:api_token', "unknown") %}
+{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
+{% set cloudflare_token = salt['pillar.get']('netbox:config_context:cloudflare:api_token') %}
 {% if "webserver-external" in role and cloudflare_token %}
 
 certbot:

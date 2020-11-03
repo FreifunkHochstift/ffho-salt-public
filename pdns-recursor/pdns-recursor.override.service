@@ -1,5 +1,6 @@
 
 [Service]
+RestartSec=10
 ExecStart=
 ExecStart=/sbin/ip vrf exec vrf_external /usr/sbin/pdns_recursor --daemon=no --write-pid=no --disable-syslog --log-timestamp=no
 User=
@@ -15,6 +16,6 @@ ProtectHome=false
 ProtectKernelModules=false
 ProtectKernelTunables=false
 #ProtectSystem=full
-ProtectSystem=
+ProtectSystem=false
 #RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictAddressFamilies=

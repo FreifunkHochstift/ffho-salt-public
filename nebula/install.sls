@@ -22,9 +22,11 @@ nebula-tmp-bin:
     - enforce_toplevel: False
 
 nebula-binary:
-  file.copy:
+  file.managed:
     - name:  /usr/local/bin/nebula
+{% if salt['file.file_exists' ]('/tmp/nebula/nebula') %}
     - source: /tmp/nebula/nebula
+{% endif %}
     - user: root
     - group: root
     - require:
