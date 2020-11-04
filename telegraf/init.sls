@@ -21,6 +21,27 @@ telegraf:
     - enable: True
     - running: True
 
+systemd-reload-telegraf:
+  cmd.run:
+    - name: systemctl --system daemon-reload
+    - onchanges:
+      - file: /etc/systemd/system/telegraf.service.d/override.conf
+    - watch_in:
+      - service: telegraf
+
+/etc/systemd/system/telegraf.service.d/override.conf:
+{%- if 'vpngw' in role or 'nextgen-gateway' in role %}
+  file.managed:
+    - makedirs: True
+    - contents: |
+        [Service]
+        # allow fetching metrics for wireguard
+        CapabilityBoundingSet=CAP_NET_ADMIN
+        AmbientCapabilities=CAP_NET_ADMIN
+{% else %}
+  file.absent
+{% endif %}
+
 /etc/telegraf/telegraf.conf:
   file.managed:
     - source: salt://telegraf/files/telegraf.conf
@@ -90,7 +111,7 @@ telegraf:
         service: telegraf
 
 /etc/telegraf/telegraf.d/in-wireguard.conf:
-{%- if 'vpngw' in role %}
+{%- if 'vpngw' in role or 'nextgen-gateway' in role %}
   file.managed:
     - source: salt://telegraf/files/in_wireguard.conf
 {% else %}
