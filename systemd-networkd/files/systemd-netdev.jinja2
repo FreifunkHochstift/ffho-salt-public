@@ -1,0 +1,32 @@
+#
+# {{ interface }} / {{ desc }}
+#
+
+[NetDev]
+Name={{ interface }}
+Kind={{ kind }}
+
+{%- if kind == "wireguard" %}
+# If we generate a wireguard interface we need additional stuff
+{%- set sites_config = salt['pillar.get']('netbox:config_context:site_config') %}
+{%- set wireguard_key = salt['pillar.get']('netbox:config_context:wireguard:secret_key') %}
+{%- set wireguard_port = sites_config[site]['wireguard_port'] %}
+[WireGuard]
+ListenPort={{ sites_config[site]['wireguard_port'] }}
+PrivateKey={{ wireguard_key }}
+
+{%- for node,bla in salt['mine.get']('netbox:role:name:netxgen-gateway', 'minion_id', tgt_type='pillar').items() | sort %}
+{%- if grains['id'] not in node %}
+{%- set wireguard_public_key = salt['mine.get'](node,'minion_wireguard_public', tgt_type='glob')  %}
+{%- set link_local = salt['wireguard_v6.generate'](wireguard_public_key) %}
+{%- if wireguard_public_key %}
+
+[WireGuardPeer]
+PublicKey=wireguard_public_key
+AllowedIPs={{ link_local }}/128
+Endpoint={{ node | regex_replace('in\.ffmuc\.net','ext.ffmuc.net') }}:{{ wireguard_port }}
+
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}

@@ -159,25 +159,48 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
        ret['netbox']['services'] = {}
        for service in services:
           ret['netbox']['services'][service['name']] = service
+
     query_param = 'device_id'
+
+    if 'vcpus' in ret['netbox']:
+        app = 'virtualization'
+        query_param = 'virtual_machine_id'
+    
+    ret['netbox']['interfaces'] = {}
+    interface_url = '{api_url}/{app}/{endpoint}/'.format(api_url=api_url,
+                                                                app=app,
+                                                                endpoint='interfaces')
+
+    interface_results = salt.utils.http.query(interface_url,
+                                        params={query_param: search_results['dict']['results'][0]['id'] },
+                                        header_dict=headers,
+                                        decode=True)
+    if 'error' in interface_results:
+                log.error('API query failed for "%s", status code: %d',
+                                minion_id, interface_results['status'])
+                log.error(interface_results['error'])
+                return ret
+    else:
+                for interface in interface_results['dict']['results']:
+                    ret['netbox']['interfaces'][interface['name']] = {}
+
     if 'vcpus' in ret['netbox']:
       query_param = 'virtual_machine_id'
-    interface_url = '{api_url}/{app}/{endpoint}/'.format(api_url=api_url,
+    ipaddress_url = '{api_url}/{app}/{endpoint}/'.format(api_url=api_url,
                                                                   app='ipam',
                                                                   endpoint='ip-addresses')
-    interface_results = salt.utils.http.query(interface_url,
+    ipaddress_results = salt.utils.http.query(ipaddress_url,
                                            params={query_param: search_results['dict']['results'][0]['id'] },
                                            header_dict=headers,
                                            decode=True)
-    if 'error' in interface_results:
+    if 'error' in ipaddress_results:
         log.error('API query failed for "%s", status code: %d',
-                  minion_id, interface_results['status'])
-        log.error(interface_results['error'])
+                  minion_id, ipaddress_results['status'])
+        log.error(ipaddress_results['error'])
         return ret
-    ipaddresses = interface_results['dict']['results']
+    ipaddresses = ipaddress_results['dict']['results']
     ## Get all interfaces for device
     interface_ids = []
-    ret['netbox']['interfaces'] = {}
     for ipaddress in ipaddresses:
         interface_id = ipaddress['assigned_object_id']
         app = 'dcim'
@@ -186,13 +209,13 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         interface_url = '{api_url}/{app}/{endpoint}/{id}/'.format(api_url=api_url,
                                                                   app=app,
                                                                   endpoint='interfaces',
-								  id=interface_id)
+                                                                  id=interface_id)
         interface_results = salt.utils.http.query(interface_url,
                                            header_dict=headers,
                                            decode=True)
         if 'error' in interface_results:
                 log.error('API query failed for "%s", status code: %d',
-                  minion_id, interface_results['status'])
+                                minion_id, interface_results['status'])
                 log.error(interface_results['error'])
                 return ret
         if interface_results['dict']['name'] not in ret['netbox']['interfaces']:
@@ -200,7 +223,6 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         if 'ipaddresses' not in ret['netbox']['interfaces'][interface_results['dict']['name']]:
             ret['netbox']['interfaces'][interface_results['dict']['name']]['ipaddresses'] = []
         ret['netbox']['interfaces'][interface_results['dict']['name']]['ipaddresses'].append(ipaddress)
-
 
     if site_details:
         log.debug('Retrieving site details for "%s" - site %s (ID %d)',
