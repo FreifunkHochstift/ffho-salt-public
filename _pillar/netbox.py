@@ -182,7 +182,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                 return ret
     else:
                 for interface in interface_results['dict']['results']:
-                    ret['netbox']['interfaces'][interface['name']] = {}
+                    ret['netbox']['interfaces'][interface['name']] = interface
+                    ret['netbox']['interfaces'][interface['name']]['ipaddresses'] = []
 
     if 'vcpus' in ret['netbox']:
       query_param = 'virtual_machine_id'

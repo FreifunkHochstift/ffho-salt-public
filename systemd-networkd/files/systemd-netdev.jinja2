@@ -10,6 +10,7 @@ Kind={{ kind }}
 # If we generate a wireguard interface we need additional stuff
 {%- set sites_config = salt['pillar.get']('netbox:config_context:site_config') %}
 {%- set wireguard_key = salt['pillar.get']('netbox:config_context:wireguard:secret_key') %}
+{%- set site = interface | regex_replace('wg-', '')%}
 {%- set wireguard_port = sites_config[site]['wireguard_port'] %}
 [WireGuard]
 ListenPort={{ sites_config[site]['wireguard_port'] }}
@@ -22,7 +23,7 @@ PrivateKey={{ wireguard_key }}
 {%- if wireguard_public_key %}
 
 [WireGuardPeer]
-PublicKey=wireguard_public_key
+PublicKey={{ wireguard_public_key }}
 AllowedIPs={{ link_local }}/128
 Endpoint={{ node | regex_replace('in\.ffmuc\.net','ext.ffmuc.net') }}:{{ wireguard_port }}
 

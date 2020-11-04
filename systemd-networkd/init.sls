@@ -18,7 +18,7 @@ generate_initrd:
 {%- set gateway = salt['pillar.get']('netbox:config_context:network:gateway') %}
 {% for iface in interfaces |sort %}
 {% if "nebula" not in iface %}
-{% if interfaces[iface]['mac_address'] is not none %}
+{% if 'mac_address' in interfaces[iface] and interfaces[iface]['mac_address'] is not none %}
 /etc/systemd/network/42-{{ iface }}.link:
   file.managed:
     - source: salt://systemd-networkd/files/systemd-link.jinja2
