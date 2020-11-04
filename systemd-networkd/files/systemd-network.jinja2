@@ -1,3 +1,4 @@
+{%- set interface_details = salt['pillar.get']('netbox:interfaces:' ~ interface) %}
 #
 # {{ interface }} / {{ desc }}
 #
@@ -6,17 +7,22 @@
 Name={{ interface }}
 
 [Network]
-VLAN={{ interface }}
+{%- if interface_details['tagged_vlans'] is not none %}
+{%- for vlan in interface_details['tagged_vlans'] %}
+VLAN={{ vlan['vid'] }}
+{%- endfor %}
+{%- endif %}
 {%- for ipaddress in ipaddresses %}
 Address={{ ipaddress['address'] }}
 {%- endfor %}
 DNS=1.1.1.1
+
+{%- if interface in gateway %}
 # We install the route provided for the site with a low metric
-{% if interface in gateway %}
-{% for gw in gateway[interface] %}
+{%- for gw in gateway[interface] %}
 [Route]
 Gateway={{ gw }}
 Destination=0.0.0.0/0
 Metric=1024
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
