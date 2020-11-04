@@ -26,3 +26,18 @@ Destination=0.0.0.0/0
 Metric=1024
 {%- endfor %}
 {%- endif %}
+
+{%- if 'wg' in interface %}
+[Network]
+Address={{ salt['wireguard_v6.generate'](salt['pillar.get']('netbox:config_context:wireguard:public_key')) }}/128
+{% for node,bla in salt['mine.get']('netbox:role:name:nextgen-gateway', 'minion_id', tgt_type='pillar').items() | sort %}
+{%- if grains['id'] not in node %}
+{%- set wireguard_public_key = salt['mine.get'](node,'minion_wireguard_public', tgt_type='glob')[node]  %}
+{%- if wireguard_public_key %}
+{%- set link_local = salt['wireguard_v6.generate'](wireguard_public_key) %}
+[Route]
+Destination={{ link_local }}/128
+{%- endif %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
