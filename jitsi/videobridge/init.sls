@@ -15,6 +15,14 @@ jitsi-videobridge2:
   service.running:
     - enable: True
 
+systemd-reload-jvb:
+  cmd.run:
+    - name: systemctl --system daemon-reload
+    - onchanges:  
+      - file: /etc/systemd/system/jitsi-videobridge2.service.d/override.conf
+    - watch_in:
+      - service: jitsi-videobridge2
+
 ### set static hostname and the like
 stats.in.ffmuc.net:
   host.present:
@@ -63,5 +71,6 @@ stats.in.ffmuc.net:
 /etc/systemd/system/jitsi-videobridge2.service.d/override.conf:
   file.managed:
     - source: salt://jitsi/videobridge/systemd-override.conf
+    - makedirs: True
 
 {% endif %}

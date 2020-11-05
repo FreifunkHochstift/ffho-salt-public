@@ -13,10 +13,6 @@
 )
 %}
 {# some fallbacks #}
-{% if "component-user" == jitsi.xmpp.username %}
-{% do jitsi.xmpp.update({'username' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}
-{% endif %}
-
 {% if not jitsi.xmpp.get('muc_nickname') %}
 {% do jitsi.xmpp.update({'muc_nickname' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}
 {% endif %}

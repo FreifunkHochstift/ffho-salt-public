@@ -1,10 +1,13 @@
 {%- from "jitsi/map.jinja" import jitsi with context %}
-org.jitsi.jicofo.BRIDGE_MUC={{ jitsi.videobridge_brewery }}
+org.jitsi.jicofo.BRIDGE_MUC={{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}
 
-org.jitsi.jicofo.jibri.BREWERY={{ jitsi.jibri_brewery }}
+{%- if jitsi.jibri_enabled %}
+org.jitsi.jicofo.jibri.BREWERY={{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}
 org.jitsi.jicofo.jibri.PENDING_TIMEOUT=90
+{% endif %}
 
 {# increase report timeout for stats (by jvb's) from 15 to 30 seconds #}
 org.jitsi.jicofo.MAX_STATS_REPORT_AGE=30000
 {# Enable octo #}
+org.jitsi.jicofo.SHORT_ID=42 {# 1-65535 #}
 org.jitsi.jicofo.BridgeSelector.BRIDGE_SELECTION_STRATEGY={{ jitsi.jicofo.bridge_selection_strategy }}

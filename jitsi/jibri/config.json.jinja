@@ -16,7 +16,7 @@
             },
             "control_muc": {
                 "domain": "{{ jitsi.jibri.xmpp.control_muc.domain }}",
-                "room_name": "{{ jitsi.jibri.xmpp.control_muc.room_name }}",
+                "room_name": "{{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}",
                 "nickname": "{{ jitsi.jibri.xmpp.control_muc.nickname }}"
             },
             "call_login": {

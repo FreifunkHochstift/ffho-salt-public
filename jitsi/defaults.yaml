@@ -3,25 +3,30 @@
 ---
 jitsi:
   public_domain: example.com
+  authentication: False
+  lobby_enabled: True
+  jibri_enabled: True
+
   xmpp:
     server_host: localhost
-    xmpp_domain: example.com
+    xmpp_domain: test.meet.ffmuc.net
     auth_domain: auth.example.com
-    username: "component-user"
-    password: "THIS_IS_SUPER_SECRET"
-    secret: "THIS_IS_A_LEGACY_SECRET"
     port: 5347
-
-  videobridge_brewery: JvbBrewery@internal.auth.meet.ffmuc.net
-  jibri_brewery: JibriBrewery@internal.auth.meet.ffmuc.net
+    brewery_domain: internal.auth.meet.ffmuc.net
 
   jicofo:
     enabled: false
     opts: ""
+    username: "focus"
+    password: "THIS_IS_SUPER_SECRET_JICOFO"
+    secret: "THIS_IS_A_LEGACY_SECRET"
     bridge_selection_strategy: SplitBridgeSelectionStrategy
 
   videobridge:
     enabled: false
+    username: "jvb"
+    password: "THIS_IS_SUPER_SECRET_JVB"
+    brewery_room: JvbBrewery
     octo:
       enabled: false
       interface: tun0 # or "ip_addr: 127.0.0.1"
@@ -30,6 +35,7 @@ jitsi:
 
   jibri:
     enabled: false
+    brewery_room: JibriBrewery
     recording_directory: /tmp/recordings
     finalize_recording_script_path: /bin/true
     chromedriver_version: 85.0.4183.87
@@ -41,9 +47,17 @@ jitsi:
         password: "THIS_IS_SUPER_SECRET"
       control_muc:
         domain: "internal.auth.example.com"
-        room_name: "JibriBrewery"
         nickname: "jibri-unnamed"
       call_login:
         domain: "recorder.example.com"
         username: "recorder-unnamed"
         password: "THIS_IS_SUPER_SECRET"
+
+  prosody:
+    enabled: False
+
+  turn:
+    secret: "THIS_IS_SUPER_SECRET_TURN"
+    hosts:
+      - hostname: turn1.example.com
+        port: 443

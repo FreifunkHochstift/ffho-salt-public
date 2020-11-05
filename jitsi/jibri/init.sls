@@ -5,6 +5,9 @@
 
 {% if jitsi.jibri.enabled %}
 
+include:
+  - jitsi.base
+
 google-chrome-repo:
   pkgrepo.managed:
     - humanname: Google Chrome Repo

@@ -1,0 +1,108 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+
+-- enable websocket support
+consider_websocket_secure = true;
+cross_domain_websocket = true;
+
+-- settings for bosh interface
+cross_domain_bosh = false;
+consider_bosh_secure = true;
+
+VirtualHost "{{ jitsi.xmpp.xmpp_domain }}"
+    authentication = {% if jitsi.authentication %}"internal_plain"{% else %}"anonymous"{% endif %}
+    ssl = {
+            key = "/etc/prosody/certs/{{ jitsi.public_domain }}.key";
+            certificate = "/etc/prosody/certs/{{ jitsi.public_domain }}.crt";
+    }
+    speakerstats_component = "speakerstats.{{ jitsi.public_domain }}"
+    conference_duration_component = "conferenceduration.{{ jitsi.public_domain }}"
+    -- we need bosh
+    modules_enabled = {
+        "bosh";
+        "websocket";
+        {% if jitsi.lobby_enabled %}"muc_lobby_rooms";{% endif %}
+        "ping"; -- Enable mod_ping
+        "conference_duration";
+        "speakerstats";
+    }
+    {%- if jitsi.lobby_enabled %}
+    lobby_muc = "lobby.{{ jitsi.public_domain }}"
+    main_muc = "conference.{{ jitsi.public_domain }}"
+    {%- endif %}
+    c2s_require_encryption = false
+
+Component "conference.{{ jitsi.public_domain }}" "muc"
+    storage = "memory"
+    modules_enabled = {
+        "muc_meeting_id";
+        "muc_domain_mapper";
+    }
+    muc_room_locking = false
+    muc_room_default_public_jids = true
+
+-- internal muc component
+Component "internal.auth.{{ jitsi.public_domain }}" "muc"
+    storage = "memory"
+    modules_enabled = {
+      "ping";
+    }
+    muc_room_cache_size = 1000
+
+VirtualHost "{{ jitsi.xmpp.auth_domain }}"
+    ssl = {
+        key = "/etc/prosody/certs/{{ jitsi.xmpp.auth_domain }}.key";
+        certificate = "/etc/prosody/certs/{{ jitsi.xmpp.auth_domain }}.crt";
+    }
+    authentication = "internal_plain"
+
+Component "focus.{{ jitsi.public_domain }}"
+    component_secret = "{{ jitsi.jicofo.secret }}"
+
+Component "speakerstats.{{ jitsi.public_domain }}" "speakerstats_component"
+    muc_component = "conference.{{ jitsi.public_domain }}"
+
+Component "conferenceduration.{{ jitsi.public_domain }}" "conference_duration_component"
+    muc_component = "conference.{{ jitsi.public_domain }}"
+
+{% if jitsi.authentication %}
+-- to allow guests to be able to join as well
+VirtualHost "guest.{{ jitsi.public_domain }}"
+    authentication = "anonymous"
+    ssl = {
+            key = "/etc/prosody/certs/{{ jitsi.public_domain }}.key";
+            certificate = "/etc/prosody/certs/{{ jitsi.public_domain }}.crt";
+    }
+    speakerstats_component = "speakerstats.{{ jitsi.public_domain }}"
+    conference_duration_component = "conferenceduration.{{ jitsi.public_domain }}"
+    -- we need bosh
+    modules_enabled = {
+        "bosh";
+        "websocket";
+        "pubsub";
+        "ping"; -- Enable mod_ping
+        "speakerstats";
+        "turncredentials";
+        "conference_duration";
+    }
+    c2s_require_encryption = false
+{% endif %}{# if guests_enabled #}
+
+{%- if jitsi.lobby_enabled %}
+Component "lobby.{{ jitsi.public_domain }}" "muc"
+    storage = "memory"
+    muc_room_cache_size = 1000
+    restrict_room_creation = true
+    muc_room_locking = false
+    muc_room_default_public_jids = true
+{% endif %}{# if lobby_enabled #}
+
+{%- if jitsi.jibri_enabled %}
+VirtualHost "recorder.{{ jitsi.public_domain }}"
+  modules_enabled = {
+    "ping";
+  }
+  c2s_require_encryption = false
+  allow_empty_token = true
+  authentication = "internal_plain"
+
+{% endif %}{# recorder enabled#}

@@ -4,10 +4,10 @@ videobridge {
         xmpp-client {
             shard1 {
                 hostname = "{{ jitsi.xmpp.server_host }}"
-                domain = "{{ jitsi.xmpp.auth_domain }}"
-                username = "{{ jitsi.xmpp.username }}"
-                password = "{{ jitsi.xmpp.password }}"
-                muc-jids = "{{ jitsi.videobridge_brewery }}"
+                domain   = "{{ jitsi.xmpp.auth_domain }}"
+                username = "{{ jitsi.videobridge.username }}"
+                password = "{{ jitsi.videobridge.password }}"
+                muc-jids = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
                 muc_nickname = "{{ jitsi.xmpp.muc_nickname }}"
                 disable_certificate_verification = true
             }
@@ -30,7 +30,7 @@ videobridge {
         bind-port = {{ jitsi.videobridge.octo.port }}
         region = "{{ jitsi.videobridge.octo.region }}"
     }
-    {% endif -%}
+    {%- endif %}
     stats {
         enabled = true
         interval = 10 seconds
