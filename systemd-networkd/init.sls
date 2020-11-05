@@ -59,4 +59,3 @@ generate_initrd:
 {% endif %}
 {% endif %}
 {% endfor %}
-

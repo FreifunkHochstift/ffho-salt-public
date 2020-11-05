@@ -161,7 +161,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
           ret['netbox']['services'][service['name']] = service
 
     query_param = 'device_id'
-
+    app = 'dcim'
     if 'vcpus' in ret['netbox']:
         app = 'virtualization'
         query_param = 'virtual_machine_id'
