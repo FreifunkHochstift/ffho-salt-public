@@ -5,6 +5,7 @@
 {% if salt['pillar.get']('netbox:config_context:influxdb', False) %}
 {# There is data available so we think telegraf should be installed #}
 {% set role = salt['pillar.get']('netbox:role:name') %}
+{% set roles = salt['pillar.get']('netbox:config_context:roles', []) %}
 
 influxdb-repo:
   pkgrepo.managed:
@@ -49,6 +50,31 @@ systemd-reload-telegraf:
     - watch_in:
           service: telegraf
 
+{% if salt["service.enabled"]("coturn") %}
+/usr/local/bin/coturn_sessions:
+  file.managed:
+    - contents: |
+        #!/bin/sh
+        # Count turn-sessions
+        netstat -tn | awk '$4 ~ /:443$/{print $5}' | cut -d: -f1 | uniq | wc -l
+    - mode: 0755
+
+/etc/telegraf/telegraf.d/in-coturn_sessions.conf:
+  file.managed:
+    - source: salt://telegraf/files/in_coturn_sessions.conf
+    - watch_in:
+          service: telegraf
+{% else %}
+/usr/local/bin/coturn_sessions:
+  file.absent:
+    - watch_in:
+          service: telegraf
+/etc/telegraf/telegraf.d/in-coturn_sessions.conf:
+  file.absent:
+    - watch_in:
+          service: telegraf
+{% endif %}
+
 /etc/telegraf/telegraf.d/in-dhcpd-pool-stats.conf:
 {% if 'gateway' in role or 'nextgen-gateway' in role %}
   file.managed:
@@ -60,7 +86,7 @@ systemd-reload-telegraf:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-dnsdist.conf:
-{% if 'dnsdist' in salt['pillar.get']('netbox:config_context:roles') %}
+{% if 'dnsdist' in roles %}
   file.managed:
     - source: salt://telegraf/files/in_dnsdist.conf
     - template: jinja
