@@ -43,6 +43,20 @@ systemd-reload-telegraf:
   file.absent
 {% endif %}
 
+{% if salt["service.enabled"]("pdns-recursor") and 'dnsdist' in roles and false %}{# broken #}
+add_telegraf_pdns_group:
+  group.present:
+    - name: pdns
+    - addusers:
+      - telegraf
+{% else %}
+del_telegraf_from_pdns_group:
+  group.present:
+    - name: pdns
+    - delusers:
+      - telegraf
+{% endif %}
+
 /etc/telegraf/telegraf.conf:
   file.managed:
     - source: salt://telegraf/files/telegraf.conf
@@ -110,6 +124,16 @@ systemd-reload-telegraf:
 {% if 'webserver-external' in role %}
   file.managed:
     - source: salt://telegraf/files/in_nginx.conf
+{% else %}
+  file.absent:
+{% endif %}
+    - watch_in:
+          service: telegraf
+
+/etc/telegraf/telegraf.d/in-powerdns_recursor.conf:
+{% if salt["service.available"]("pdns-recursor") and false %}{# not working #}
+  file.managed:
+    - source: salt://telegraf/files/in_powerdns_recursor.conf
 {% else %}
   file.absent:
 {% endif %}

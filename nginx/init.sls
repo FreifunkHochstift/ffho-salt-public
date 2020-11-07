@@ -108,4 +108,12 @@ nginx-module-{{module}}:
     - watch_in:
       - cmd: nginx-configtest
 
+/etc/nginx/conf.d/log_json.conf:
+  file.managed:
+    - source: salt://nginx/files/log_json.conf.jinja
+    - makedirs: True
+    - template: jinja
+    - require:
+      - pkg: nginx
+
 {% endif %}{# webserver in role #}

@@ -23,7 +23,7 @@ protocol kernel {
               export filter {
                         if net ~ [ 0.0.0.0/0] then {
                             krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
-                        accept;
+                            accept;
                         }
                         };
         };
@@ -38,6 +38,9 @@ protocol kernel {
               import all;       # Import to table, default is import all
               export filter {
                         krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
+                        {%- if salt['pillar.get']('netbox:role:name') == 'webserver-external' %}
+                        krt_mtu = 1280;
+                        {%- endif %} 
                         accept;
                         };
          };
