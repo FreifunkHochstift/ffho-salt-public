@@ -25,7 +25,6 @@ PrivateKey={{ wireguard_key }}
 PublicKey={{ wireguard_public_key }}
 AllowedIPs={{ link_local }}/128
 Endpoint={{ node | regex_replace('in\.ffmuc\.net','ext.ffmuc.net') }}:{{ wireguard_port }}
-
 {%- endif %}
 {%- endif %}
 {%- endfor %}
@@ -33,15 +32,16 @@ Endpoint={{ node | regex_replace('in\.ffmuc\.net','ext.ffmuc.net') }}:{{ wiregua
 
 {%- if kind == "vxlan" %}
 {%- set sites = salt['pillar.get']('netbox:config_context:site_config') %}
+{%- set current_site = interface | regex_replace('vx-','') %}
 [VXLAN]
-VNI={{ sites[ interface | regex_replace('vx-','')]['vni'] }}
-Local={{ salt['wireguard_v6.generate'](salt['pillar.get']('netbox:config_context:wireguard:public_key')) }}/128
-{% for node,bla in salt['mine.get']('netbox:role:name:nextgen-gateway', 'minion_id', tgt_type='pillar').items() | sort %}
+VNI={{ sites[current_site]['vni'] }}
+Local={{ salt['wireguard_v6.generate'](salt['pillar.get']('netbox:config_context:wireguard:public_key')) }}
+{%- for node,bla in salt['mine.get']('netbox:role:name:nextgen-gateway', 'minion_id', tgt_type='pillar').items() | sort %}
 {%- if grains['id'] not in node %}
 {%- set wireguard_public_key = salt['mine.get'](node,'minion_wireguard_public', tgt_type='glob')[node]  %}
 {%- if wireguard_public_key %}
 {%- set link_local = salt['wireguard_v6.generate'](wireguard_public_key) %}
-Remote={{ link_local }}/128
+Remote={{ link_local }}
 {%- endif %}
 {%- endif %}
 {%- endfor %}
