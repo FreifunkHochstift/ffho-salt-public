@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import hashlib
-from salt.util.network import mac2eui64
+import re
+from salt.utils.network import mac2eui64
 from textwrap import wrap
 
 def generate(pubkey):
@@ -11,4 +12,4 @@ def generate(pubkey):
     hash_as_list = wrap(hashed_key, 2)
     temp_mac = "02:" + hash_as_list[0] + ":" + hash_as_list[1] + ":" + hash_as_list[2] + ":" + hash_as_list[3] + ":" + hash_as_list[4]
 
-    return(mac2eui64(mac=temp_mac, prefix='fe80::/10'))
+    return(re.sub('\/\d+$', '', mac2eui64(mac=temp_mac, prefix='fe80::/10')))

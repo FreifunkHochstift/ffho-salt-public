@@ -53,7 +53,7 @@ nginx-module-{{module}}:
 
 /etc/nginx/nginx.conf:
   file.managed:
-    - source: salt://nginx/files/nginx.conf
+    - source: salt://nginx/files/nginx.conf.jinja
     - template: jinja
     - require:
       - pkg: nginx

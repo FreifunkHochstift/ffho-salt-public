@@ -56,6 +56,14 @@ generate_initrd:
       interface: {{ iface }}
       desc: {{ interfaces[iface]['description'] }}
       kind: "wireguard"
+{% elif "vx" in iface %}
+/etc/systemd/network/40-{{ iface }}.netdev:
+  file.managed:
+    - source: salt://systemd-networkd/files/systemd-netdev.jinja2
+    - template: jinja
+      interface: {{ iface }}
+      desc: {{ interfaces[iface]['description'] }}
+      kind: "vxlan"
 {% endif %}
 {% endif %}
 {% endfor %}

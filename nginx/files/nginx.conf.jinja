@@ -47,12 +47,6 @@ http {
 	resolver 127.0.0.1;
 
 	##
-	# Logging Settings
-	##
-	access_log /var/log/nginx/access.log;
-	error_log /var/log/nginx/error.log;
-
-	##
 	# Gzip Settings
 	##
 	gzip on;
@@ -89,6 +83,12 @@ http {
 	##
 	include /etc/nginx/conf.d/*.conf;
 	include /etc/nginx/sites-enabled/*;
+
+	##
+	# Logging Settings
+	##
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
 }
 
 stream {
