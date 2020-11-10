@@ -46,3 +46,9 @@ Remote={{ link_local }}
 {%- endif %}
 {%- endfor %}
 {%- endif %}
+
+{%- if kind == "batadv" %}
+[BatmanAdvanced]
+GatewayMode=server
+RoutingAlgorithm=BATMAN_V
+{%- endif %}
