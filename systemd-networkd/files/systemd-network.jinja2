@@ -43,7 +43,17 @@ Destination={{ link_local }}/128
 {%- endfor %}
 {%- endif %}
 
-{%- if 'dummy-' in interface %}
+{%- if 'dummy-' in interface or 'vx-' in interface %}
 [Network]
-BatmanAdvanced={{ interface | regex_replace('dummy-', 'bat-') }}
+BatmanAdvanced={{ interface | regex_replace('dummy-', 'bat-') |  regex_replace('vx-', 'bat-')   }}
+{%- endif %}
+
+{%- if 'bat-' in interface %}
+[Network]
+Bridge={{ interface | regex_replace('bat-', 'br-') }}
+{%- endif %}
+
+{%- if 'br-' in interface %}
+[Network]
+IPv6AcceptRA=no
 {%- endif %}

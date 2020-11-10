@@ -172,7 +172,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                                 endpoint='interfaces')
 
     interface_results = salt.utils.http.query(interface_url,
-                                        params={query_param: search_results['dict']['results'][0]['id'] },
+                                        params={query_param: search_results['dict']['results'][0]['id'], 'limit': 1000 },
                                         header_dict=headers,
                                         decode=True)
     if 'error' in interface_results:
