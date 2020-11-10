@@ -11,6 +11,17 @@ protocol direct {
         ipv4;                   # Connect to default IPv4 table
         ipv6;                   # ... and to default IPv6 table
 }
+{%- if 'nextgen-gateway' in salt['pillar.get']('netbox:role:name') %}
+{%- for iface in interfaces|sort%}
+{%- if 'br' in iface %}
+{%- for ipaddress in interfaces[iface]['ipaddresses']%}
+{%- if ipaddress['family']['value'] == 6 %}
+{%- do prefixes_v6.append(salt['network.calc_net'](ipaddress['address'])) %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
 
 {%- for iface in interfaces|sort %}
 {%- if 'dummy' in iface %}
@@ -29,7 +40,7 @@ protocol kernel {
         };
 }
 {%- endif %}
-{% do prefixes_v4.append(ipaddress['address']) %}
+{%- do prefixes_v4.append(ipaddress['address']) %}
 {%- else %}
 {%- if iface == 'dummy0' %}
 protocol kernel {
@@ -46,7 +57,7 @@ protocol kernel {
          };
 }
 {%- endif %}
-{% do prefixes_v6.append(ipaddress['address']) %}
+{%- do prefixes_v6.append(ipaddress['address']) %}
 {%- endif %}
 {%- endfor %}
 {%- endif %}

@@ -3,7 +3,7 @@
 #
 
 [Match]
-{%- if 'bat-' in interface %}
+{%- if 'bat-' in interface or 'dummy-' in interface %}
 OriginalName={{ interface }}
 [Link]
 MACAddress={{ mac }}
