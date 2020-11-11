@@ -81,32 +81,42 @@ firewall:
   - port: 60001-60010
     proto: udp
     host: any
-{% if "graylog" in salt["pillar.get"]("netbox:config_context:docker") -%}
+{%- if "graylog" in salt["pillar.get"]("netbox:config_context:docker") %}
     # Allow pushing to graylog via filebeat
   - port: 5044
     proto: tcp
     host: any
-{% endif -%}
-{% if "salt_master" in roles -%}
+{%- endif %}
+{%- if "salt_master" in roles %}
     # Allow salt access for any host in the network
   - port: 4505-4506
     proto: tcp
     host: any
-{% endif -%}
-{% if "stats.in.ffmuc.net" == grains["id"] -%}
+{%- endif %}
+{%- if "docker01.in.ffmuc.net" == grains["id"] %}
+# Allow connections for chat.ffmuc.net
+  - port: 8000
+    proto: tcp
+    host: webfrontend03.in.ffmuc.net
+# Allow connections for chat.ffmuc.net
+  - port: 8000
+    proto: tcp
+    host: webfrontend04.in.ffmuc.net
+{%- endif %}
+{%- if "stats.in.ffmuc.net" == grains["id"] %}
   # Allow stats
   - port: 8086
     proto: tcp
     host: any
-{% endif %}
-{% if "dnsserver" == role or "dnsdist" in roles %}
+{%- endif %}
+{%- if "dnsserver" == role or "dnsdist" in roles %}
   - port: 53
     proto: udp
     host: any
   - port: 53
     proto: tcp
     host: any
-{% endif %}
+{%- endif %}
 {%- if "dnsdist" in roles %}
   - port: 8083
     proto: tcp

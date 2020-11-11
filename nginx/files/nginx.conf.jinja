@@ -78,6 +78,9 @@ http {
 			application/x-javascript application/xml application/xml+rss
 			application/ecmascript application/json image/svg+xml;
 
+	# Set hint which webfrontend is used
+	add_header X-FFMuc-Edge "{{ grains.id.split('.')[0] }}";
+
 	##
 	# Virtual Host Configs
 	##
