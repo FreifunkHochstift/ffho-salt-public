@@ -105,6 +105,15 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
+{%- if "icinga2.in.ffmuc.net" == grains["id"] %}
+  # Allow icinga2
+  - port: 5665
+    proto: tcp
+    host: any
+{%- endif %}
+  - port: 5665
+    proto: tcp
+    host: icinga2.in.ffmuc.net
 {%- if "dnsserver" == role or "dnsdist" in roles %}
   - port: 53
     proto: udp

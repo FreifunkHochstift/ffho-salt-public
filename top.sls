@@ -13,6 +13,7 @@ base:
     - fail2ban
     - ff_base
     - grafana
+    - graylog-sidecar
     - icinga2
     - influxdb
     - jenkins

@@ -6,9 +6,11 @@
 {%- set device_role = salt['mine.get'](node_id,'minion_device_role')[node_id] %}
 {%- set sites = salt['pillar.get']('netbox:config_context:sites') %}
 {%- set address = salt['mine.get'](node_id,'minion_address', tgt_type='glob')[node_id] %}
+{%- set overlay_address = salt['mine.get'](node_id,'minion_overlay_address', tgt_type='glob')[node_id] %}
 {%- set address6 = salt['mine.get'](node_id,'minion_address6', tgt_type='glob')[node_id] %}
 {%- set icinga_address = salt['mine.get'](grains['id'],'minion_address', tgt_type='glob')[grains['id']] %}
 {%- set icinga_address6 = salt['mine.get'](grains['id'],'minion_address6', tgt_type='glob')[grains['id']] %}
+{%- set location = salt['mine.get'](node_id,'minion_location', tgt_type='glob')[node_id] %}
 
 {% if 'mine_interval' not in role %}
 {% do roles.append(role) %}
@@ -31,11 +33,17 @@ object Host "{{ node_id }}" {
 	import "generic-host"
 
 	display_name = "{{ node_id }}"
-	{% if 'mine_interval' not in address and'mine_interval' not in icinga_address %}
+	{% if location == 'VIE01' %}
+	{% if 'mine_interval' not in overlay_address %}
+	address = "{{ overlay_address | regex_replace('/\d+$','') }}"
+	{% endif %}
+	{% else %}
+	{% if 'mine_interval' not in address and 'mine_interval' not in icinga_address %}
 	address = "{{ address | regex_replace('/\d+$','') }}"
 	{% endif %}
 	{% if 'mine_interval' not in address6 and 'mine_interval' not in icinga_address6 %}
 	address6 = "{{ address6 | regex_replace('/\d+$','') }}"
+	{% endif %}
 	{% endif %}
         check_command = "hostalive"
 
@@ -52,6 +60,9 @@ object Host "{{ node_id }}" {
 		"{{ site }}",
 	{%- endfor %}
 	]
+
+	vars.location = "{{ location }}"
+
 	vars.disk_wfree = "5%"
 	vars.disk_cfree = "3%"
 	vars.disks["disk /"] = {
