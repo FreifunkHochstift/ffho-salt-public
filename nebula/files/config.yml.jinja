@@ -94,13 +94,71 @@ firewall:
     host: any
 {%- endif %}
 {%- if "docker01.in.ffmuc.net" == grains["id"] %}
-# Allow connections for chat.ffmuc.net
+  # Allow connections for draw
+  - port: 5001
+    proto: tcp
+    group: webfrontend
+  # Allow connections for chat.ffmuc.net
   - port: 8000
     proto: tcp
     group: webfrontend
 {%- endif %}
+{%- if "docker02.in.ffmuc.net" == grains["id"] %}
+  # Allow connections for tickets.ffmuc.net
+  - port: 8000
+    proto: tcp
+    group: webfrontend
+  # Allow connections for etherpad
+  - port: 8081
+    proto: tcp
+    group: webfrontend
+  # Allow connections for ffmuc.net/wiki
+  - port: 8083
+    proto: tcp
+    group: webfrontend
+  # Allow connections for ffmuc.net/speed
+  - port: 8888
+    proto: tcp
+    group: webfrontend
+{%- endif %}
+{%- if "docker03.in.ffmuc.net" == grains["id"] %}
+  # Allow connections for unifi (stun)
+  - port: 3478
+    proto: udp
+    group: webfrontend
+  # Allow connections for unifi (inform)
+  - port: 8082
+    proto: tcp
+    group: webfrontend
+  # Allow connections for cloud.ffmuc.net
+  - port: 8089
+    proto: tcp
+    group: webfrontend
+  # Allow connections for byro
+  - port: 8345
+    proto: tcp
+    group: webfrontend
+  # Allow connections for byro (static)
+  - port: 8346
+    proto: tcp
+    group: webfrontend
+  # Allow connections for unifi (web)
+  - port: 8443
+    proto: tcp
+    group: webfrontend
+{%- endif %}
+{%- if "map.in.ffmuc.net" == grains["id"] %}
+  # Allow stats access
+  - port: 80
+    proto: tcp
+    group: webfrontend
+{%- endif %}
 {%- if "stats.in.ffmuc.net" == grains["id"] %}
-  # Allow stats
+  # Allow stats access
+  - port: 3000
+    proto: tcp
+    group: webfrontend
+  # Allow stats incoming
   - port: 8086
     proto: tcp
     host: any
