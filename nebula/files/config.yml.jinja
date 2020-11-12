@@ -97,11 +97,7 @@ firewall:
 # Allow connections for chat.ffmuc.net
   - port: 8000
     proto: tcp
-    host: webfrontend03.in.ffmuc.net
-# Allow connections for chat.ffmuc.net
-  - port: 8000
-    proto: tcp
-    host: webfrontend04.in.ffmuc.net
+    group: webfrontend
 {%- endif %}
 {%- if "stats.in.ffmuc.net" == grains["id"] %}
   # Allow stats

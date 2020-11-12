@@ -24,6 +24,8 @@ icinga2-repo:
   pkgrepo.managed:
     {% if grains.osfullname in 'Raspbian' %}
     - name: deb http://packages.icinga.com/raspbian icinga-{{ grains.oscodename }} main
+    {% elif grains.osfullname in 'Ubuntu' %}
+    - name: deb http://packages.icinga.com/{{ grains.lsb_distrib_id | lower }} icinga-{{ grains.oscodename }} main
     {% else %}
     - name: deb http://packages.icinga.com/debian icinga-{{ grains.oscodename }} main
     {% endif %}
@@ -314,40 +316,6 @@ Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/:
     - template: jinja
     - watch_in:
       - service: icinga2-service
-
-# Create configuration for network devices
-Create /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/:
-  file.directory:
-    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
-    - makedirs: true
-    - require:
-      - pkg: icinga2-pkg
-
-Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/:
-  file.directory:
-    - name: /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
-    - makedirs: true
-    - require:
-      - pkg: icinga2-pkg
-    - watch_in:
-      - service: icinga2-service
-
-  # Generate config files for every WBBL device known to pillar
-  {% for link_id, link_config in salt['pillar.get']('net:wbbl', {}).items () %}
-/etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/{{ link_id }}.conf:
-  file.managed:
-    - source: salt://icinga2/wbbl.conf.tmpl
-    - template: jinja
-    - context:
-      link_id: {{ link_id }}
-      link_config: {{ link_config }}
-    - require:
-      - file: Create /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
-    - require_in:
-      - file: Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/net/wbbl/
-    - watch_in:
-      - service: icinga2-service
-  {% endfor %}
 
 ################################################################################
 #                               Icinga2 Client                                 #
