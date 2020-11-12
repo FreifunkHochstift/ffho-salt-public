@@ -16,6 +16,6 @@ server {
     ssl_certificate     /etc/letsencrypt/live/ffmuc.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ffmuc.net/privkey.pem;
 
-    access_log /var/log/nginx/{{ domain }}_access.log;
+    access_log /var/log/nginx/{{ domain }}_access.log json_normal;
     error_log  /var/log/nginx/{{ domain }}_error.log;
 }

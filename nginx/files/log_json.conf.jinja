@@ -1,0 +1,51 @@
+map $remote_addr $ip_anonym1 {
+ default 0.0.0;
+ "~(?P<ip>(\d+)\.(\d+)\.(\d+))\.\d+" $ip;
+ "~(?P<ip>[^:]+:[^:]+:[^:]+):" $ip;
+}
+
+map $remote_addr $ip_anonym2 {
+ default .0;
+ "~(?P<ip>(\d+)\.(\d+)\.(\d+))\.\d+" .0;
+ "~(?P<ip>[^:]+:[^:]+:[^:]+):" ::;
+}
+
+map $ip_anonym1$ip_anonym2 $ip_anonymized {
+ default 0.0.0.0;
+ "~(?P<ip>.*)" $ip;
+}
+
+{% for flavor in ["normal", "anonym"] %}
+# the upper params are deprecated but here for migration purposes
+log_format json_{{ flavor }} escape=json '{'
+   {#- just for migration as those fields are used in dashboards currently #}
+   '"http_param":"$request_uri",'
+   '"http_request":"$request_method",'
+   '"http_useragent":"$http_user_agent",'
+   '"http_response":"$status",'
+   '"IP":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %}",'
+   '"http_referrer":"$http_referer",'
+   {#- just to see something human friendly #}
+   '"message":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %} $host - $request_method $request_uri - $status",'
+   {#- now the "future" variables #}
+   '"timestamp": "$time_iso8601",'
+   '"http_host":"$host",'
+   '"port":"$server_port",'
+   '"remote_addr":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %}",'
+   '"remote_user":"$remote_user",'
+   '"upstream_addr":"$upstream_addr",'
+   '"upstream_cache_status": "$upstream_cache_status",'
+   '"upstream_duration":"$upstream_response_time",'
+   '"http_request_method":"$request_method",'
+   '"http_request_uri":"$request_uri",'
+   '"http_referer":"$http_referer",'
+   '"http_user_agent":"$http_user_agent",'
+   '"http_protocol_version":"$server_protocol",'{# HTTP/1.1, HTTP/2, ... #}
+   '"response_status":"$status",'
+   '"body_bytes_sent":"$body_bytes_sent",'
+   '"ssl_protocol":"$ssl_protocol",'
+   '"gzip_ratio":"$gzip_ratio",'
+   '"brotli_ratio":"$brotli_ratio"'
+'}';
+
+{% endfor %}
