@@ -30,7 +30,7 @@ class Nodeinfo(Respondd):
   def getBatmanInterfaces(self, batmanInterface):
     ret = {}
 
-    lines = lib.helper.call(['batctl', '-m', batmanInterface, 'if'])
+    lines = lib.helper.call(['batctl', 'meshif', batmanInterface, 'if'])
     for line in lines:
       lineMatch = re.match(r'^([^:]*)', line)
       interface = lineMatch.group(0)
@@ -77,7 +77,7 @@ class Nodeinfo(Respondd):
 
   @staticmethod
   def getVPNFlag(batmanInterface):
-    lines = lib.helper.call(['batctl', '-m', batmanInterface, 'gw_mode'])
+    lines = lib.helper.call(['batctl', 'meshif', batmanInterface, 'gw_mode'])
     if re.match(r'^server', lines[0]):
       return True
     else:

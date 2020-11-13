@@ -19,7 +19,7 @@ class Statistics(Respondd):
 
     macBridge = lib.helper.getInterfaceMAC(self._config['bridge'])
 
-    lines = lib.helper.call(['batctl', '-m', self._config['batman'], 'tl', '-n'])
+    lines = lib.helper.call(['batctl', 'meshif', self._config['batman'], 'tl', '-n'])
     for line in lines:
       # batman-adv -> translation-table.c -> batadv_tt_local_seq_print_text
       # R = BATADV_TT_CLIENT_ROAM
@@ -139,7 +139,7 @@ class Statistics(Respondd):
   def getGateway(self):
     ret = None
 
-    lines = lib.helper.call(['batctl', '-m', self._config['batman'], 'gwl', '-n'])
+    lines = lib.helper.call(['batctl', 'meshif', self._config['batman'], 'gwl', '-n'])
     for line in lines:
       lineMatch = re.match(r'(\*|=>)\s+([0-9a-f:]+)\s\([\d \.]+\)\s+([0-9a-f:]+)', line)
       if lineMatch:

@@ -16,6 +16,8 @@ python3-netifaces:
 /opt/respondd-{{ site }}:
   file.recurse:
     - source: salt://respondd/respondd-tmpl
+    - watch_in:
+        - service: respondd@{{site}}
 {% endif %}
 
 /opt/respondd-{{site}}/alias.json:
@@ -24,6 +26,8 @@ python3-netifaces:
     - template: jinja
     - defaults:
       site: {{ site }}
+    - watch_in:
+        - service: respondd@{{site}}
 
 /opt/respondd-{{site}}/config.json:
   file.managed:
@@ -31,6 +35,8 @@ python3-netifaces:
     - template: jinja
     - defaults:
       site: {{ site }}
+    - watch_in:
+        - service: respondd@{{site}}
 
 /opt/respondd-{{site}}/lib/respondd_client.py:
   file.managed:
@@ -39,6 +45,8 @@ python3-netifaces:
     - defaults:
       site: {{ site }}
       id: {{ salt['pillar.get']('netbox:config_context:site_config:{{ site }}:site_no')  }}
+    - watch_in:
+        - service: respondd@{{site}}
 
 
 /opt/respondd-{{ site }}/ext-respondd.py:

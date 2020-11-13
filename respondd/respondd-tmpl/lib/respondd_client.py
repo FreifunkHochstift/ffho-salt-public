@@ -42,7 +42,7 @@ class ResponddClient:
     self._sock.setsockopt(socket.SOL_SOCKET,socket.SO_BINDTODEVICE,bytes(self._config['bridge'].encode()))
     self._sock.bind(('::', self._config['port']))
 
-    lines = lib.helper.call(['batctl', '-m', self._config['batman'], 'if'])
+    lines = lib.helper.call(['batctl', 'meshif', self._config['batman'], 'if'])
     for line in lines:
       lineMatch = re.match(r'^([^:]*)', line)
       self.joinMCAST(self._sock, self._config['addr'], lineMatch.group(1))

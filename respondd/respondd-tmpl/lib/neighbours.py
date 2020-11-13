@@ -33,7 +33,7 @@ class Neighbours(Respondd):
   def getMeshInterfaces(batmanInterface):
     ret = {}
 
-    lines = lib.helper.call(['batctl', '-m', batmanInterface, 'if'])
+    lines = lib.helper.call(['batctl', 'meshif', batmanInterface, 'if'])
     for line in lines:
       lineMatch = re.match(r'^([^:]*)', line)
       interface = lineMatch.group(1)
@@ -52,7 +52,7 @@ class Neighbours(Respondd):
 
     meshInterfaces = self.getMeshInterfaces(self._config['batman'])
 
-    lines = lib.helper.call(['batctl', '-m', self._config['batman'], 'o', '-n'])
+    lines = lib.helper.call(['batctl', 'meshif', self._config['batman'], 'o', '-n'])
     for line in lines:
       # * e2:ad:db:b7:66:63    2.712s   (175) be:b7:25:4f:8f:96 [mesh-vpn-l2tp-1]
       lineMatch = re.match(r'^[ \*\t]*([0-9a-f:]+)[ ]*([\d\.]*)s[ ]*\(([ ]*\d*)\)[ ]*([0-9a-f:]+)[ ]*\[[ ]*(.*)\]', line, re.I)
