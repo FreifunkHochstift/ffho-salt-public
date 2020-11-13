@@ -37,8 +37,8 @@ docker-pkgs:
 /usr/local/bin/docker-compose:
   file.managed:
     - source: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-{{ grains["kernel"] }}-{{ grains["cpuarch"] }}
+    - source_hash: 04216d65ce0cd3c27223eab035abfeb20a8bef20259398e3b9d9aa8de633286d
     - mode: 0755
-    - skip_verify: True
 
 {#
 # Install docker-compose via pip *shrug*
