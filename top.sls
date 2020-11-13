@@ -113,6 +113,10 @@ base:
     - match: pillar
     - docker
 
+  # LibreNMS
+  nodes:{{ grains['id'] }}:roles:librenms:
+    - match: pillar
+    - librenms
 #
 # Grains
 #
