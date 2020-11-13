@@ -61,11 +61,15 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 
 /etc/nginx/sites-enabled/zz-default.conf:
+{% if 'VIE01' in salt['pillar.get']('netbox:site:name') -%}
   file.managed:
     - source: salt://nginx/files/default.conf
     - makedirs: True
     - require:
       - pkg: nginx
+{% else %}
+  file.absent:
+{% endif %}
     - watch_in:
       - cmd: nginx-configtest
 
