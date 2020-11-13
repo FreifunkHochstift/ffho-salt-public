@@ -33,6 +33,13 @@ docker-pkgs:
             "max-file": "3"
           }
         }
+
+/usr/local/bin/docker-compose:
+  file.managed:
+    - source: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-{{ grains["kernel"] }}-{{ grains["cpuarch"] }}
+    - mode: 0755
+    - skip_verify: True
+
 {#
 # Install docker-compose via pip *shrug*
 python-pip:
