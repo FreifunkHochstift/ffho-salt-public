@@ -1,0 +1,20 @@
+[Unit]
+Description=Wireguard Key Exchange Worker
+Documentation=https://github.com/freifunkMUC/wgkex
+After=network.target
+
+[Service]
+User=wgkex
+WorkingDirectory=/srv/wgkex
+ExecStart=/usr/bin/python3 -u -m wgkex.worker.app
+Restart=on-failure
+
+# Enable Logging
+SyslogIdentifier=wgkex
+
+# allow fetching metrics for wireguard
+CapabilityBoundingSet=CAP_NET_ADMIN
+AmbientCapabilities=CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target
