@@ -51,6 +51,12 @@ $WorkDirectory /var/spool/rsyslog
 #
 $IncludeConfig /etc/rsyslog-early.d/*.conf
 
+
+#
+# Mirror all remaining logs to graylog
+#
+*.*	@{{ graylog_uri }}
+
 #
 # Include all config files in /etc/rsyslog.d/
 #

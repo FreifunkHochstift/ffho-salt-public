@@ -4,6 +4,7 @@
 
 {% set roles = salt['pillar.get'] ('nodes:' ~ grains['id'] ~ ':roles') %}
 {% set logserver = salt['pillar.get'] ('logging:syslog:logserver') %}
+{% set graylog_uri = salt['pillar.get'] ('logging:graylog:syslog_uri') %}
 
 rsyslog:
   pkg.installed:
@@ -30,6 +31,8 @@ rsyslog:
       - service: rsyslog
 {% if 'logserver' in roles %}
     - source: salt://rsyslog/rsyslog.conf.logserver
+    - template: jinja
+      graylog_uri: {{ graylog_uri }}
 {% else %}
     - source: salt://rsyslog/rsyslog.conf
     - template: jinja
