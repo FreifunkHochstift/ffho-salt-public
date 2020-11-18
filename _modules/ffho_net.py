@@ -701,6 +701,15 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 			vni = 100 + site_no
 			bat_iface = "bat-%s" % site
 
+			# If there's no batman interface for this site, there's no point
+			# in setting up a VXLAN interfaces
+			if bat_iface not in ifaces:
+				continue
+
+			# bail out if VXLAN tunnel already configured
+			if vx_iface in ifaces:
+				continue
+
 			try:
 				iface_id = int (re.sub ('vlan', '', iface))
 
@@ -718,15 +727,6 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 				iface_id = 9999
 				mcast_ip = "225.0.0.%s" % site_no
 				vni = site_no
-
-			# bail out if VXLAN tunnel already configured
-			if vx_iface in ifaces:
-				continue
-
-			# If there's no batman interface for this site, there's no point
-			# in setting up a VXLAN interfaces
-			if bat_iface not in ifaces:
-				continue
 
 			# Add the VXLAN interface
 			ifaces[vx_iface] = {
