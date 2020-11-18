@@ -6,6 +6,7 @@
 {%- set node_id = grains['id'] %}
 {%- set sites_config = salt['pillar.get']('sites', {}) %}
 {%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
+{%- set iface_list = salt['ffho_net.get_interface_list'](ifaces) %}
 
 #source /etc/network/interfaces.d/*
 
@@ -27,7 +28,7 @@ iface lo
 {#
  # Set up ifaces dict with configured and generated interfaces.
  #}
-{%- for interface in ifaces|sort if interface not in ['lo'] %}
+{%- for interface in iface_list if interface not in ['lo'] %}
   {%- set config = ifaces.get (interface) %}
 
   {#- Let's go #}

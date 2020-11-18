@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import collections
+from functools import cmp_to_key
 import ipaddress
 import re
 from copy import deepcopy
@@ -950,6 +951,52 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 	_update_interface_desc (node_config, sites_config)
 
 	return ifaces
+
+
+vlan_vxlan_iface_re = re.compile (r'^vlan(\d+)|^vx_v(\d+)_(\w+)')
+
+def _cmp (x, y):
+	if x < y:
+		return -1
+	elif x == y:
+		return 0
+	else:
+		return 1
+
+def _iface_sort (iface_a, iface_b):
+	a = vlan_vxlan_iface_re.search (iface_a)
+	b = vlan_vxlan_iface_re.search (iface_b)
+
+	# At least one interface didn't match, do regular comparison
+	if not a or not b:
+		return _cmp (iface_a, iface_b)
+
+	# Extract VLAN ID from VLAN interface (if given) or VXLAN
+	vid_a = a.group (1) if a.group (1) else a.group (2)
+	vid_b = b.group (1) if b.group (1) else b.group (2)
+
+	# If it's different type of interfaces (one VLAN, one VXLAN), do regular comparison
+	if (a.group (1) == None) != (b.group (1) == None):
+		return _cmp (iface_a, iface_b)
+
+	# Ok, t's two VLAN or two VXLAN interfaces
+
+	# If it's VXLAN interfaces and the VLAN ID is the same, sort by site name
+	if a.group (2) and vid_a == vid_b:
+		return _cmp (a.groups (2), b.groups (2))
+
+	# If it's two VLANs or two VXLANs with different VLAN IDs, sort by VLAN ID
+	else:
+		return _cmp (int (vid_a), int (vid_b))
+
+
+def get_interface_list (ifaces):
+	iface_list = []
+
+	for iface in sorted (ifaces.keys (), key = cmp_to_key (_iface_sort)):
+		iface_list.append (iface)
+
+	return iface_list
 
 
 # Generate entries for /etc/bat-hosts for every batman interface we will configure on any node.
