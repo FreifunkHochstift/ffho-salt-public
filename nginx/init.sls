@@ -76,6 +76,7 @@ nginx-module-{{module}}:
 # TODO: Make dynamic
 {% for domain in [
     "ffmuc.net",
+    "broker.ffmuc.net",
     "byro.ffmuc.net",
     "chat.ffmuc.net",
     "cloud.ffmuc.net",
