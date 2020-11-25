@@ -53,7 +53,7 @@ net.ipv4.neigh.default.gc_thresh2:
     - config: /etc/sysctl.d/10-global.conf
 net.ipv4.neigh.default.gc_thresh3:
   sysctl.present:
-    - value: 4096
+    - value: 8192
     - config: /etc/sysctl.d/10-global.conf
 
 net.ipv6.neigh.default.gc_thresh1:
@@ -66,7 +66,12 @@ net.ipv6.neigh.default.gc_thresh2:
     - config: /etc/sysctl.d/10-global.conf
 net.ipv6.neigh.default.gc_thresh3:
   sysctl.present:
-    - value: 4096
+    - value: 8192
+    - config: /etc/sysctl.d/10-global.conf
+
+net.ipv6.route.max_size:
+  sysctl.present:
+    - value: 2147483647
     - config: /etc/sysctl.d/10-global.conf
 
 #
