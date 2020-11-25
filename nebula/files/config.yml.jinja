@@ -147,6 +147,16 @@ firewall:
     proto: tcp
     group: webfrontend
 {%- endif %}
+{%- if "docker04.in.ffmuc.net" == grains["id"] %}
+  # Allow connections for http backend of broker.ffmuc.net
+  - port: 5000
+    proto: tcp
+    group: webfrontend
+  # Allow connections for mqtt backend of broker.ffmuc.net
+  - port: 1883
+    proto: tcp
+    host: any
+{%- endif %}
 {%- if "map.in.ffmuc.net" == grains["id"] %}
   # Allow stats access
   - port: 80
