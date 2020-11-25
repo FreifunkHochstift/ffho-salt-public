@@ -11,10 +11,6 @@
       "domain_code": "ffmuc_{{ site }}",
       "role": "gateway"
     },
-    "location": {
-      "latitude": 48.185406,
-      "longitude": 11.602850
-    },
     "pages": [
       "https://stats.ffmuc.net",
       "https://ffmuc.net"
