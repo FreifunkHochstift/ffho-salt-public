@@ -9,18 +9,7 @@ python3-pyroute2:
   git.latest:
     - name: https://github.com/freifunkMUC/wgkex
     - target: /srv/wgkex
-    - rev: add_mqtt
-
-# temporary:
-/srv/wgkex/wgkex/config/config.py:
-  file.managed:
-    - source: https://raw.githubusercontent.com/freifunkMUC/wgkex/extend_config_mqtt/wgkex/config/config.py
-    - skip_verify: True
-    - require:
-      - git: /srv/wgkex
-    - require_in:
-      - service: wgkex-service
-    - watch_in: wgkex-service
+    - rev: master
 
 /etc/systemd/system/wgkex.service:
   file.managed:
