@@ -52,14 +52,6 @@ openvpn:
       - pkg: openvpn
 
 
-# Create 1024 bit DH params, if not present already
-/etc/openvpn/dh1024.pem:
-  cmd.run:
-    - name: openssl dhparam -out /etc/openvpn/dh1024.pem 1024
-#    - creates: /etc/openvpn/dh1024.pem
-    - unless: ls /etc/openvpn/dh1024.pem
-
-
 # Create log directory for status log
 /var/log/openvpn:
   file.directory:
