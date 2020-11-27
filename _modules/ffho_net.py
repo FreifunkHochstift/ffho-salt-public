@@ -1190,6 +1190,10 @@ def get_ospf_interface_config (node_config, grains_id):
 		if ospf_config_pillar.get ('ignore', False):
 			continue
 
+		# Ignore interfaces without any IPs configured
+		if not iface_config.get ('prefixes'):
+			continue
+
 		# Wireless Local Links (WLL)
 		if re.search (r'^vlan90\d$', iface):
 			ospf_on = True
