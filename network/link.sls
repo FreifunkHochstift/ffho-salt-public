@@ -2,16 +2,6 @@
 # Networking / link
 #
 
-{% if grains['oscodename'] == 'jessie' %}
-# Udev rules
-/etc/udev/rules.d/42-ffho-net.rules:
-  file.managed:
-    - template: jinja
-    - source: salt://network/udev-rules.tmpl
-
-# Stretch, Buster, ...
-{% else %}
-
 # Write an systemd link file for every interface with a MAC
   {% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
     {% if 'mac' in iface_config %}
@@ -26,8 +16,6 @@
       - cmd: update-initramfs
     {% endif %}
   {% endfor %}
-{% endif %}
-
 
 # Rebuild initrd files if neccessary
 update-initramfs:
