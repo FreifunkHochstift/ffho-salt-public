@@ -15,9 +15,6 @@ include:
 fastd:
   pkg.installed:
     - name: fastd
-{% if grains.oscodename in ['jessie'] %}
-    - fromrepo: {{ grains.oscodename }}-backports
-{% endif %}
   service.dead:
     - enable: False
 
