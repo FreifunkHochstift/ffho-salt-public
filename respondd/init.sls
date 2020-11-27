@@ -46,25 +46,20 @@ ffho-respondd:
     - defaults:
       bat_iface: "bat-{{site}}"
       fastd_peers: "false"
-      hostname: "{{grains['id'].split('.')[0]}}{% if salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}"
+      hostname: "{{ grains['id'].split('.')[0] }}{% if node_config.get ('sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}"
       mcast_iface: {% if 'br-' ~ site in ifaces %}"br-{{site}}"{% else %}"bat-{{site}}"{% endif %}
-    {% if 'fastd' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) and not 'batman_ext' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+    {% if 'fastd' in node_config.get ('roles', []) and not 'batman_ext' in node_config.get ('roles', []) %}
       mesh_vpn: [{{ site }}_intergw, {{ site }}_nodes4, {{ site }}_nodes6]
     {% else %}
       mesh_vpn: False
     {% endif %}
-      site: {{site}}
+      site: {{ site }}
       site_code: "{{ region_code }}"
-      location: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':location', {})}}
+      location: {{ node_config.get('location', {}) }}
+      location_hidden: {{ 'location-hidden' in node_config.get ('tags', []) }}
     - require:
       - git: ffho-respondd
 
-{% if grains.id == 'gw05.in.ffho.net' and site == 'pad-cty' %}
-Stop respondd@{{site}}:
-  service.dead:
-    - name: respondd@{{site}}
-    - enable: False
-{% else %}
 respondd@{{site}}:
   service.running:
     - enable: True
@@ -74,9 +69,8 @@ respondd@{{site}}:
     - watch:
       - file: /srv/ffho-respondd/{{site}}.conf
       - git: ffho-respondd
-{% endif %}
 
-{% if 'batman_ext' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if 'batman_ext' in node_config.get('roles', []) %}
 /srv/ffho-respondd/{{site}}-ext.conf:
   file.managed:
     - source: salt://respondd/respondd-config.tmpl
@@ -84,7 +78,7 @@ respondd@{{site}}:
     - defaults:
       bat_iface: "bat-{{site}}-ext"
       fastd_peers: "{% if 'fastd_peers' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}true{% else %}false{% endif %}"
-      hostname: "{{grains['id'].split('.')[0]}}{% if salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}-ext"
+      hostname: "{{ grains['id'].split('.')[0] }}{% if node_config.get ('sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}-ext"
       mcast_iface: "bat-{{ site }}-ext"
     {% if 'fastd' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
       mesh_vpn: [{{ site }}_intergw, {{ site }}_nodes4, {{ site }}_nodes6]
@@ -92,8 +86,8 @@ respondd@{{site}}:
       mesh_vpn: False
     {% endif %}
       site: {{site}}
-      site_code: "{{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':site_code', '')}}"
-      location: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':location', {})}}
+      site_code: "{{ node_config.get ('site_code', '') }}"
+      location: {{ node_config.get ('location', {}) }}
     - require:
       - git: ffho-respondd
 

@@ -6,7 +6,7 @@
 {%- endif %}
   "nodeinfo": {
     "hostname": "{{ hostname }}",
-{%- if location %}
+{%- if location and not location_hidden  %}
     "location": {
       "latitude": {{ location.latitude }},
       "longitude": {{ location.longitude }}
