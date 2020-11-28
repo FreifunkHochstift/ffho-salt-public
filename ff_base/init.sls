@@ -27,3 +27,9 @@ ffmuc_packages:
       - dmidecode
       - psmisc
       - lshw
+
+ffmuc_removed_packages:
+  pkg.removed:
+    - pkgs:
+      - postfix
+      - rpcbind

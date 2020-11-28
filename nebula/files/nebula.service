@@ -2,6 +2,7 @@
 Description=nebula
 Wants=basic.target network.target
 After=basic.target network.target
+Before=snmpd.service
 
 [Service]
 SyslogIdentifier=nebula

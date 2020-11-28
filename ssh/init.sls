@@ -54,7 +54,7 @@ ssh-{{ user }}:
       - nogroup
     - system: True
     {% else %}
-    {% if 'Ubuntu' in grains.lsb_distrib_id %}
+    {% if 'Ubuntu' in grains.lsb_distrib_id or 'Raspbian' in grains.lsb_distrib_id %}
     - usergroup: False
     {% else %}
     - gid_from_name: True

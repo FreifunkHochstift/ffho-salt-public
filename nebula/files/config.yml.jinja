@@ -69,6 +69,12 @@ firewall:
   - port: 22
     proto: tcp
     host: any
+{%- if "webserver" in role %}
+    # HTTP
+  - port: 80
+    proto: tcp
+    host: any
+{%- endif %}
     # HTTPS
   - port: 443
     proto: tcp
