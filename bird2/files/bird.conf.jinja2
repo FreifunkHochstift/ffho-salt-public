@@ -21,6 +21,14 @@ protocol direct {
 {%- endfor %}
 {%- endif %}
 {%- endfor %}
+{% set nat66 = salt['pillar.get']('netbox:config_context:network:nat66_pool') %}
+{%- if nat66 %}
+protocol static {
+        ipv6;
+        route {{ nat66 }} blackhole;
+}
+{%- do prefixes_v6.append(nat66) %}
+{%- endif %}
 {%- endif %}
 
 {%- for iface in interfaces|sort %}
