@@ -45,10 +45,10 @@ ffho-respondd:
     - template: jinja
     - defaults:
       bat_iface: "bat-{{site}}"
-      fastd_peers: "false"
+      fastd_peers: "{% if 'fastd_peers' in node_config.get ('roles', []) %}true{% else %}false{% endif %}"
       hostname: "{{ grains['id'].split('.')[0] }}{% if node_config.get ('sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}"
       mcast_iface: {% if 'br-' ~ site in ifaces %}"br-{{site}}"{% else %}"bat-{{site}}"{% endif %}
-    {% if 'fastd' in node_config.get ('roles', []) and not 'batman_ext' in node_config.get ('roles', []) %}
+    {% if 'fastd' in node_config.get ('roles', []) %}
       mesh_vpn: [{{ site }}_intergw, {{ site }}_nodes4, {{ site }}_nodes6]
     {% else %}
       mesh_vpn: False
@@ -77,7 +77,7 @@ respondd@{{site}}:
     - template: jinja
     - defaults:
       bat_iface: "bat-{{site}}-ext"
-      fastd_peers: "{% if 'fastd_peers' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}true{% else %}false{% endif %}"
+      fastd_peers: "{% if 'fastd_peers' in node_confi.get ('roles', []) %}true{% else %}false{% endif %}"
       hostname: "{{ grains['id'].split('.')[0] }}{% if node_config.get ('sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}-ext"
       mcast_iface: "bat-{{ site }}-ext"
     {% if 'fastd' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
@@ -100,6 +100,15 @@ respondd@{{site}}-ext:
     - watch:
       - file: /srv/ffho-respondd/{{site}}-ext.conf
       - git: ffho-respondd
+{% else %}
+/srv/ffho-respondd/{{ site }}-ext.conf:
+  file.absent
+
+respondd@{{ site }}-ext:
+  service.dead:
+    - enable: False
+    - prereq:
+      - file: /srv/ffho-respondd/{{ site }}-ext.conf
 {% endif %}
 {% endfor %}
 
