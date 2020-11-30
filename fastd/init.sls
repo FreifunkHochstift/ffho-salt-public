@@ -2,9 +2,6 @@
 # Fastd for gateways
 #
 
-include:
-  - network
-
 {% set sites_all = pillar.get ('sites') %}
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id, {}) %}
 {% set sites_node = node_config.get('sites', {}) %}
