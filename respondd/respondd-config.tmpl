@@ -6,7 +6,7 @@
 {%- endif %}
   "nodeinfo": {
     "hostname": "{{ hostname }}",
-{%- if location and not location_hidden  %}
+{%- if location and not location_hidden and location.get ('latitude') and location.get ('longitude') %}
     "location": {
       "latitude": {{ location.latitude }},
       "longitude": {{ location.longitude }}
@@ -14,7 +14,7 @@
 {%- endif %}
     "software": {
       "firmware": {
-        "release": "FFHO-1.0"
+        "release": "FFHO-{{ grains.osmajorrelease }}.0"
       }
     },
     "system": {
