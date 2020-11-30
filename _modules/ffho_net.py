@@ -709,6 +709,7 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 	for iface in list (ifaces.keys ()):
 		iface_config = ifaces.get (iface)
 		batman_connect_sites = iface_config.get ('batman_connect_sites', [])
+		iface_has_prefixes = len (iface_config.get ('prefixes', {})) != 0
 
 		# If we got a string, convert it to a list with a single element
 		if type (batman_connect_sites) == str:
@@ -734,7 +735,6 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 			# iface_name := vx_<last 5 chars of underlay iface>_<site> stripped to 15 chars
 			vx_iface = ("vx_%s_%s" % (re.sub ('vlan', 'v', iface)[-5:], re.sub (r'[_-]', '', site)))[:15]
 			site_no = _get_site_no (sites_config, site)
-			vni = 100 + site_no
 			bat_iface = "bat-%s" % site
 
 			# If there's no batman interface for this site, there's no point
@@ -752,25 +752,36 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 				# Gather interface specific mcast address.
 				# The address is derived from the vlan-id of the underlying interface,
 				# assuming that it in fact is a vlan interface.
+
 				# Mangle the vlan-id into two 2 digit values, eliminating any leading zeros.
 				iface_id_4digit = "%04d" % iface_id
 				octet2 = int (iface_id_4digit[0:2])
 				octet3 = int (iface_id_4digit[2:4])
-				mcast_ip = "225.%s.%s.%s" % (octet2, octet3, site_no)
-
 				vni = octet2 * 256 * 256 + octet3 * 256 + site_no
-			except ValueError:
+
+				vtep_config = {
+					'vxlan-id' : vni,
+					'vxlan-physdev' : iface,
+				}
+
+				# If there are prefixes configured on this underlay interface go for legacy IPv4 Multicast (for now)
+				if iface_has_prefixes:
+					vtep_config['vxlan-svcnodeip'] = "225.%s.%s.%s" % (octet2, octet3, site_no)
+				else:
+					vtep_config['vxlan-remote-group'] = "ff42:%s::%s" % (iface_id, site_no)
+
+			except ValueError as v:
+				vtep_config = {
+					'vxlan-config-error' : str (v),
+				}
+
 				iface_id = 9999
 				mcast_ip = "225.0.0.%s" % site_no
 				vni = site_no
 
 			# Add the VXLAN interface
 			ifaces[vx_iface] = {
-				'vxlan' : {
-					'vxlan-id'        : vni,
-					'vxlan-svcnodeip' : mcast_ip,
-					'vxlan-physdev'   : iface,
-				},
+				'vxlan' : vtep_config,
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, iface_id),
 				'mtu'       : MTU['batman_underlay_iface'],
 			}
