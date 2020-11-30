@@ -27,7 +27,7 @@ default_bond_config = {
 
 
 #
-# Default parameters added to any given bonding interface,
+# Default parameters added to any given bridge interface,
 # if not specified at the interface configuration.
 default_bridge_config = {
 	'bridge-fd' : '0',
@@ -41,11 +41,20 @@ default_bridge_config = {
 default_hop_penalty_by_role = {
 	'bbr'       :  5,
 	'bras'      : 50,
-	'batman_gw' :  5,
+	'batman_gw' : 50,
 	'batman_ext': 50,
 }
 batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
 
+default_batman_iface_penalty_by_role = {
+	'local_wired' : 5,
+	'local_wired_backup' : 10,
+	'WBBL' : 10,
+	'WBBL_backup' : 15,
+	'DCI' : 15,
+	'VPN_intergw' : 50,
+	'VPN_node' : 50,
+}
 
 #
 # Default interface attributes to be added to GRE interface to AS201701 when
@@ -282,6 +291,7 @@ def _update_batman_config (node_config, iface, sites_config):
 				for role in batman_role_evaluation_order:
 					if role in node_roles:
 						batman_config['batman-hop-penalty'] = default_hop_penalty_by_role[role]
+						break
 
 				if 'batman_ext' in node_roles and iface.endswith('-ext'):
 					batman_config['batman-hop-penalty'] = default_hop_penalty_by_role['batman_ext']
@@ -460,6 +470,32 @@ def _set_mtu_to_iface_and_upper (ifaces, iface_name, mtu):
 			return
 
 		vlan_raw_device_config['automtu'] = mtu
+
+#
+#
+#
+def _get_batman_iface_penalty (iface):
+	if iface.startswith ('vlan'):
+		vid = int (re.sub ('vlan', '', iface))
+		if 1000 <= vid < 1100:
+			return default_batman_iface_penalty_by_role.get ('local_wired')
+
+		if 1400 <= vid < 1500:
+			return default_batman_iface_penalty_by_role.get ('DCI')
+
+		if 2000 <= vid < 2100:
+			return default_batman_iface_penalty_by_role.get ('WBBL')
+
+		if 2200 <= vid < 2300:
+			return default_batman_iface_penalty_by_role.get ('WBBL_backup')
+
+	if 'intergw' in iface:
+		return default_batman_iface_penalty_by_role.get ('VPN_intergw')
+
+	if 'nodes' in iface:
+		return default_batman_iface_penalty_by_role.get ('VPN_node')
+
+	return None
 
 
 # Generate configuration entries for any batman related interfaces not
@@ -738,6 +774,12 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 				'hwaddress' : gen_batman_iface_mac (site_no, device_no, iface_id),
 				'mtu'       : MTU['batman_underlay_iface'],
 			}
+
+			iface_penalty = _get_batman_iface_penalty (iface)
+			if iface_penalty:
+				ifaces[vx_iface]['batman'] = {
+					'batman-hop-penalty' : iface_penalty
+				}
 
 			# If the batman interface for this site doesn't have any interfaces
 			# set up - which basicly cannot happen - add this VXLAN tunnel as
