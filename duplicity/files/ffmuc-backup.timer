@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs FFmuc-backup every day
+
+[Timer]
+OnUnitActiveSec=1d
+RandomizedDelaySec=360
+Unit=ffmuc-backup.service
+
+[Install]
+WantedBy=multi-user.target
