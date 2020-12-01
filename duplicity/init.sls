@@ -1,3 +1,4 @@
+{% if 'Raspbian' not in grains.lsb_distrib_id %}
 duplicity-packages:
   pkg.installed:
     - pkgs:
@@ -5,6 +6,7 @@ duplicity-packages:
       - gnupg 
       - gnupg-agent
       - python3-pip
+
     - require:
       - pkgrepo: duplicity_repo
 
@@ -14,16 +16,17 @@ duplicity_repo:
     - keyid: 8F571BB27A86F4A2
     - keyserver: pgp.mit.edu
 
+b2sdk:
+  pip.installed:
+    - require:
+      - pkg: duplicity-packages
+{% endif %}
+
 backup-script:
   file.managed:
     - name: /usr/local/sbin/backup.sh
     - source: salt://duplicity/files/backup.sh.jinja2
     - template: jinja
-
-b2sdk:
-  pip.installed:
-    - require:
-      - pkg: duplicity-packages
 
 /etc/systemd/system/ffmuc-backup.service:
   file.managed:
@@ -38,4 +41,10 @@ systemd-reload-ffmuc-backup:
     - name: systemctl --system daemon-reload
     - onchanges:
       - file: /etc/systemd/system/ffmuc-backup.service
+      - file: /etc/systemd/system/ffmuc-backup.timer
+
+ffmuc-backup-timer-enable:
+  service.enabled:
+    - name: ffmuc-backup.timer
+    - require:
       - file: /etc/systemd/system/ffmuc-backup.timer

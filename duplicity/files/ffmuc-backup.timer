@@ -7,4 +7,4 @@ RandomizedDelaySec=360
 Unit=ffmuc-backup.service
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target

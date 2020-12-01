@@ -102,9 +102,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                            decode=True)
         search_results = vm_search_results
     # Check status code for API call
-    if 'error' in search_results:
-        llog.error(f'API query failed for "{minion_id}", status code: {search_results['status']}')
-        log.error(search_results['error'])
+    if "error" in search_results:
+        log.error(f'API query failed for "{minion_id}", status code: {search_results["status"]}')
+        log.error(search_results["error"])
         return ret
     # Assign results from API call to "netbox" key
     if len(search_results['dict']['results']) == 0:
@@ -131,9 +131,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                       header_dict=headers,
                                       decode=True)
 
-    if 'error' in device_results:
-        log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
-        log.error(search_results['error'])
+    if "error" in device_results:
+        log.error(f'API query failed for "{minion_id}", status code: {search_results["status"]}')
+        log.error(search_results["error"])
         return ret
 
     ret['netbox'] = device_results['dict']
@@ -173,9 +173,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                         params={query_param: search_results['dict']['results'][0]['id'], 'limit': 1000 },
                                         header_dict=headers,
                                         decode=True)
-    if 'error' in interface_results:
-                log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
-                log.error(interface_results['error'])
+    if "error" in interface_results:
+                log.error(f'API query failed for "{minion_id}", status code: {interface_results["status"]}')
+                log.error(interface_results["error"])
                 return ret
     else:
                 for interface in interface_results['dict']['results']:
@@ -191,9 +191,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                            params={query_param: search_results['dict']['results'][0]['id'] },
                                            header_dict=headers,
                                            decode=True)
-    if 'error' in ipaddress_results:
-        log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
-        log.error(ipaddress_results['error'])
+    if "error" in ipaddress_results:
+        log.error(f'API query failed for "{minion_id}", status code: {ipaddress_results["status"]}')
+        log.error(ipaddress_results["error"])
         return ret
     ipaddresses = ipaddress_results['dict']['results']
     ## Get all interfaces for device
@@ -210,9 +210,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         interface_results = salt.utils.http.query(interface_url,
                                            header_dict=headers,
                                            decode=True)
-        if 'error' in interface_results:
-                log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
-                log.error(interface_results['error'])
+        if "error" in interface_results:
+                log.error(f'API query failed for "{minion_id}", status code: {interface_results["status"]}')
+                log.error(interface_results["error"])
                 return ret
         if interface_results['dict']['name'] not in ret['netbox']['interfaces']:
             ret['netbox']['interfaces'][interface_results['dict']['name']] = interface_results['dict']
@@ -229,13 +229,13 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         site_details_ret = salt.utils.http.query(site_url,
                                                  header_dict=headers,
                                                  decode=True)
-        if 'error' in site_details_ret:
+        if "error" in site_details_ret:
             log.error(f'Unable to retrieve site details for {site_name} (ID {site_id})')
-            log.error(f'Status code: {site_details_ret['status']}, error: {site_details_ret['error']}')
+            log.error(f'Status code: {site_details_ret["status"]}, error: {site_details_ret["error"]}')
         else:
             ret['netbox']['site'] = site_details_ret['dict']
     if site_prefixes:
-        log.debug(f'Retrieving site details for "{minion_id}" - site {site_name} (ID {site_id})')
+        log.debug(f'Retrieving site prefixes for "{minion_id}" - site {site_name} (ID {site_id})')
         prefixes_url = '{api_url}/{app}/{endpoint}'.format(api_url=api_url,
                                                            app='ipam',
                                                            endpoint='prefixes')
@@ -243,9 +243,9 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                   params={'site_id': site_id},
                                                   header_dict=headers,
                                                   decode=True)
-        if 'error' in site_prefixes_ret:
+        if "error" in site_prefixes_ret:
             log.error(f'Unable to retrieve site prefixes for {site_name} (ID {site_id})')
-            log.error(f'Status code: {site_prefixes_ret['status']}, error: {site_prefixes_ret['error']}')
+            log.error(f'Status code: {site_prefixes_ret["status"]}, error: {site_prefixes_ret["error"]}')
         else:
             ret['netbox']['site']['prefixes'] = site_prefixes_ret['dict']['results']
     if proxy_return:
@@ -256,8 +256,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                      header_dict=headers,
                                                      decode=True)
             # Check status code for API call
-            if 'error' in platform_results:
-                log.info(f'API query failed for "{minion_id}": {platform_results['error']}')
+            if "error" in platform_results:
+                log.info(f'API query failed for "{minion_id}": {platform_results["error"]}')
             # Assign results from API call to "proxy" key if the platform has a
             # napalm_driver defined.
             napalm_driver = platform_results['dict'].get('napalm_driver')
