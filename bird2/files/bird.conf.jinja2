@@ -21,7 +21,7 @@ protocol direct {
 {%- endfor %}
 {%- endif %}
 {%- endfor %}
-{% set nat66 = salt['pillar.get']('netbox:config_context:network:nat66_pool') %}
+{%- set nat66 = salt['pillar.get']('netbox:config_context:network:nat66_pool') %}
 {%- if nat66 %}
 protocol static {
         ipv6;

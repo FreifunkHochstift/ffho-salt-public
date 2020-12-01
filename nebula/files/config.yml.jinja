@@ -188,7 +188,7 @@ firewall:
   - port: 5665
     proto: tcp
     host: icinga2.in.ffmuc.net
-{%- if "dnsserver" == role or "dnsdist" in roles %}
+{%- if "dnsserver" == role or "dnsdist" in roles or "gateway" in role %}
   - port: 53
     proto: udp
     host: any

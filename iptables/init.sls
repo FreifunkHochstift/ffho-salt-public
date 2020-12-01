@@ -4,14 +4,16 @@ iptables_pkgs:
       - iptables-persistent
       - netfilter-persistent
 
+{% if "guardian" in grains.id %}
 
 {% set own_location = salt['pillar.get']('netbox:site:name') %}
 
 {% if salt['grains.get']('ip4_interfaces:vlan3:0') %}
-{% set nat_ip = salt['grains.get']('ip4_interfaces:vlan3:0') %}
+  {% set nat_ip = salt['grains.get']('ip4_interfaces:vlan3:0') %}
 {% else %}
-{% set nat_ip = salt['grains.get']('ip4_interfaces:dummy0:0') %}
+  {% set nat_ip = salt['grains.get']('ip4_interfaces:dummy0:0') %}
 {% endif %}
+
 {% set nodes = salt['mine.get']('netbox:platform:slug:linux', 'minion_id', tgt_type='pillar') %}
 {% for node in nodes %}
 {%- set node_location = salt['mine.get'](node, 'minion_location', tgt_type='glob') %}
@@ -51,6 +53,6 @@ iptables_pkgs:
     - to: {{ nat_ip }}:{{ 20000 + n1 * 256 + n2  }}
     - save: True
 
-{% endif %}
-
-{% endfor %}
+{% endif %}{# if own_location == node_location[node] #}
+{% endfor %}{# for node in nodes #}
+{% endif %}{# if guardian #}

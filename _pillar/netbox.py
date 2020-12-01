@@ -82,7 +82,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
     headers = {}
     if api_token:
         headers = {
-            'Authorization': 'Token {}'.format(api_token)
+            'Authorization': f'Token {api_token}'
         }
     device_search_url = '{api_url}/{app}/{endpoint}'.format(api_url=api_url,
                                                      app='dcim',
@@ -103,16 +103,15 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         search_results = vm_search_results
     # Check status code for API call
     if 'error' in search_results:
-        log.error('API query failed for "%s", status code: %d',
-                  minion_id, search_results['status'])
+        llog.error(f'API query failed for "{minion_id}", status code: {search_results['status']}')
         log.error(search_results['error'])
         return ret
     # Assign results from API call to "netbox" key
     if len(search_results['dict']['results']) == 0:
-        log.error('No device found for "%s"', minion_id)
+        log.error(f'No device found for "{minion_id}"')
         return ret
     if len(search_results['dict']['results']) > 1:
-        log.error('More than one device found for "%s"', minion_id)
+        log.error(f'More than one device found for "{minion_id}"')
         return ret
     if 'vcpus' not in search_results['dict']['results'][0]:
         device_url = '{api_url}/{app}/{endpoint}/{id}/'.format(api_url=api_url,
@@ -133,8 +132,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                       decode=True)
 
     if 'error' in device_results:
-        log.error('API query failed for "%s", status code: %d',
-                  minion_id, search_results['status'])
+        log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
         log.error(search_results['error'])
         return ret
 
@@ -176,8 +174,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                         header_dict=headers,
                                         decode=True)
     if 'error' in interface_results:
-                log.error('API query failed for "%s", status code: %d',
-                                minion_id, interface_results['status'])
+                log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
                 log.error(interface_results['error'])
                 return ret
     else:
@@ -195,8 +192,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                            header_dict=headers,
                                            decode=True)
     if 'error' in ipaddress_results:
-        log.error('API query failed for "%s", status code: %d',
-                  minion_id, ipaddress_results['status'])
+        log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
         log.error(ipaddress_results['error'])
         return ret
     ipaddresses = ipaddress_results['dict']['results']
@@ -215,8 +211,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                            header_dict=headers,
                                            decode=True)
         if 'error' in interface_results:
-                log.error('API query failed for "%s", status code: %d',
-                                minion_id, interface_results['status'])
+                log.error(f'API query failed for "{minion_id}", status code: {interface_results['status']}')
                 log.error(interface_results['error'])
                 return ret
         if interface_results['dict']['name'] not in ret['netbox']['interfaces']:
@@ -226,8 +221,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         ret['netbox']['interfaces'][interface_results['dict']['name']]['ipaddresses'].append(ipaddress)
 
     if site_details:
-        log.debug('Retrieving site details for "%s" - site %s (ID %d)',
-                  minion_id, site_name, site_id)
+        log.debug(f'Retrieving site details for "{minion_id}" - site {site_name} (ID {site_id})')
         site_url = '{api_url}/{app}/{endpoint}/{site_id}/'.format(api_url=api_url,
                                                                   app='dcim',
                                                                   endpoint='sites',
@@ -236,16 +230,12 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                  header_dict=headers,
                                                  decode=True)
         if 'error' in site_details_ret:
-            log.error('Unable to retrieve site details for %s (ID %d)',
-                      site_name, site_id)
-            log.error('Status code: %d, error: %s',
-                      site_details_ret['status'],
-                      site_details_ret['error'])
+            log.error(f'Unable to retrieve site details for {site_name} (ID {site_id})')
+            log.error(f'Status code: {site_details_ret['status']}, error: {site_details_ret['error']}')
         else:
             ret['netbox']['site'] = site_details_ret['dict']
     if site_prefixes:
-        log.debug('Retrieving site prefixes for "%s" - site %s (ID %d)',
-                  minion_id, site_name, site_id)
+        log.debug(f'Retrieving site details for "{minion_id}" - site {site_name} (ID {site_id})')
         prefixes_url = '{api_url}/{app}/{endpoint}'.format(api_url=api_url,
                                                            app='ipam',
                                                            endpoint='prefixes')
@@ -254,11 +244,8 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                   header_dict=headers,
                                                   decode=True)
         if 'error' in site_prefixes_ret:
-            log.error('Unable to retrieve site prefixes for %s (ID %d)',
-                      site_name, site_id)
-            log.error('Status code: %d, error: %s',
-                      site_prefixes_ret['status'],
-                      site_prefixes_ret['error'])
+            log.error(f'Unable to retrieve site prefixes for {site_name} (ID {site_id})')
+            log.error(f'Status code: {site_prefixes_ret['status']}, error: {site_prefixes_ret['error']}')
         else:
             ret['netbox']['site']['prefixes'] = site_prefixes_ret['dict']['results']
     if proxy_return:
@@ -270,8 +257,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                                                      decode=True)
             # Check status code for API call
             if 'error' in platform_results:
-                log.info('API query failed for "%s": %s',
-                         minion_id, platform_results['error'])
+                log.info(f'API query failed for "{minion_id}": {platform_results['error']}')
             # Assign results from API call to "proxy" key if the platform has a
             # napalm_driver defined.
             napalm_driver = platform_results['dict'].get('napalm_driver')
@@ -286,7 +272,6 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
                     ret['proxy']['username'] = proxy_username
 
         except Exception:
-            log.debug(
-                'Could not create proxy config data for "%s"', minion_id)
+            log.debug(f'Could not create proxy config data for "{minion_id}"')
 
     return ret
