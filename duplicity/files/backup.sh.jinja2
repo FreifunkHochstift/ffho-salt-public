@@ -5,9 +5,6 @@ KEYID="{{ salt['pillar.get']('netbox:config_context:backblaze:keyid') }}"
 export PASSPHRASE="{{ salt['pillar.get']('netbox:config_context:backup:password') }}"
 BUCKET="FFMUC-Backups"
 
-
-{% for backup_dir in salt['pillar.get']('netbox:config_context:backup:directories') %}
-duplicity --full-if-older-than 7D /etc b2://$KEYID:$APPLICATION_KEY@$BUCKET/{{ grains.id }}{{ backup_dir }}
-duplicity remove-older-than 14D --force b2://$KEYID:$APPLICATION_KEY@$BUCKET/{{ grains.id }}{{ backup_dir }}
-{% endfor %}
+duplicity --full-if-older-than 7D {% for backup_dir in salt['pillar.get']('netbox:config_context:backup:directories') %} --include {{ backup_dir }}{%- endfor %} --exclude '**' / b2://$KEYID:$APPLICATION_KEY@$BUCKET/{{ grains.id }}
+duplicity remove-older-than 14D --force b2://$KEYID:$APPLICATION_KEY@$BUCKET/{{ grains.id }}
 unset PASSPHRASE
