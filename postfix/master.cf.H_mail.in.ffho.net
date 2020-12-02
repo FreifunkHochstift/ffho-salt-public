@@ -122,5 +122,5 @@ scalemail-backend unix	-	n	n	-	2	pipe
 #mailman   unix  -       n       n       -       -       pipe
 #  flags=FR user=list
 #  argv=/usr/lib/mailman/bin/postfix-to-mailman.py ${nexthop} ${user}
-greyfix    unix  -       n       n       -       -       spawn
-  user=nobody argv=/usr/local/sbin/greyfix --greylist-delay 60 -/ 24 -6 56
+#greyfix    unix  -       n       n       -       -       spawn
+#  user=nobody argv=/usr/local/sbin/greyfix --greylist-delay 60 -/ 24 -6 56
