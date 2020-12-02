@@ -48,3 +48,6 @@ ffmuc-backup-timer-enable:
     - name: ffmuc-backup.timer
     - require:
       - file: /etc/systemd/system/ffmuc-backup.timer
+    - full_restart: True
+    - onchanges:
+      - file: /etc/systemd/system/ffmuc-backup.timer

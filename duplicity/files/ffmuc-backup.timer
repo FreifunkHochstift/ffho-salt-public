@@ -2,9 +2,10 @@
 Description=Runs FFmuc-backup every day
 
 [Timer]
-OnUnitActiveSec=1d
-RandomizedDelaySec=360
+OnCalendar=*-*-* 4:00:00
+RandomizedDelaySec=3600
 Unit=ffmuc-backup.service
+Persistent=true
 
 [Install]
 WantedBy=timers.target
