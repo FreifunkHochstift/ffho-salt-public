@@ -88,16 +88,6 @@ postmap_aliases:
       - file: /etc/postfix/virtual-aliases
 
 
-/etc/postfix/transport:
-  file.managed:
-    - source: salt://postfix/transport
-
-postmap_transport:
-  cmd.wait:
-    - name: /usr/sbin/postmap /etc/postfix/transport
-    - watch:
-      - file: /etc/postfix/transport
-
 /etc/postfix/mynetworks:
   file.managed:
     - source: salt://postfix/mynetworks
