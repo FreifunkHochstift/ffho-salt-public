@@ -14,7 +14,7 @@ duplicity_repo:
   pkgrepo.managed:
     - ppa: duplicity-team/duplicity-release-git
     - keyid: 8F571BB27A86F4A2
-    - keyserver: pgp.mit.edu
+    - keyserver: keyserver.ubuntu.com
 
 b2sdk:
   pip.installed:

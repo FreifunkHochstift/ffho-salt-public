@@ -201,3 +201,8 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
+{%- if "docker07.in.ffmuc.net" == grains["id"]%}
+  - port: 6343
+    proto: udp
+    host: any
+{%- endif %}

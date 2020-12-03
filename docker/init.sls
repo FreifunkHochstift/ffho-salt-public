@@ -14,7 +14,7 @@ docker-repo:
     - key_url: https://download.docker.com/linux/{{ grains.lsb_distrib_id | lower }}/gpg
 
 docker-pkgs:
-  pkg.latest:
+  pkg.installed:
     - pkgs:
       - docker-ce
       - docker-ce-cli
