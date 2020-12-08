@@ -1,7 +1,7 @@
 #
 # LDAP auth for OpenVPN (Salt managed)
 #
-auth		sufficien	pam_ldap.so
+auth		sufficient	pam_ldap.so
 auth		required	pam_deny.so
 
 account		sufficient	pam_ldap.so
