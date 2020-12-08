@@ -9,7 +9,7 @@ cross_domain_bosh = false;
 consider_bosh_secure = true;
 
 VirtualHost "{{ jitsi.xmpp.xmpp_domain }}"
-    authentication = {% if jitsi.authentication %}"internal_plain"{% else %}"anonymous"{% endif %}
+    authentication = {% if jitsi.authentication %}"internal_plain"{% else %}"token"{% endif %}
     ssl = {
             key = "/etc/prosody/certs/{{ jitsi.public_domain }}.key";
             certificate = "/etc/prosody/certs/{{ jitsi.public_domain }}.crt";
@@ -30,6 +30,9 @@ VirtualHost "{{ jitsi.xmpp.xmpp_domain }}"
     main_muc = "conference.{{ jitsi.public_domain }}"
     {%- endif %}
     c2s_require_encryption = false
+    app_id = ""
+    app_secret = ""
+    allow_empty_token = true
 
 Component "conference.{{ jitsi.public_domain }}" "muc"
     storage = "memory"
@@ -37,6 +40,7 @@ Component "conference.{{ jitsi.public_domain }}" "muc"
         "muc_meeting_id";
         "muc_domain_mapper";
     }
+    muc_room_cache_size = 1000
     muc_room_locking = false
     muc_room_default_public_jids = true
 
@@ -101,8 +105,6 @@ VirtualHost "recorder.{{ jitsi.public_domain }}"
   modules_enabled = {
     "ping";
   }
-  c2s_require_encryption = false
-  allow_empty_token = true
   authentication = "internal_plain"
 
 {% endif %}{# recorder enabled#}
