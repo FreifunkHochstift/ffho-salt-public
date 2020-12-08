@@ -40,7 +40,7 @@ protocol kernel {
         ipv4 {                  # Connect protocol to IPv4 table by channel
               import all;       # Import to table, default is import all
               export filter {
-                        if net ~ [ 0.0.0.0/0] then {
+                        if net ~ [ 0.0.0.0/0 ] then {
                             krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
                             accept;
                         }
@@ -56,11 +56,13 @@ protocol kernel {
 
               import all;       # Import to table, default is import all
               export filter {
-                        krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
-                        {%- if salt['pillar.get']('netbox:role:name') == 'webserver-external' %}
-                        krt_mtu = 1280;
-                        {%- endif %} 
-                        accept;
+                        if net ~ [ ::/0 ] then {
+                                krt_prefsrc = {{ ipaddress['address'].split('/')[0] }};
+                                {%- if salt['pillar.get']('netbox:role:name') == 'webserver-external' %}
+                                krt_mtu = 1280;
+                                {%- endif %} 
+                                accept;
+                        }
                         };
          };
 }
@@ -71,14 +73,26 @@ protocol kernel {
 {%- endif %}
 {% endfor %}
 
+filter DEFAULT {
+  if net ~ [ 0.0.0.0/0 ] then {
+    accept;
+  }
+  reject;
+}
+
+filter DEFAULT6 {
+  if net ~ [ ::/0 ] then {
+    accept;
+  }
+  reject;
+}
+
 filter EXTERNAL_OUT {
   if net ~ {{ prefixes_v4 | string | regex_replace('\'','') }} then {
     accept;
   }
   reject;
 }
-
-
 
 filter EXTERNAL6_OUT {
   if net ~ {{ prefixes_v6 | string | regex_replace('\'','') }} then  {
@@ -96,7 +110,7 @@ protocol bgp {{ iface }}_v4 {
         local {{ ipaddress['address'].split('/')[0] }} as {{ uplink_vlan['local_asn'] }};
         neighbor {{ uplink_vlan['neighbor_v4'] }} as {{ uplink_vlan['remote_asn'] }};
         ipv4 {
-                import all;
+                import filter DEFAULT;
                 export filter EXTERNAL_OUT;
         };
 }
@@ -105,7 +119,7 @@ protocol bgp {{ iface }}_v6 {
         local {{ ipaddress['address'].split('/')[0] }} as {{ uplink_vlan['local_asn'] }};
         neighbor {{ uplink_vlan['neighbor_v6'] }} as {{ uplink_vlan['remote_asn'] }};
         ipv6 {  
-                import all;
+                import filter DEFAULT6;
                 export filter EXTERNAL6_OUT;
         };
 }
