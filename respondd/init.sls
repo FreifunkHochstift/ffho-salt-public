@@ -77,7 +77,7 @@ respondd@{{site}}:
     - template: jinja
     - defaults:
       bat_iface: "bat-{{site}}-ext"
-      fastd_peers: "{% if 'fastd_peers' in node_confi.get ('roles', []) %}true{% else %}false{% endif %}"
+      fastd_peers: "{% if 'fastd_peers' in node_config.get ('roles', []) %}true{% else %}false{% endif %}"
       hostname: "{{ grains['id'].split('.')[0] }}{% if node_config.get ('sites', [])|length > 1 or grains.id.startswith('gw') %}-{{site}}{% endif %}-ext"
       mcast_iface: "bat-{{ site }}-ext"
     {% if 'fastd' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
