@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+
+{%- import_yaml "jitsi/defaults.yaml" as default_settings %}
+
+{#- Retrieve the config dict only once #}
+{%- set _config = salt['pillar.get']("netbox:config_context:nebula-meet", default={}) %}
+
+{% set nebula = salt['grains.filter_by'](
+    default_settings,
+    default='nebula-meet',
+    merge=_config,
+)
+%}

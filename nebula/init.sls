@@ -31,6 +31,15 @@ include:
     - group: root
     - mode: 640
 
+{% if nebula.loophole.enabled %}
+generate_ssh_host_ed25519_key:
+  cmd.run:
+    - name: ssh-keygen -t ed25519 -q -N "" -f /etc/nebula/ssh_host_ed25519_key
+    - unless: test -f /etc/nebula/ssh_host_ed25519_key
+    - require_in:
+        - file: /etc/nebula-meet/config.yml
+{% endif %}
+
 /etc/nebula/config.yml:
   file.managed:
     - source:

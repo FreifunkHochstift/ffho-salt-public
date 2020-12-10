@@ -1,0 +1,80 @@
+{%- from "nebula-meet/map.jinja" import nebula with context %}
+
+pki:
+  ca: /etc/nebula-meet/ca.crt
+  cert: /etc/nebula-meet/{{ grains.id }}.crt
+  key: /etc/nebula-meet/{{ grains.id }}.key
+static_host_map:
+{%- for lighthouse, public_addrs in nebula.lighthouses.items() %}
+  "{{ lighthouse }}": {{ public_addrs }}
+{%- endfor %}
+lighthouse:
+  am_lighthouse: {{ nebula.am_lighthouse }}
+  interval: 60
+  hosts:
+{%- for lighthouse in nebula.lighthouses %}
+    - {{ lighthouse }}
+{%- endfor %}
+
+listen:
+  host: {{ nebula.listen.host }}
+  port: {{ nebula.listen.port }}
+
+punchy:
+  punch: true
+  respond: true
+  delay: 1s
+
+local_range: "{{ nebula.local_range }}
+
+tun:
+  dev: {{ nebula.interface }}
+  # Toggles forwarding of local broadcast packets, the address of which depends on the ip/mask encoded in pki.cert
+  drop_local_broadcast: true
+  # Toggles forwarding of multicast packets
+  drop_multicast: true
+  tx_queue: 500
+  mtu: 1300
+
+handshakes:
+  try_interval: 100ms
+  retries: 20
+  wait_rotation: 5
+  trigger_buffer: 64
+
+logging:
+  level: info
+  format: text
+
+firewall:
+  conntrack:
+    tcp_timeout: 120h
+    udp_timeout: 3m
+    default_timeout: 10m
+    max_connections: 100000
+
+  outbound:
+  - port: any
+    proto: any
+    host: any
+
+  inbound:
+  - port: any
+    proto: icmp
+    host: any
+    # SSH
+  - port: 22
+    proto: tcp
+    host: any
+    # HTTPS
+  - port: 443
+    proto: tcp
+    host: any
+    # SNMP
+  - port: 161
+    proto: udp
+    host: librenms.in.ffmuc.net
+    # mosh
+  - port: 60001-60010
+    proto: udp
+    host: any
