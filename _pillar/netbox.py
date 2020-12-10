@@ -197,7 +197,7 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
         return ret
     ipaddresses = ipaddress_results['dict']['results']
     ## Get all interfaces for device
-    interface_ids = []
+
     for ipaddress in ipaddresses:
         interface_id = ipaddress['assigned_object_id']
         app = 'dcim'
@@ -273,5 +273,10 @@ def ext_pillar(minion_id, pillar, *args, **kwargs):
 
         except Exception:
             log.debug(f'Could not create proxy config data for "{minion_id}"')
+
+    tag_list = []
+    for tag in ret['netbox']['tags']:
+        tag_list.append(tag['slug'])
+    ret['netbox']['tag_list'] = tag_list
 
     return ret
