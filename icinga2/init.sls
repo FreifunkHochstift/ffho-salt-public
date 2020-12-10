@@ -17,6 +17,21 @@ icinga2:
     - enable: True
     - reload: True
 
+# Create directory for systemd overrides
+/etc/systemd/system/icinga2.service.d:
+  file.directory:
+    - require:
+      - pkg: icinga2
+
+# Add override for ExecStart to close stdio
+/etc/systemd/system/icinga2.service.d/override.conf:
+  file.managed:
+    - source: salt://icinga2/systemd.override.conf
+    - require:
+      - file: /etc/systemd/system/icinga2.service.d
+    - watch_in:
+      - service: icinga2
+
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
   pkg.installed:
