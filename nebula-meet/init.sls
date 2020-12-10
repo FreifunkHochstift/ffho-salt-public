@@ -31,7 +31,7 @@ include:
     - group: root
     - mode: 640
 
-{% if nebula.ssh_loophole.enable %}
+{% if nebula.loophole.enabled %}
 generate_ssh_host_ed25519_key:
   cmd.run:
     - name: ssh-keygen -t ed25519 -q -N "" -f /etc/nebula/ssh_host_ed25519_key
@@ -57,7 +57,7 @@ systemd-reload-nebula:
   cmd.run:
    - name: systemctl --system daemon-reload
    - onchanges:  
-     - file: nebula-service-file
+     - file: nebula-meet-service-file
 
 nebula-meet-service-file:
   file.managed:
@@ -73,7 +73,7 @@ nebula-service:
     - reload: True
     - name: nebula-meet
     - require:
-        - file: nebula-service-file
+        - file: nebula-meet-service-file
         - file: /etc/nebula-meet/config.yml
         - file: /etc/nebula-meet/{{ grains['id'] }}.crt
         - file: /etc/nebula-meet/{{ grains['id'] }}.key

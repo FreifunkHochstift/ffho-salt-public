@@ -2,19 +2,24 @@
 videobridge {
     apis {
         xmpp-client {
-            shard1 {
-                hostname = "{{ jitsi.xmpp.server_host }}"
-                domain   = "{{ jitsi.xmpp.auth_domain }}"
-                username = "{{ jitsi.videobridge.username }}"
-                password = "{{ jitsi.videobridge.password }}"
-                muc-jids = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
-                muc_nickname = "{{ jitsi.xmpp.muc_nickname }}"
-                disable_certificate_verification = true
+            configs {
+                shard1 {
+                    hostname = "{{ jitsi.xmpp.server_host }}"
+                    domain   = "{{ jitsi.xmpp.auth_domain }}"
+                    username = "{{ jitsi.videobridge.username }}"
+                    password = "{{ jitsi.videobridge.password }}"
+                    muc_jids = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
+                    muc_nickname = "{{ jitsi.xmpp.muc_nickname }}"
+                    disable_certificate_verification = true
+                }
             }
+            
         }
     }
     http-servers {
         public {
+            # TODO: Split this to own var 
+            host = {{ jitsi.videobridge.octo.ip_addr }}
             port = 9090
         }
     }
@@ -26,7 +31,7 @@ videobridge {
     {%- if jitsi.videobridge.octo.enabled %}
     octo {
         enabled = true
-        bind-address = "{{ jitsi.videobridge.octo.ip_addr }}"
+        bind-address = {{ jitsi.videobridge.octo.ip_addr }}
         bind-port = {{ jitsi.videobridge.octo.port }}
         region = "{{ jitsi.videobridge.octo.region }}"
     }

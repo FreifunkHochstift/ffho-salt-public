@@ -25,7 +25,7 @@ punchy:
   respond: true
   delay: 1s
 
-local_range: "{{ nebula.local_range }}
+local_range: "{{ nebula.local_range }}"
 
 tun:
   dev: {{ nebula.interface }}
@@ -66,15 +66,18 @@ firewall:
   - port: 22
     proto: tcp
     host: any
-    # HTTPS
-  - port: 443
-    proto: tcp
-    host: any
-    # SNMP
-  - port: 161
-    proto: udp
-    host: librenms.in.ffmuc.net
     # mosh
   - port: 60001-60010
     proto: udp
     host: any
+  # Allow tcp/443 from any host with BOTH laptop and home group
+  - port: 9090
+    proto: tcp
+    host: any
+  # Allow octo
+  - port: 4096
+    proto: any
+    group: jvb
+  - port: 10000
+    proto: udp
+    group: jibri

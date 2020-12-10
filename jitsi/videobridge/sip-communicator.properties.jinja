@@ -1,4 +1,8 @@
 
 # enable stats collecting only for localhost
 org.jitsi.videobridge.rest.private.jetty.host=127.0.0.1
-org.jitsi.videobridge.rest.jetty.port=9090
+
+# enable octo (dont ask me, why it does not work if set via jvb.conf...)
+org.jitsi.videobridge.octo.BIND_ADDRESS=10.111.0.11
+org.jitsi.videobridge.octo.BIND_PORT=4096
+org.jitsi.videobridge.REGION=ffmuc-de1
