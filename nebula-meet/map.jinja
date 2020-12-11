@@ -12,3 +12,5 @@
     merge=_config,
 )
 %}
+{# cleanups #}
+{% do nebula.lighthouses.pop("127.0.0.1", None) %}
