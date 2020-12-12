@@ -2,7 +2,9 @@
 # Telegraf
 ###
 
-{% if salt['pillar.get']('netbox:config_context:influxdb', False) %}
+{% set tags = salt['pillar.get']('netbox:tag_list', []) %}
+{% if "telegraf" in tags %}
+
 {# There is data available so we think telegraf should be installed #}
 {% set role = salt['pillar.get']('netbox:role:name') %}
 {% set roles = salt['pillar.get']('netbox:config_context:roles', []) %}
@@ -182,4 +184,4 @@ del_telegraf_from_pdns_group:
     - watch_in:
         service: telegraf
 
-{% endif %}
+{% endif %}{# if telegraf in tags #}
