@@ -59,7 +59,10 @@ prosody-{{domain}}-cert:
 {% endfor %}{# ext #}
 {% endfor %}{# domain #}
 
-{% for component in ["mod_reload_components", "mod_reload_modules"] %}
+{% for component in [
+  "mod_auth_token",
+  "mod_reload_components",
+  "mod_reload_modules" ] %}
 /usr/lib/prosody/modules/{{ component }}.lua:
   file.managed:
     - source: https://hg.prosody.im/prosody-modules/raw-file/tip/{{ component }}/{{ component }}.lua
