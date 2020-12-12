@@ -3,6 +3,8 @@
 ##
 {%- from "jitsi/map.jinja" import jitsi with context %}
 
+{% if jitsi.prosody.enabled %}
+
 prosody-repo:
   pkgrepo.managed:
     - humanname: Prosody
@@ -65,7 +67,8 @@ prosody-{{domain}}-cert:
     - watch_in:
       - service: prosody
 
-{% endfor %}
+{% endfor %}{# for component #}
+
 {% for component in [
   "ext_events.lib",
   "mod_conference_duration",
@@ -84,4 +87,5 @@ prosody-{{domain}}-cert:
     - watch_in:
       - service: prosody
 
-{% endfor %}
+{% endfor %}{# for component #}
+{% endif %}{# if jitsi.prosody.enabled #}
