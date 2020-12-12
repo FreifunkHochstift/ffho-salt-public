@@ -37,7 +37,8 @@ generate-dhparam:
       - cmd: update_ca_certificates
 
 {%- set cert_validity = salt['cmd.run']('openssl x509 -noout -checkend 2592000 -in /etc/ssl/certs/'~ grains['id']  ~'.cert.pem') %}
-{% if 'Certificate will not expire' not in cert_validity  %}
+{%- if salt["network.ping"]("ca.ov.ffmuc.net", return_boolean=True) %}
+{% if 'Certificate will not expire' not in cert_validity %}
 {%- set cert_bundle = salt['cfssl_certs.request_cert']('https://ca.ov.ffmuc.net', grains['id']) %}
 # Install found certificates
 /etc/ssl/certs/{{ grains['id'] }}.cert.pem:
@@ -57,7 +58,8 @@ generate-dhparam:
     - mode: 440
     - require:
       - pkg: ssl-cert
-{% endif %}
+{% endif %}{# Certificate wont expire #}
+{% endif %}{# can ping ca #}
 
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
 {% set cloudflare_token = salt['pillar.get']('netbox:config_context:cloudflare:api_token') %}
@@ -102,4 +104,4 @@ ffmuc-wildcard-cert:
         - pip: acme-client
         - file: dns_credentials
 
-{% endif %}
+{% endif %}{# if "webserver-external" in role and cloudflare_token #}
