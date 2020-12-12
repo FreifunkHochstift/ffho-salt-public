@@ -29,5 +29,6 @@ nebula-binary:
 {% endif %}
     - user: root
     - group: root
+    - mode: 0755
     - require:
         - archive: nebula-tmp-bin
