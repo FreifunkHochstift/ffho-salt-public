@@ -1,33 +1,13 @@
 base:
   # Base config for all minions
   '*':
-    - apt
-    - bash
-    - burp
-    - certs
-    - dns-server/auth
-    - docker
-    #- docker-containers
-    - dphys-swapfile
-    - duplicity
-    - graylog-sidecar
     - fail2ban
-    - ff_base
-    - grafana
     - graylog-sidecar
-    - icinga2
-    - influxdb
-    - jenkins
     - locales
     - logrotate
-    - kvm
     - mosh
     - motd
-    - nebula
-    - ntp
     - screen
-    - snmpd
-    - ssh
     - sudo
     - sysctl
     - telegraf
@@ -35,6 +15,33 @@ base:
     - tmux
     - unattended-upgrades
     - vim
+  '*.in.ffmuc.net':
+    - apt
+    - bash
+    #- burp
+    - certs
+    - dns-server/auth
+    - docker
+    #- docker-containers
+    - dphys-swapfile
+    - duplicity
+    - ff_base
+    - grafana
+    - icinga2
+    - influxdb
+    - jenkins
+    - kvm
+    - nebula
+    - ntp
+    - snmpd
+    - ssh
+  '*.meet.ffmuc.net':
+    - nebula-meet
+    - jitsi.base
+    - jitsi.prosody
+    - jitsi.jicofo
+    - jitsi.jibri
+    - jitsi.videobridge
   'gw*':
     - fastd
     - dhcp-server
@@ -42,18 +49,7 @@ base:
     - pdns-recursor
     - radvd
     - respondd
-  'jvb*':
-    - telegraf
-    - jitsi.base
-    - jitsi.videobridge
-    - jitsi.jicofo
-  'jibri*':
-    - telegraf
-    - jitsi.base
-    - jitsi.jibri
   'dns01.in.ffmuc.net':
     - cloudflare
   'vpn0*.in.ffmuc.net':
     - wireguard
-  '*.meet.ffmuc.net':
-    - nebula.meet
