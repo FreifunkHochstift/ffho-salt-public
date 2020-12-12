@@ -7,6 +7,7 @@ base:
     - logrotate
     - mosh
     - motd
+    - nebula
     - screen
     - sudo
     - sysctl
@@ -31,7 +32,6 @@ base:
     - influxdb
     - jenkins
     - kvm
-    - nebula
     - ntp
     - snmpd
     - ssh
