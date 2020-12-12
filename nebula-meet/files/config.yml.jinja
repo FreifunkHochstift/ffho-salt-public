@@ -1,4 +1,5 @@
 {%- from "nebula-meet/map.jinja" import nebula with context %}
+{% do nebula.lighthouses.pop("127.0.0.1", None) %}
 
 pki:
   ca: /etc/nebula-meet/ca.crt
