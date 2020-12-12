@@ -1,3 +1,5 @@
+{%- if 'backup' in salt['pillar.get']('netbox:tag_list', []) -%}
+
 {% if 'Raspbian' not in grains.lsb_distrib_id %}
 duplicity-packages:
   pkg.installed:
@@ -51,3 +53,5 @@ ffmuc-backup-timer-enable:
     - full_restart: True
     - onchanges:
       - file: /etc/systemd/system/ffmuc-backup.timer
+
+{% endif %}{# if backup in tags #}

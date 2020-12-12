@@ -1,7 +1,3 @@
-{%- set tags = [] %}
-{%- for tag in salt['pillar.get']('netbox:tags') -%}
-{%- do tags.append(tag['name']) -%}
-{%- endfor -%}
 base:
   # Base config for all minions
   '*':
@@ -13,9 +9,7 @@ base:
     - docker
     #- docker-containers
     - dphys-swapfile
-    {%- if 'backup' in tags %}
     - duplicity
-    {%- endif %}
     - graylog-sidecar
     - fail2ban
     - ff_base
