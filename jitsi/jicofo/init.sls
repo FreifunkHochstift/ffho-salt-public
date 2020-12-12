@@ -17,11 +17,6 @@ jicofo:
       - file: /etc/jitsi/jicofo/jicofo.conf
       - file: /etc/jitsi/jicofo/sip-communicator.properties
 
-### set static hostname and the like
-stats.in.ffmuc.net:
-  host.present:
-    - ip: 10.111.0.254
-
 /etc/jitsi/jicofo/config:
   file.managed:
     - source: salt://jitsi/jicofo/config.jinja
