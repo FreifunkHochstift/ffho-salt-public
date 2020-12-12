@@ -111,7 +111,7 @@ del_telegraf_from_pdns_group:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-jvb-stats.conf:
-{% if salt['pillar.get']('netbox:config_context:videobridge:enabled', False) %}
+{% if salt['pillar.get']('netbox:config_context:jitsi:videobridge:enabled', False) %}
   file.managed:
     - source: salt://telegraf/files/in_jitsi-videobridge.conf
 {% else %}
