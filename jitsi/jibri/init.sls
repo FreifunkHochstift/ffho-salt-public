@@ -26,6 +26,10 @@ jibri:
   service.running:
     - enable: True
     - reload: True
+    - require:
+      - file: /etc/jitsi/jibri/config.json
+    - watch:
+      - file: /etc/jitsi/jibri/config.json
 
 google-chrome-stable:
   pkg.installed:
