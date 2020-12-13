@@ -47,7 +47,7 @@ jitsi:
         password: "THIS_IS_SUPER_SECRET"
       control_muc:
         domain: "internal.auth.example.com"
-        nickname: "jibri-unnamed"
+        #nickname: "jibri-unnamed"
       call_login:
         domain: "recorder.example.com"
         username: "recorder-unnamed"

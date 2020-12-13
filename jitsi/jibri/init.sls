@@ -15,6 +15,10 @@ google-chrome-repo:
     - file: /etc/apt/sources.list.d/google-chrome.list
     - key_url: https://dl-ssl.google.com/linux/linux_signing_key.pub
 
+snd-aloop:
+  kmod.present:
+    - persist: True
+
 jibri:
   pkg.installed:
     - require:
@@ -38,7 +42,7 @@ chromedriver-binary:
 
 /etc/jitsi/jibri/config.json:
   file.managed:
-    - source: jitsi/jibri/config.json.jinja
+    - source: salt://jitsi/jibri/config.json.jinja
     - template: jinja
 
 {% endif %} # jibri.enabled

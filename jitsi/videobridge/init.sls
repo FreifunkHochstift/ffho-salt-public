@@ -73,4 +73,10 @@ stats.in.ffmuc.net:
     - source: salt://jitsi/videobridge/systemd-override.conf
     - makedirs: True
 
+{% else %}
+# stop and disable videobridge
+jitsi-videobridge2:
+  service.dead:
+    - enable: False
+
 {% endif %}
