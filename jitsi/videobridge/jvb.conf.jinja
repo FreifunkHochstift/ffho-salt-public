@@ -1,6 +1,10 @@
 {%- from "jitsi/map.jinja" import jitsi with context %}
 videobridge {
     apis {
+        rest {
+            # enable colibri rest interface
+            enabled = true
+        }
         xmpp-client {
             configs {
                 shard1 {
@@ -36,12 +40,16 @@ videobridge {
         region = "{{ jitsi.videobridge.octo.region }}"
     }
     {%- endif %}
+    rest {
+        shutdown {
+            enabled = true
+        }
+    }
     stats {
         enabled = true
         interval = 10 seconds
         transports = [
-            { type = "muc" },
-            { type = "colibri" }
+            { type = "muc" }
         ]
     }
     websockets {
