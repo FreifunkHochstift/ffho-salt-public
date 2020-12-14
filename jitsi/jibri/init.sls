@@ -38,11 +38,10 @@ google-chrome-stable:
 
 chromedriver-binary:
   archive.extracted:
-    - name: /usr/local/bin/chromedriver
+    - name: /usr/local/bin/
     - source: https://chromedriver.storage.googleapis.com/{{ jitsi.jibri.chromedriver_version }}/chromedriver_linux64.zip
-    - overwrite: True
-    - mode: 0755
-    #- if_missing: /usr/local/bin/chromedriver
+    - skip_verify: True
+    - enforce_toplevel: False
 
 /etc/jitsi/jibri/config.json:
   file.managed:
