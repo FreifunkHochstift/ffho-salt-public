@@ -15,7 +15,7 @@ google-chrome-repo:
     - file: /etc/apt/sources.list.d/google-chrome.list
     - key_url: https://dl-ssl.google.com/linux/linux_signing_key.pub
 
-snd-aloop:
+snd_aloop:
   kmod.present:
     - persist: True
 
