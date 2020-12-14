@@ -17,6 +17,10 @@
 {% do jitsi.xmpp.update({'muc_nickname' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}
 {% endif %}
 
+{% if "latest" == jitsi.jibri.chromedriver_version %}
+{% do jitsi.jibri.update({'chromedriver_version' : salt['http.query']('chromedriver.storage.googleapis.com/LATEST_RELEASE') }) %}
+{% endif %}
+
 {% if jitsi.videobridge.octo.enabled and not jitsi.videobridge.octo.get('ip_addr') and jitsi.videobridge.octo.get('interface') %}
 {% do jitsi.videobridge.octo.update({'ip_addr' : salt['network.interfaces']()[jitsi.videobridge.octo.interface]['inet'][0]['address'] }) %}
 {% endif %}

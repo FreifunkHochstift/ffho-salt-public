@@ -38,7 +38,7 @@ jitsi:
     brewery_room: JibriBrewery
     recording_directory: /tmp/recordings
     finalize_recording_script_path: /bin/true
-    chromedriver_version: 85.0.4183.87
+    chromedriver_version: latest
     xmpp:
       environment_name: ffmuc_environment
       control_login:
