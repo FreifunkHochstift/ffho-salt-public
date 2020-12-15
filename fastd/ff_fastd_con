@@ -17,7 +17,7 @@ fastd_con () {
 }
 
 if [ "${1}" = '-a' ]; then
-	for fastd_instance in $(find /etc/fastd -mindepth 1 -maxdepth 1 -type d  -exec basename {} \;); do
+	for fastd_instance in $(find /etc/fastd -mindepth 1 -maxdepth 1 -type d  -exec basename {} \; | sort); do
 		fastd_con ${fastd_instance}
 	done
 else
