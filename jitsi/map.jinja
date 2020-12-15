@@ -18,7 +18,7 @@
 {% endif %}
 
 {% if "latest" == jitsi.jibri.chromedriver_version %}
-{% do jitsi.jibri.update({'chromedriver_version' : salt['http.query']('chromedriver.storage.googleapis.com/LATEST_RELEASE') }) %}
+{% do jitsi.jibri.update({'chromedriver_version' : salt['http.query']('http://chromedriver.storage.googleapis.com/LATEST_RELEASE') }) %}
 {% endif %}
 
 {% if jitsi.videobridge.octo.enabled and not jitsi.videobridge.octo.get('ip_addr') and jitsi.videobridge.octo.get('interface') %}

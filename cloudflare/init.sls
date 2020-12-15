@@ -20,17 +20,17 @@ ffmuc.net:
 {%- for node_id in nodes %}
 {%- set external_address = salt['mine.get'](node_id,'minion_external_ip', tgt_type='glob') %}
 {%- set external_address6 = salt['mine.get'](node_id,'minion_external_ip6', tgt_type='glob') %}
-{%- if external_address and not '__data__' in external_address[node_id] and external_address[node_id] | length > 0 %}
-{%- set node = node_id | regex_search('(^\w+(\d+)?)') %}
+{%- if external_address and not '__data__' in external_address[node_id] and external_address[node_id][0] is defined and external_address[node_id] | length > 0 %}
+{%- set node = node_id | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
-                  content: {{ external_address[node_id] | first }} 
+                  content: "{{ external_address[node_id] | first }}"
                   salt_managed: True
                   type: A
 {% endif %}{# external_address #}
-{% if external_address6 and not '__data__' in external_address6[node_id] and external_address6[node_id] | length > 0 %}
-{% set node = node_id | regex_search('(^\w+(\d+)?)') %}
+{% if external_address6 and not '__data__' in external_address6[node_id] and external_address6[node_id][0] is defined and external_address6[node_id] | length > 0 %}
+{% set node = node_id | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
                 - name: {{ node[0] }}.ext.ffmuc.net
-                  content: {{ external_address6[node_id] | first }} 
+                  content: "{{ external_address6[node_id] | first }}"
                   salt_managed: True
                   type: AAAA
 {%- endif %}
@@ -41,14 +41,14 @@ ffmuc.net:
 {%- if services[service]['custom_fields']['cname'] %}
 {%- if services[service]['virtual_machine'] %}
 {%- if services[service]['custom_fields']['public'] %}
-{%- set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
+{%- set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
 {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
 {%- else %}
 {%- do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
 {%- endif %}
 {%- else %}
 {%- if services[service]['custom_fields']['public'] %}
-{%- set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
+{%- set target = services[service]['device']['name'] | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
 {%- do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
 {%- else %}
 {%- do cnames.update({service: services[service]['device']['name'] }) %}

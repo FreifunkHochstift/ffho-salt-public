@@ -216,13 +216,13 @@ record-A-overlay-{{ node_id }}:
   {% endif %}
 
 # Create Entries in ext.ffmuc.net for each device with external IPs
-  {% if external_address and external_address[node_id] | length > 0 and not '__data__' in external_address[node_id] %}
+  {% if external_address is defined and external_address[node_id] | length > 0 and external_address[node_id][0] is defined and not '__data__' in external_address[node_id] %}
 record-A-external-{{ node_id }}:
   ddns.present:
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
-    - data: {{ external_address[node_id] | first }}
+    - data: {{ external_address[node_id][0] }}
     - rdtype: A
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key
@@ -233,13 +233,13 @@ record-A-external-{{ node_id }}:
       - file: dns-key
   {%- endif -%}
 
-  {%- if external_address6 and external_address[node_id] | length > 0 and not '__data__' in external_address6[node_id] %}
+  {%- if external_address6 is defined and external_address[node_id] | length > 0 and external_address6[node_id][0] is defined and not '__data__' in external_address6[node_id] %}
 record-AAAA-external-{{ node_id }}:
   ddns.present:
     - name: {{ node[0] }}.ext.ffmuc.net.
     - zone: ext.ffmuc.net
     - ttl: 60
-    - data: {{ external_address6[node_id] | first }} 
+    - data: "{{ external_address6[node_id][0] }}"
     - rdtype: AAAA
     - nameserver: 127.0.0.1
     - keyfile: /etc/bind/salt-master.key

@@ -126,6 +126,10 @@ firewall:
   - port: 8888
     proto: tcp
     group: webfrontend
+  # Allow connections for ldap
+  - port: 636
+    proto: tcp
+    host: any
 {%- endif %}
 {%- if "docker03.in.ffmuc.net" == grains["id"] %}
   # Allow connections for unifi (stun)

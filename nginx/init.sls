@@ -64,7 +64,6 @@ nginx-module-{{module}}:
 {% if 'VIE01' in salt['pillar.get']('netbox:site:name') -%}
   file.managed:
     - source: salt://nginx/files/default.conf
-    - makedirs: True
     - require:
       - pkg: nginx
 {% else %}

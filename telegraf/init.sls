@@ -123,7 +123,7 @@ del_telegraf_from_pdns_group:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-nginx.conf:
-{% if 'webserver-external' in role %}
+{% if 'webserver-external' == role or 'jitsi meet' == role%}
   file.managed:
     - source: salt://telegraf/files/in_nginx.conf
 {% else %}

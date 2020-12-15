@@ -1,7 +1,7 @@
 #
 # grafana
 #
-{% if 'grafana_server' in salt['pillar.get']('netbox:config_context:roles') %}
+{% if 'grafana_server' in salt['pillar.get']('netbox:tag_list', []) %}
 
 grafana:
 # add Grafana Repo
