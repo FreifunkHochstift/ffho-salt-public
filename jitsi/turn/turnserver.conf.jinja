@@ -3,7 +3,7 @@
 
 use-auth-secret
 keep-address-family
-static-auth-secret={{ jitsi.turn.secret | default("PLEASE_CHANGE_ME") }}
+static-auth-secret={{ jitsi.turn.secret }}
 realm=default-realm
 
 cert=/etc/letsencrypt/live/{{ grains.id }}/fullchain.pem
