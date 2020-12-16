@@ -97,5 +97,7 @@ nginx-module-{{module}}:
     - template: jinja
     - require:
       - pkg: nginx
+    - require_in:
+      - service: nginx
 
 {% endif %}{# webserver in role #}
