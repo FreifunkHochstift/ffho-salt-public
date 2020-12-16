@@ -1,3 +1,4 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
 # Jicofo HOCON configuration. See /usr/share/jicofo/jicofo.jar/reference.conf for
 #available options, syntax, and default values.
 jicofo {
@@ -7,7 +8,7 @@ jicofo {
     }
     health {
         enabled = true
-        max-check-duration = 30 seconds
+        max-check-duration = 60 seconds
     }
 {%- if jitsi.jibri_enabled %}
     jibri {

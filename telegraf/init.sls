@@ -112,6 +112,16 @@ del_telegraf_from_pdns_group:
     - watch_in:
           service: telegraf
 
+/etc/telegraf/telegraf.d/in-jicofo.conf:
+{% if salt['pillar.get']('netbox:config_context:jitsi:jicofo:enabled', False) %}
+  file.managed:
+    - source: salt://telegraf/files/in_jicofo.conf
+{% else %}
+  file.absent:
+{% endif %}
+    - watch_in:
+          service: telegraf
+
 /etc/telegraf/telegraf.d/in-jvb-stats.conf:
 {% if salt['pillar.get']('netbox:config_context:jitsi:videobridge:enabled', False) %}
   file.managed:
@@ -123,7 +133,7 @@ del_telegraf_from_pdns_group:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-nginx.conf:
-{% if 'webserver-external' == role or 'jitsi meet' == role%}
+{% if 'webserver-external' == role or 'jitsi meet' == role %}
   file.managed:
     - source: salt://telegraf/files/in_nginx.conf
 {% else %}
