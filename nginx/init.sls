@@ -60,17 +60,7 @@ nginx-module-{{module}}:
     - watch_in:
       - cmd: nginx-configtest
 
-/etc/nginx/sites-enabled/zz-default.conf:
-{% if 'VIE01' in salt['pillar.get']('netbox:site:name') -%}
-  file.managed:
-    - source: salt://nginx/files/default.conf
-    - require:
-      - pkg: nginx
-{% else %}
-  file.absent:
-{% endif %}
-    - watch_in:
-      - cmd: nginx-configtest
+
 
 # TODO: Make dynamic
 {% for domain in [

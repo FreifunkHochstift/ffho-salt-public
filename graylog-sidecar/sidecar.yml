@@ -1,5 +1,5 @@
 # The URL to the Graylog server API.
-server_url: "{% if "meet" == grains.id.split(".")[1] %}http://10.111.0.117:9000{%else%}https://log.ov.ffmuc.net{% endif %}/api"
+server_url: "{% if "meet" == grains.id.split(".")[1] %}http://10.111.0.118:9000{%else%}https://log.ov.ffmuc.net{% endif %}/api"
 
 # The API token to use to authenticate against the Graylog server API.
 # This field is mandatory

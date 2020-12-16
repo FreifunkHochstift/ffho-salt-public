@@ -104,10 +104,6 @@ firewall:
   - port: 5001
     proto: tcp
     group: webfrontend
-  # Allow connections for chat.ffmuc.net
-  - port: 8000
-    proto: tcp
-    group: webfrontend
 {%- endif %}
 {%- if "docker02.in.ffmuc.net" == grains["id"] %}
   # Allow connections for tickets.ffmuc.net
@@ -173,6 +169,12 @@ firewall:
     proto: tcp
     group: webfrontend
 {%- endif %}
+{%- if "docker05.in.ffmuc.net" == grains["id"] %}
+  # Allow connections for chat.ffmuc.net
+  - port: 8000
+    proto: tcp
+    group: webfrontend
+{%- endif %}
 {%- if "stats.in.ffmuc.net" == grains["id"] %}
   # Allow stats access
   - port: 3000
@@ -208,5 +210,13 @@ firewall:
 {%- if "docker07.in.ffmuc.net" == grains["id"]%}
   - port: 6343
     proto: udp
+    host: any
+  # Graylog Webfrontend
+  - port: 9000
+    proto: tcp
+    host: any
+  # Allow pushing to graylog via filebeat
+  - port: 5044
+    proto: tcp
     host: any
 {%- endif %}
