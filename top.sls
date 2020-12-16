@@ -2,6 +2,7 @@ base:
   # Base config for all minions
   '*':
     - fail2ban
+    - ff_base
     - graylog-sidecar
     - locales
     - logrotate
@@ -26,7 +27,6 @@ base:
     #- docker-containers
     - dphys-swapfile
     - duplicity
-    - ff_base
     - grafana
     - icinga2
     - influxdb
