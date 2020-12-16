@@ -2,7 +2,8 @@
 # nginx
 ###
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{% if "webserver" in role %}
+{% set tags = salt['pillar.get']('netbox:tag_list', []) %}
+{% if "webserver" in role or "webserver" in tags %}
 
 /etc/apt/sources.list.d/nginx.list:
   pkgrepo.managed:
@@ -61,22 +62,7 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 
 
-
-# TODO: Make dynamic
-{% for domain in [
-    "ffmuc.net",
-    "broker.ffmuc.net",
-    "byro.ffmuc.net",
-    "chat.ffmuc.net",
-    "cloud.ffmuc.net",
-    "doh.ffmuc.net",
-    "map.ffmuc.net",
-    "stats.ffmuc.net",
-    "tiles.ffmuc.net",
-    "tickets.ffmuc.net",
-    "unifi.ffmuc.net",
-    "stub_status"
-] %}
+{% for domain in salt['pillar.get']('netbox:config_context:webserver:domains') %}
 /etc/nginx/sites-enabled/{{ domain }}.conf:
   file.managed:
     - source:
@@ -91,16 +77,18 @@ nginx-module-{{module}}:
     - watch_in:
       - cmd: nginx-configtest
 
-{% endfor %}
+{% endfor %}{# domain #}
 
-/etc/nginx/streams-enabled/unifi.conf:
+{% for stream in salt['pillar.get']('netbox:config_context:webserver:streams') %}
+/etc/nginx/streams-enabled/{{ stream }}.conf:
   file.managed:
-    - source: salt://nginx/files/unifi_stream.conf
+    - source: salt://nginx/files/{{ stream }}_stream.conf
     - makedirs: True
     - require:
       - pkg: nginx
     - watch_in:
       - cmd: nginx-configtest
+{% endfor %}{# stream #}
 
 /etc/nginx/conf.d/log_json.conf:
   file.managed:
