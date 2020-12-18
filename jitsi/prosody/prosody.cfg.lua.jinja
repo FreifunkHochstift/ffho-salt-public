@@ -30,6 +30,11 @@ interfaces = {"127.0.0.1" {% if nebula_ip %}, "{{ nebula_ip}}"{% endif %}}
 -- disable listening for https
 https_ports = {}
 
+network_settings = {
+	read_timeout = 300;
+	tcp_backlog = 511;
+}
+
 -- Enable use of libevent for better performance under high load
 -- For more information see: https://prosody.im/doc/libevent
 -- https://prosody.im/doc/network_backend
@@ -39,13 +44,12 @@ use_libevent = true
 -- Prosody will always look in its source directory for modules, but
 -- this option allows you to specify additional locations where Prosody
 -- will look for modules first. For community modules, see https://modules.prosody.im/
-plugin_paths = { "/usr/local/lib/prosody/modules" }
+plugin_paths = { "/usr/share/jitsi-meet/prosody-plugins", "/usr/lib/prosody/modules" }
 
 -- This is the list of modules Prosody will load on startup.
 -- It looks for mod_modulename.lua in the plugins folder, so make sure that exists too.
 -- Documentation for bundled modules can be found at: https://prosody.im/doc/modules
 modules_enabled = {
-
 	-- Generally required
 		"roster"; -- Allow users to have a roster. Recommended ;)
 		"saslauth"; -- Authentication for clients and servers. Recommended if you want to log in.

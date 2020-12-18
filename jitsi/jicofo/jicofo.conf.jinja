@@ -12,7 +12,7 @@ jicofo {
     }
 {%- if jitsi.jibri_enabled %}
     jibri {
-        brewery-jid = {{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}
+        brewery-jid = "{{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}"
         pending-timeout = 90 seconds
     }
 {% endif %}
@@ -20,4 +20,14 @@ jicofo {
         enabled = true
         id = 42
     }
+# currently handled via /etc/jitsi/jicofo/config. For future use
+#    xmpp {
+#        client {
+#            hostname = {{ jitsi.xmpp.server_host }}
+#            port = {{ jitsi.xmpp.port }}
+#            domain = {{ jitsi.xmpp.xmpp_domain }}
+#            username = {{ jitsi.jicofo.username }}
+#            password = {{ jitsi.jicofo.password }}
+#        }
+#    }
 }

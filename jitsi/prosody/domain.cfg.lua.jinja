@@ -40,7 +40,7 @@ Component "conference.{{ jitsi.public_domain }}" "muc"
         "muc_meeting_id";
         "muc_domain_mapper";
     }
-    muc_room_cache_size = 1000
+    muc_room_cache_size = 10000
     muc_room_locking = false
     muc_room_default_public_jids = true
 
@@ -50,7 +50,7 @@ Component "internal.auth.{{ jitsi.public_domain }}" "muc"
     modules_enabled = {
       "ping";
     }
-    muc_room_cache_size = 1000
+    muc_room_cache_size = 10000
 
 VirtualHost "{{ jitsi.xmpp.auth_domain }}"
     ssl = {
@@ -94,7 +94,7 @@ VirtualHost "guest.{{ jitsi.public_domain }}"
 {%- if jitsi.lobby_enabled %}
 Component "lobby.{{ jitsi.public_domain }}" "muc"
     storage = "memory"
-    muc_room_cache_size = 1000
+    muc_room_cache_size = 10000
     restrict_room_creation = true
     muc_room_locking = false
     muc_room_default_public_jids = true
@@ -106,5 +106,7 @@ VirtualHost "recorder.{{ jitsi.public_domain }}"
     "ping";
   }
   authentication = "internal_plain"
+  c2s_require_encryption = false
+  allow_empty_token = true
 
 {% endif %}{# recorder enabled#}
