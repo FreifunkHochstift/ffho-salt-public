@@ -2,6 +2,13 @@
 # Bash
 #
 
+bash-completion:
+  pkg.installed
+
+/etc/bash.bashrc:
+  file.managed:
+    - source: salt://bash/bash.bashrc
+
 #
 # .bashrc for root
 /root/.bashrc:

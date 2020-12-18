@@ -1,6 +1,7 @@
 base:
   # Base config for all minions
   '*':
+    - bash
     - fail2ban
     - ff_base
     - graylog-sidecar
@@ -19,7 +20,6 @@ base:
     - vim
   '*.in.ffmuc.net':
     - apt
-    - bash
     #- burp
     - certs
     - dns-server/auth
