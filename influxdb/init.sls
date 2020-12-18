@@ -40,4 +40,13 @@ influxdb-user:
     - template: jinja
     - require:
       - pkg: influxdb-pkg
+
+# avoid influxdb
+/etc/rsyslog.d/influxd.conf:
+  file.managed:
+    - contents: |
+        # Managed by Salt
+        # avoid influxdb logs to fill syslog AND daemon.log
+        :programname,isequal,"influxd"         /var/log/influxd.log
+        & stop
 {% endif %}
