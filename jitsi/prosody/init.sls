@@ -13,6 +13,18 @@ prosody-repo:
     - key_url: https://prosody.im/files/prosody-debian-packages.key
     - clean_file: True
 
+prosody-dependencies:
+  pkg.installed:
+    - pkgs:
+      - lua-basexx
+      - lua-event
+      - lua-luaossl
+      - lua-sec
+      - luarocks
+      - lua5.2
+      - liblua5.2-dev
+      - patch
+
 # Hacks for enabling token auth in jitsi
 # https://community.jitsi.org/t/jitsi-meet-tokens-chronicles-on-debian-buster/76756
 # orig file path: https://emrah.com/files/lua-cjson-2.1devel-1.linux-x86_64.rock
@@ -71,13 +83,21 @@ copy-prosody-plugins:
     - require:
       - pkg: extract_prosody_modules
 
+patch_muc_owner_allow_kick:
+  cmd.run:
+    - name: patch -d /usr/lib/prosody/modules/muc -p0 < /usr/share/jitsi-meet/prosody-plugins/muc_owner_allow_kick.patch
+    - require:
+      - file: copy-prosody-plugins
+
 remove-temporary-files:
   file.absent:
     - names:
       - /var/cache/apt/archives/jitsi-meet-prosody*.deb
       - /tmp/jitsi-prosody-modules
+      - /usr/share/jitsi-meet/prosody-plugins//muc_owner_allow_kick.patch
     - require:
       - file: copy-prosody-plugins
+      - cmd: patch_muc_owner_allow_kick
 
 /etc/prosody/prosody.cfg.lua:
   file.managed:
@@ -87,6 +107,7 @@ remove-temporary-files:
 /etc/prosody/conf.d/{{ jitsi.public_domain }}.cfg.lua:
   file.managed:
     - source: salt://jitsi/prosody/domain.cfg.lua.jinja
+    - makedirs: True
     - template: jinja
 
 jicofo-auth:
@@ -146,8 +167,16 @@ update-certificates:
 
 {% endfor %}{# for component #}
 
+/usr/lib/prosody/modules/token_auth_utils.lib.lua:
+  file.managed:
+    - source: https://hg.prosody.im/prosody-modules/raw-file/tip/mod_auth_token/token_auth_utils.lib.lua
+    - skip_verify: True
+    - watch_in:
+      - service: prosody
+
 {% for component in [
   "ext_events.lib",
+  "mod_muc_domain_mapper",
   "mod_conference_duration",
   "mod_conference_duration_component",
   "mod_muc_lobby_rooms",
