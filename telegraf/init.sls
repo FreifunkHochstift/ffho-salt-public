@@ -12,7 +12,7 @@
 influxdb-repo:
   pkgrepo.managed:
     - humanname: Jitsi Repo
-    - name: deb https://repos.influxdata.com/debian {{ grains.oscodename }} stable
+    - name: deb https://repos.influxdata.com/{{ grains.lsb_distrib_id | lower }} {{ grains.oscodename }} stable
     - file: /etc/apt/sources.list.d/influxdb.list
     - key_url: https://repos.influxdata.com/influxdb.key
 

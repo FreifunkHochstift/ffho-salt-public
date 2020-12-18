@@ -5,7 +5,7 @@
 
 influxdb-repo:
   pkgrepo.managed:
-    - name: deb https://repos.influxdata.com/ubuntu focal stable
+    - name: deb https://repos.influxdata.com/{{ grains.lsb_distrib_id | lower }} {{ grains.oscodename }} stable
     - key_url:  https://repos.influxdata.com/influxdb.key
     - file: /etc/apt/sources.list.d/influxdb.list
 
@@ -49,4 +49,9 @@ influxdb-user:
         # avoid influxdb logs to fill syslog AND daemon.log
         :programname,isequal,"influxd"         /var/log/influxd.log
         & stop
+
+/etc/logrotate.d/influxd.conf:
+  file.managed:
+    - source: salt://influxdb/logrotate.conf
+
 {% endif %}
