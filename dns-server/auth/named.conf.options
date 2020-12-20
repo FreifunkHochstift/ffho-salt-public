@@ -1,14 +1,15 @@
 acl "trusted" {
+	5.1.66.0/24;
 	10.80.240.0/20;
 	10.8.0.0/23;
 	172.30.0.0/20;
 	127.0.0.1;
 	2001:608:a01::/48;
+	2001:678:e68:ff00::/48
 };
 
 options {
 	directory "/var/cache/bind";
-
 
 	recursion yes;
 	allow-recursion { trusted; };
@@ -16,6 +17,11 @@ options {
 	dnssec-validation auto;
 
 	auth-nxdomain no;    # conform to RFC1035
+	{%- if salt["service.enabled"]("dnsdist") %}
+	listen-on port {{ listening_port }} { 127.0.0.1; };
+	listen-on-v6 port {{ listening_port }} { ::1; };
+	{% else %}
 	listen-on-v6 { any; };
+	{%- endif %}
 };
 

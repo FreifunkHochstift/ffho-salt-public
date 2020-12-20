@@ -24,10 +24,15 @@ addAction(AndRule({NotRule(makeRule({"2001:678:e68:200::/56", "2001:678:e68:300:
 ssl_cert="/etc/letsencrypt/live/doh.ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
 {%- else %}
+addLocal("0.0.0.0")
+addLocal("::")
+
+addAction(AndRule({NotRule(makeRule({"ffmuc.net"})), NotRule(makeRule({"127.0.0.1","::1","10.80.248.0/24","10.8.0.0/23","5.1.66.0/24","2001:678:e68::/48"})), DSTPortRule(53)}), DropAction())
 ssl_cert="/etc/letsencrypt/live/ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/ffmuc.net/privkey.pem"
 {%- endif %}
 
+{% if 'webfrontend' in grains.id %}
 -- listen for DoT on external interface
 addTLSLocal("0.0.0.0", ssl_cert, ssl_key, { reusePort=true{{ additional_listener_config }}, tcpFastOpenQueueSize=20, minTLSVersion="tls1.1" })
 addTLSLocal("[::]", ssl_cert, ssl_key, { reusePort=true{{ additional_listener_config }}, tcpFastOpenQueueSize=20, minTLSVersion="tls1.1" })
@@ -53,25 +58,12 @@ addDNSCryptBind("[::]:8443", "2.dnscrypt-cert.ffmuc.net", "/run/dnsdist/resolver
 
 -- set number of queries to be allowed per second from an IP but exclude localhost
 addAction(AndRule({MaxQPSIPRule(300), NotRule(OrRule({makeRule("127.0.0.1"), makeRule("::1")}))}), DropAction())
+{% endif %}{# webfrontend in grains.id #}
 
-{#-
-{%- if site_id == 1 %}
-{%- for ipaddress in salt["pillar.get"]("netbox:interfaces:vlan3:ipaddresses", []) %}
-{%- if ipaddress.family.value == 6 %}
-newServer({address="2001:608:a01::40", name="gw01", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="4de3b70f-9c66-4c39-a724-f7da1232525d"})
-newServer({address="2001:608:a01::41", name="gw02", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="59ffd03f-fd80-494f-b010-b6b211567874"})
-newServer({address="2001:608:a01::42", name="gw07", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=3, retries=2, id="8b2362c3-15aa-4090-bb35-913a24063ee5"})
-newServer({address="2001:608:a01::1",  name="gw03", source="{{ ipaddress["address"].split('/')[0] }}@vrf_external", weight=1, retries=2, id="ad1b2876-54f2-454f-b7f3-2206ea7f4de2"})
-
-{%- endif %}
-{% endfor %}
-{%- else %}
-#}
-newServer({address="10.8.0.29", name="web03", weight=3, retries=2, id="23b0121d-91c5-4338-8c5a-cc8ba6f2ca8d"})
-newServer({address="10.8.0.30", name="web04", weight=3, retries=2, id="0ed35651-7766-492c-ab44-562e76d395b6"})
-newServer({address="10.8.0.32", name="gw04", weight=3, retries=2, id="23b0121d-91c5-4338-8c5a-cc8ba6f2ca8d"})
-newServer({address="10.8.0.33", name="gw05", weight=3, retries=2, id="0ed35651-7766-492c-ab44-562e76d395b6"})
-{#-{%- endif %}#}
+newServer({address="10.8.0.29:1653", name="web03", weight=3, retries=2, id="23b0121d-91c5-4338-8c5a-cc8ba6f2ca8d"})
+newServer({address="10.8.0.30:1653", name="web04", weight=3, retries=2, id="0ed35651-7766-492c-ab44-562e76d395b6"})
+newServer({address="10.8.0.32:1653", name="gw04", weight=3, retries=2, id="fec91b13-6d71-4162-92a5-68c197ee99c4"})
+newServer({address="10.8.0.33:1653", name="gw05", weight=3, retries=2, id="24d189ad-2070-458d-b34a-7c0c22ba7bcd"})
 
 setWHashedPertubation(3962345)
 setServerPolicy(whashed)
@@ -81,7 +73,8 @@ setServerPolicy(whashed)
 newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
 {%- else %}
 -- just a dummy for now; will be done later
-newServer({address="10.8.0.10", name="dns01", pool="auth", id="d0e8196c-c418-4286-86e6-b7c05200b592"})
+--newServer({address="10.8.0.10", name="dns01", pool="auth", id="d0e8196c-c418-4286-86e6-b7c05200b592"})
+newServer({address="127.0.0.1:553", name="local-auth", pool="auth"}){# bind #}
 {%- endif %}
 addAction({'in.ffmuc.net.', 'ov.ffmuc.net'}, PoolAction("auth"))
 addAction({'ext.ffmuc.net'}, PoolAction("auth"))
@@ -113,7 +106,7 @@ setKey("{{ dnsdist_console["key"] }}")
 {%- endif %}
 
 setMaxUDPOutstanding(65535)
-setMaxTCPClientThreads(2000)           -- set X(int) to handle number of maximum tcp clients
-setMaxTCPConnectionDuration(120)      -- set X(int) for tcp connection duaration from a connected client. X is number of seconds.
-setMaxTCPConnectionsPerClient(30)    -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
-setMaxTCPQueriesPerConnection(1000)    -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())
+setMaxTCPClientThreads(2000)        -- set X(int) to handle number of maximum tcp clients
+setMaxTCPConnectionDuration(120)    -- set X(int) for tcp connection duaration from a connected client. X is number of seconds.
+setMaxTCPConnectionsPerClient(30)   -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
+setMaxTCPQueriesPerConnection(1000) -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())

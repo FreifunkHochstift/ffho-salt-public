@@ -201,6 +201,13 @@ firewall:
   - port: 53
     proto: tcp
     host: any
+  # access pdns-recursor as dnsdist is listening on 53
+  - port: 1653
+    proto: udp
+    host: any
+  - port: 1653
+    proto: tcp
+    host: any
 {%- endif %}
 {%- if "dnsdist" in roles %}
   - port: 8083

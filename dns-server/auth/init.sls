@@ -2,25 +2,33 @@
 # Authoritive FFHO DNS Server configuration (dns01/dns02 anycast)
 #
 
-{%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{% if 'dnsserver' in role %}
+{%- if 'authorative-dns' in salt['pillar.get']('netbox:tag_list', []) -%}
 
 # Get all nodes for DNS records
 {% set nodes = salt['mine.get']('netbox:platform:slug:linux', 'minion_id', tgt_type='pillar') %}
 {% set cnames = salt['pillar.get']('netbox:config_context:dns_zones:cnames') %}
 {%- set node_has_overlay = [] %}{# List of node[0] #}
 
+{%- if salt["service.enabled"]("dnsdist") %}
+{%- set listening_port = 553 %}
+{%- else %}
+{%- set listening_port = 53 %}
+{%- endif %}
+
 include:
   - dns-server
 
 python-dnspython:
   pkg.installed:
-    - name: python-dnspython
+    - name: python3-dnspython
 
 # Bind options
 /etc/bind/named.conf.options:
   file.managed:
     - source: salt://dns-server/auth/named.conf.options
+    - template: jinja
+    - defaults:
+      listening_port: {{ listening_port }}
     - require:
       - pkg: bind9
     - watch_in:
@@ -140,6 +148,7 @@ record-A-{{ node_id }}:
     - data: {{ address | regex_replace('/\d+$','') }}
     - rdtype: A
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -155,6 +164,7 @@ record-PTR-{{ node_id }}:
     - data: {{ node_id }}.
     - rdtype: PTR
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -173,6 +183,7 @@ record-AAAA-{{ node_id }}:
     - data: {{ address6 | regex_replace('/\d+$','') }}
     - rdtype: AAAA
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -188,6 +199,7 @@ record-PTR6-{{ node_id }}:
     - data: {{ node_id }}.
     - rdtype: PTR
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -207,6 +219,7 @@ record-A-overlay-{{ node_id }}:
     - data: {{ overlay_address[node_id] | regex_replace('/\d+$','') }}
     - rdtype: A
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -225,6 +238,7 @@ record-A-external-{{ node_id }}:
     - data: {{ external_address[node_id][0] }}
     - rdtype: A
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -242,6 +256,7 @@ record-AAAA-external-{{ node_id }}:
     - data: "{{ external_address6[node_id][0] }}"
     - rdtype: AAAA
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -287,6 +302,7 @@ record-CNAME-{{ cname }}:
     - data: {{ cnames[cname] }}.
     - rdtype: CNAME
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -308,6 +324,7 @@ record-CNAME-{{ cname_ov }}:
     - data: {{ target_ov }}.
     - rdtype: CNAME
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -336,6 +353,7 @@ record-A-extra-{{ dns_entry }}:
     - data: {{ extra_dns_entries[dns_entry]['address'] }}
     - rdtype: A
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
@@ -354,6 +372,7 @@ record-AAAA-extra-{{ dns_entry }}:
     - data: {{ extra_dns_entries[dns_entry]['address6'] }}
     - rdtype: AAAA
     - nameserver: 127.0.0.1
+    - port: {{ listening_port }}
     - keyfile: /etc/bind/salt-master.key
     - keyalgorithm: hmac-sha512
     - replace_on_change: True
