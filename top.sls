@@ -20,11 +20,8 @@ base:
     - vim
   '*.in.ffmuc.net':
     - apt
-    #- burp
     - certs
-    - dns-server/auth
     - docker
-    #- docker-containers
     - dphys-swapfile
     - duplicity
     - grafana
@@ -49,7 +46,9 @@ base:
     - pdns-recursor
     - radvd
     - respondd
-  'dns01.in.ffmuc.net':
+  'webfrontend03.in.ffmuc.net':
     - cloudflare
+  'webfrontend0[3-4].in.ffmuc.net':
+    - dns-server/auth
   'vpn0*.in.ffmuc.net':
     - wireguard

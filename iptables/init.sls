@@ -23,6 +23,8 @@ iptables_pkgs:
 {%- set overlay_address = salt['mine.get'](node,'minion_overlay_address', tgt_type='glob') %}
 {%- set minion_address = salt['mine.get'](node,'minion_address', tgt_type='glob')[node] %}
 
+{%- if overlay_address and overlay_address[node] | length > 0 and not '__data__' in overlay_address[node] %}
+
 {% set nebula_internal_ip_split = overlay_address[node].split('/')[0].split('.') %}
 {% set n1 = nebula_internal_ip_split[2] | int %}
 {% set n2 = nebula_internal_ip_split[3] | int %}
@@ -52,7 +54,7 @@ iptables_pkgs:
     - sport: {{ 20000 + n1 * 256 + n2  }}
     - to: {{ nat_ip }}:{{ 20000 + n1 * 256 + n2  }}
     - save: True
-
+{% endif %}
 {% endif %}{# if own_location == node_location[node] #}
 {% endfor %}{# for node in nodes #}
 {% endif %}{# if guardian #}

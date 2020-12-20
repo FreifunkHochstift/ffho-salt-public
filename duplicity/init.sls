@@ -5,7 +5,7 @@ duplicity-packages:
   pkg.installed:
     - pkgs:
       - duplicity
-      - gnupg 
+      - gnupg
       - gnupg-agent
       - python3-pip
 
@@ -17,6 +17,7 @@ duplicity_repo:
     - ppa: duplicity-team/duplicity-release-git
     - keyid: 8F571BB27A86F4A2
     - keyserver: keyserver.ubuntu.com
+    - file: /etc/apt/sources.list.d/duplicity.list
 
 b2sdk:
   pip.installed:
@@ -28,6 +29,7 @@ backup-script:
   file.managed:
     - name: /usr/local/sbin/backup.sh
     - source: salt://duplicity/files/backup.sh.jinja2
+    - mode: 0750
     - template: jinja
 
 /etc/systemd/system/ffmuc-backup.service:
