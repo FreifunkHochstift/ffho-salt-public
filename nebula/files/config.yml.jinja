@@ -83,6 +83,9 @@ firewall:
   - port: 161
     proto: udp
     host: librenms.in.ffmuc.net
+  - port: 161
+    proto: udp
+    host: nms.in.ffmuc.net
     # mosh
   - port: 60001-60010
     proto: udp
@@ -106,22 +109,6 @@ firewall:
     group: webfrontend
 {%- endif %}
 {%- if "docker02.in.ffmuc.net" == grains["id"] %}
-  # Allow connections for tickets.ffmuc.net
-  - port: 8000
-    proto: tcp
-    group: webfrontend
-  # Allow connections for etherpad
-  - port: 8081
-    proto: tcp
-    group: webfrontend
-  # Allow connections for ffmuc.net/wiki
-  - port: 8083
-    proto: tcp
-    group: webfrontend
-  # Allow connections for ffmuc.net/speed
-  - port: 8888
-    proto: tcp
-    group: webfrontend
   # Allow connections for ldap
   - port: 636
     proto: tcp
@@ -162,10 +149,12 @@ firewall:
   - port: 1883
     proto: tcp
     host: any
-{%- endif %}
-{%- if "map.in.ffmuc.net" == grains["id"] %}
-  # Allow stats access
-  - port: 80
+  # Allow connections for etherpad
+  - port: 8081
+    proto: tcp
+    group: webfrontend
+  # Allow connections for ffmuc.net/wiki
+  - port: 8084
     proto: tcp
     group: webfrontend
 {%- endif %}
@@ -174,8 +163,22 @@ firewall:
   - port: 8000
     proto: tcp
     group: webfrontend
+  # Allow connections for tickets.ffmuc.net
+  - port: 8002
+    proto: tcp
+    group: webfrontend
+  # Allow connections for ffmuc.net/speed
+  - port: 8888
+    proto: tcp
+    group: webfrontend
 {%- endif %}
-{%- if "stats.in.ffmuc.net" == grains["id"] %}
+{%- if "map.in.ffmuc.net" == grains["id"] %}
+  # Allow stats access
+  - port: 80
+    proto: tcp
+    group: webfrontend
+{%- endif %}
+{%- if "stats.in.ffmuc.net" == grains["id"] or 'metrics.in.ffmuc.net' == grains["id"] %}
   # Allow stats access
   - port: 3000
     proto: tcp
@@ -226,4 +229,8 @@ firewall:
   - port: 5044
     proto: tcp
     host: any
+  # Allow forwarding from deprecated graylog instance
+  - port: 12201
+    proto: udp
+    host: docker01.in.ffmuc.net
 {%- endif %}
