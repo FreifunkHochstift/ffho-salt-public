@@ -103,44 +103,20 @@ firewall:
     host: any
 {%- endif %}
 {%- if "docker01.in.ffmuc.net" == grains["id"] %}
+    # Graylog Webfrontend
+  - port: 9000
+    proto: tcp
+    host: any
+  # Allow pushing to graylog via filebeat
+  - port: 5044
+    proto: tcp
+    host: any
+{%- endif %}
+{%- if "docker04.in.ffmuc.net" == grains["id"] %}
   # Allow connections for draw
   - port: 5001
     proto: tcp
     group: webfrontend
-{%- endif %}
-{%- if "docker02.in.ffmuc.net" == grains["id"] %}
-  # Allow connections for ldap
-  - port: 636
-    proto: tcp
-    host: any
-{%- endif %}
-{%- if "docker03.in.ffmuc.net" == grains["id"] %}
-  # Allow connections for unifi (stun)
-  - port: 3478
-    proto: udp
-    group: webfrontend
-  # Allow connections for unifi (inform)
-  - port: 8082
-    proto: tcp
-    group: webfrontend
-  # Allow connections for cloud.ffmuc.net
-  - port: 8089
-    proto: tcp
-    group: webfrontend
-  # Allow connections for byro
-  - port: 8345
-    proto: tcp
-    group: webfrontend
-  # Allow connections for byro (static)
-  - port: 8346
-    proto: tcp
-    group: webfrontend
-  # Allow connections for unifi (web)
-  - port: 8443
-    proto: tcp
-    group: webfrontend
-{%- endif %}
-{%- if "docker04.in.ffmuc.net" == grains["id"] %}
   # Allow connections for http backend of broker.ffmuc.net
   - port: 5000
     proto: tcp
@@ -157,10 +133,24 @@ firewall:
   - port: 8084
     proto: tcp
     group: webfrontend
+  # Allow connections for ldap
+  - port: 636
+    proto: tcp
+    host: any
+  - port: 80
+    proto: tcp
+    host: any
+  - port: 8087
+    proto: tcp
+    host: any
 {%- endif %}
 {%- if "docker05.in.ffmuc.net" == grains["id"] %}
   # Allow connections for chat.ffmuc.net
   - port: 8000
+    proto: tcp
+    group: webfrontend
+  # Allow connections for cloud.ffmuc.net
+  - port: 8089
     proto: tcp
     group: webfrontend
   # Allow connections for tickets.ffmuc.net
@@ -171,6 +161,49 @@ firewall:
   - port: 8888
     proto: tcp
     group: webfrontend
+    # Allow connections for unifi (web)
+  - port: 8443
+    proto: tcp
+    group: webfrontend
+  # Allow connections for unifi (stun)
+  - port: 3478
+    proto: udp
+    group: webfrontend
+  # Allow connections for unifi (inform)
+  - port: 8080
+    proto: tcp
+    group: webfrontend
+  # Allow salt access for any host in the network
+  - port: 4505-4506
+    proto: tcp
+    host: any
+{%- endif %}
+{%- if "docker06.in.ffmuc.net" == grains["id"] %}
+  # Allow connections for byro
+  - port: 8345
+    proto: tcp
+    group: webfrontend
+  # Allow connections for byro (static)
+  - port: 8346
+    proto: tcp
+    group: webfrontend
+{%- endif %}
+{%- if "docker07.in.ffmuc.net" == grains["id"]%}
+  - port: 6343
+    proto: udp
+    host: any
+  # Graylog Webfrontend
+  - port: 9000
+    proto: tcp
+    host: any
+  # Allow pushing to graylog via filebeat
+  - port: 5044
+    proto: tcp
+    host: any
+  # Allow forwarding from deprecated graylog instance
+  - port: 12201
+    proto: udp
+    host: docker01.in.ffmuc.net
 {%- endif %}
 {%- if "map.in.ffmuc.net" == grains["id"] %}
   # Allow stats access
@@ -217,20 +250,17 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "docker07.in.ffmuc.net" == grains["id"]%}
-  - port: 6343
-    proto: udp
-    host: any
-  # Graylog Webfrontend
-  - port: 9000
+{%- if "icinga-vie01.in.ffmuc.net" == grains["id"] %}
+  # Allow icinga2
+  - port: 5665
     proto: tcp
     host: any
-  # Allow pushing to graylog via filebeat
-  - port: 5044
+{%- endif %}
+  - port: 5665
     proto: tcp
-    host: any
-  # Allow forwarding from deprecated graylog instance
-  - port: 12201
-    proto: udp
-    host: docker01.in.ffmuc.net
+    host: icinga-vie01.in.ffmuc.net
+{%- if "nms.in.ffmuc.net" == grains["id"]%}
+  - port: 80
+    proto: tcp
+    host: webfrontend
 {%- endif %}
