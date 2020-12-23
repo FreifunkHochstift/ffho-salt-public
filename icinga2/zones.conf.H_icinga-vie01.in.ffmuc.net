@@ -1,0 +1,16 @@
+#
+# zones.conf (Salt managed)
+#
+
+object Zone "master" {
+	endpoints = [ "icinga-vie01.in.ffmuc.net" ]
+}
+
+object Zone "global-templates" {
+	global = true
+}
+
+object Endpoint "icinga-vie01.in.ffmuc.net" {
+	host = "icinga-vie01.ov.ffmuc.net"
+	port = "5665"
+}

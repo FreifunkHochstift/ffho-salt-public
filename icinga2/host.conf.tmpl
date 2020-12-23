@@ -33,7 +33,7 @@ object Host "{{ node_id }}" {
 	import "generic-host"
 
 	display_name = "{{ node_id }}"
-	{% if location == 'VIE01' %}
+	{% if location == 'VIE01' or location == 'MUC01' %}
 	{% if 'mine_interval' not in overlay_address %}
 	address = "{{ overlay_address | regex_replace('/\d+$','') }}"
 	{% endif %}

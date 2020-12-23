@@ -1,16 +1,13 @@
 #
 # Icinga2
 #
-{% if 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') or 'icinga2_client' in salt['pillar.get']('netbox:config_context:roles') %}
-{% if salt['pillar.get']('netbox:role:name') %}
-{%- set role = salt['pillar.get']('netbox:role:name') %}
-{% else %}
-{%- set role = salt['pillar.get']('netbox:device_role:name') %}
-{% endif %}
+{%- if 'icinga2_server' in salt['pillar.get']('netbox:tag_list', [])  or 'icinga2_client' in salt['pillar.get']('netbox:tag_list', []) %}
 
-{%- if 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') %}
+
+{%- if 'icinga2_server' in salt['pillar.get']('netbox:tag_list', []) %}
 # server should send states to graylog
 {%- set icinga2_features = ["gelf"] %}
+{%- set icinga2_features = ["api"] %}
 {%- else %}
 # Nodes should accept config and commands from Icinga2 server
 {%- set icinga2_features = ["api"] %}
@@ -212,7 +209,7 @@ icinga2-ca:
 ################################################################################
 #                               Icinga2 Server                                 #
 ################################################################################
-{% if 'monitoring' in role and 'icinga2_server' in salt['pillar.get']('netbox:config_context:roles') %}
+{% if 'icinga2_server' in salt['pillar.get']('netbox:tag_list', []) %}
 
 # Install command definitions
 /etc/icinga2/zones.d/master/ffmuc-conf.d/services:
@@ -246,7 +243,7 @@ Cleanup /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/:
       - service: icinga2-service
 
   # Generate config file for every client known to pillar
-{% for node_id,data in salt['mine.get']('netbox:config_context:roles:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
+{% for node_id,data in salt['mine.get']('netbox:tag_list:icinga2_client', 'minion_id', tgt_type='pillar').items() %}
 /etc/icinga2/zones.d/master/ffmuc-conf.d/hosts/generated/{{ node_id }}.conf:
   file.managed:
     - source: salt://icinga2/host.conf.tmpl
