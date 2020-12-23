@@ -7,5 +7,5 @@ ov.ffmuc.net		IN SOA	anycast01.ffmuc.net. hostmaster.ffmuc.net. (
 				6000       ; expire (1 hour 40 minutes)
 				600        ; minimum (10 minutes)
 				)
-			NS	guardian.ffmuc.net.
+			NS	anycast01.ffmuc.net.
 $ORIGIN ov.ffmuc.net.

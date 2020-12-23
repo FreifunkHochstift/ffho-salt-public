@@ -270,23 +270,23 @@ record-AAAA-external-{{ node_id }}:
 # Create CNAMES as defined in netbox:config_context:dns_zones:cnames or netbox:services (cnames field needs to be set to true)
 {% set services = salt['pillar.get']('netbox:services') %}
 {% for service in services %}
-{% if services[service]['custom_fields']['cname'] %}
-{% if services[service]['virtual_machine'] %}
-{% if services[service]['custom_fields']['public'] %}
-{% set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
-{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-{% else %}
-{% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
-{% endif %}
-{% else %}
-{% if services[service]['custom_fields']['public'] %}
-{% set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
-{% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
-{% else %}
-{% do cnames.update({service: services[service]['device']['name'] }) %}
-{% endif %}
-{% endif %}
-{% endif %}
+  {% if services[service]['custom_fields']['cname'] %}
+    {% if services[service]['virtual_machine'] %}
+      {% if services[service]['custom_fields']['public'] %}
+        {% set target = services[service]['virtual_machine']['name'] | regex_search('(^\w+(\d+)?)') %}
+        {% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+      {% else %}
+        {% do cnames.update({service: services[service]['virtual_machine']['name'] }) %}
+      {% endif %}
+    {% else %}
+      {% if services[service]['custom_fields']['public'] %}
+        {% set target = services[service]['device']['name'] | regex_search('(^\w+(\d+)?)') %}
+        {% do cnames.update({service: target[0] ~ '.ext.ffmuc.net' }) %}
+      {% else %}
+        {% do cnames.update({service: services[service]['device']['name'] }) %}
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endfor %}
 
 {%- for cname in cnames %}
@@ -311,11 +311,11 @@ record-CNAME-{{ cname }}:
       - file: dns-key
 
 # we create a cname ov.ffmuc.net entry for each in.ffmuc.net entry
-{% if 'in.ffmuc.net' in cname  %}
-{% set data = cname | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
-{% set cname_ov = data[0] ~ '.ov.ffmuc.net' %}
-{% set target  = cnames[cname] | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
-{% set target_ov = target[0] ~ '.ov.ffmuc.net' %}
+  {% if 'in.ffmuc.net' in cname  %}
+    {% set data = cname | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
+    {% set cname_ov = data[0] ~ '.ov.ffmuc.net' %}
+    {% set target  = cnames[cname] | regex_search('(^\w+(-)?(\w+)?(\d+)?)') %}
+    {%- set target_ov = target[0] ~ '.ov.ffmuc.net' %}
 record-CNAME-{{ cname_ov }}:
   ddns.present:
     - name: {{ cname_ov }}.
@@ -331,7 +331,7 @@ record-CNAME-{{ cname_ov }}:
     - require:
       - pkg: python-dnspython
       - file: dns-key
-{% endif %}
+  {% endif %}
 
 {%- endfor %}{# for cname in cnames #}
 

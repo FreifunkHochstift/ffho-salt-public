@@ -27,7 +27,7 @@ ssl_key="/etc/letsencrypt/live/doh.ffmuc.net/privkey.pem"
 addLocal("0.0.0.0")
 addLocal("::")
 
-addAction(AndRule({NotRule(makeRule({"ffmuc.net"})), NotRule(makeRule({"127.0.0.1","::1","10.80.248.0/24","10.8.0.0/23","5.1.66.0/24","2001:678:e68::/48"})), DSTPortRule(53)}), DropAction())
+addAction(AndRule({NotRule(makeRule({"ffmuc.net"})), NotRule(makeRule({"127.0.0.1","::1","10.80.0.0/16","10.8.0.0/23","5.1.66.0/24","2001:608:a01::/48","2001:678:e68::/48"})), DSTPortRule(53)}), DropAction())
 ssl_cert="/etc/letsencrypt/live/ffmuc.net/fullchain.pem"
 ssl_key="/etc/letsencrypt/live/ffmuc.net/privkey.pem"
 {%- endif %}
@@ -74,7 +74,11 @@ newServer({address="2001:608:a01:ffff::12", name="dns01", pool="auth"})
 {%- else %}
 -- just a dummy for now; will be done later
 --newServer({address="10.8.0.10", name="dns01", pool="auth", id="d0e8196c-c418-4286-86e6-b7c05200b592"})
+{%- if 'authorative-dns' in salt['pillar.get']('netbox:tag_list', []) %}
 newServer({address="127.0.0.1:553", name="local-auth", pool="auth"}){# bind #}
+{%- else %}
+newServer({address="5.1.66.255", name="anycast01", pool="auth"})
+{%- endif %}
 {%- endif %}
 addAction({'in.ffmuc.net.', 'ov.ffmuc.net'}, PoolAction("auth"))
 addAction({'ext.ffmuc.net'}, PoolAction("auth"))
