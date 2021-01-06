@@ -48,4 +48,14 @@ chromedriver-binary:
     - source: salt://jitsi/jibri/config.json.jinja
     - template: jinja
 
+{% else %}
+google-chrome-stable:
+  pkg.removed
+google-chrome-repo:
+  pkgrepo.absent:
+    - name: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+jibri:
+  pkg.removed
+/etc/jitsi/jibri:
+  file.absent
 {% endif %} # jibri.enabled
