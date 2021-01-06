@@ -1,0 +1,44 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+[general]
+port=5060
+bindaddr=0.0.0.0
+language=de
+deny=0.0.0.0/0.0.0.0
+{% for instance in jitsi.asterisk.jigasi_instances %}
+permit={{ instance.ip }}/255.255.255.255
+{% endfor %}
+allowguest=no
+
+register => {{ jitsi.asterisk.sip.username }}:{{ jitsi.asterisk.sip.password }}@{{ jitsi.asterisk.sip.host }}/{{ jitsi.asterisk.sip.username }}
+
+[ext-sip-account]
+type=friend
+context=von-voip-provider
+username={{ jitsi.asterisk.sip.username }}
+fromuser={{ jitsi.asterisk.sip.username }}
+secret={{ jitsi.asterisk.sip.password }}
+host={{ jitsi.asterisk.sip.host }}
+fromdomain={{ jitsi.asterisk.sip.host }}
+qualify=yes
+insecure=port,invite
+nat=yes
+disallow=all
+allow=g722
+allow=ulaw
+allow=alaw
+allow=gsm
+allow=g726
+
+{% for instance in jitsi.asterisk.jigasi_instances %}
+[{{ instance.number }}]
+type=friend
+context=meine-telefone
+secret={{ instance.password }}
+host=dynamic
+disallow=all
+allow=g722
+allow=ulaw
+allow=alaw
+allow=gsm
+allow=g726
+{% endfor %}

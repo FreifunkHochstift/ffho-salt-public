@@ -1,0 +1,11 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+# Jigasi settings
+JIGASI_SIPUSER={{ jitsi.jigasi.sip.username }}@{{ jitsi.jigasi.sip.host }}
+JIGASI_SIPPWD={{ jitsi.jigasi.sip.password }}
+JIGASI_SECRET={{ jitsi.jigasi.xmpp.secret }}
+JIGASI_OPTS="--nocomponent=true"
+JIGASI_HOSTNAME={{ jitsi.public_domain }}
+JIGASI_HOST={{ jitsi.xmpp.server_host }}
+
+# adds java system props that are passed to jigasi (default are for logging config file)
+JAVA_SYS_PROPS="-Djava.util.logging.config.file=/etc/jitsi/jigasi/logging.properties"

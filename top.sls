@@ -35,10 +35,15 @@ base:
   '*.meet.ffmuc.net':
     - nebula-meet
     - jitsi.base
-    - jitsi.prosody
-    - jitsi.jicofo
     - jitsi.jibri
     - jitsi.videobridge
+  'jicofo*.meet.ffmuc.net':
+    - jitsi.prosody
+    - jitsi.jicofo
+    - nginx
+  'call*':
+    - jitsi.asterisk
+    - jisti.jigasi
   'gw*':
     - fastd
     - dhcp-server

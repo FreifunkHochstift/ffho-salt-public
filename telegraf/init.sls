@@ -122,6 +122,16 @@ del_telegraf_from_pdns_group:
     - watch_in:
           service: telegraf
 
+/etc/telegraf/telegraf.d/in-jigasi.conf:
+{% if salt['pillar.get']('netbox:config_context:jitsi:jigasi:enabled', False) %}
+  file.managed:
+    - source: salt://telegraf/files/in_jigasi.conf
+{% else %}
+  file.absent:
+{% endif %}
+    - watch_in:
+          service: telegraf
+
 /etc/telegraf/telegraf.d/in-jvb-stats.conf:
 {% if salt['pillar.get']('netbox:config_context:jitsi:videobridge:enabled', False) %}
   file.managed:

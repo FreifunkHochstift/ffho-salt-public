@@ -27,6 +27,7 @@ ffmuc_packages:
       - dmidecode
       - psmisc
       - lshw
+      - jq
 
 ffmuc_removed_packages:
   pkg.removed:

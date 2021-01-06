@@ -5,7 +5,8 @@ jitsi:
   public_domain: example.com
   authentication: False
   lobby_enabled: True
-  jibri_enabled: True
+  jibri_enabled: False
+  conference_mapper_url: "https://meet.example.com/conferencemapper"
 
   xmpp:
     server_host: localhost
@@ -61,3 +62,24 @@ jitsi:
     hosts:
       - hostname: turn1.example.com
         port: 443
+
+  asterisk:
+    enabled: False
+    jigasi_instances:
+      - ip: "127.0.0.1"
+        password: cccc
+        number: 2000
+    sip:
+      username: sip-user
+      password: sip-password
+      host: sip.example.com
+
+  jigasi:
+    enabled: False
+    global_ip: "1.2.3.4"
+    sip:
+      host: "127.0.0.1"
+      username: 2000
+      password: cccc
+    xmpp:
+      secret: SUPER_SECRET
