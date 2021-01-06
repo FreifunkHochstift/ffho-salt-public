@@ -95,6 +95,15 @@ ffmuc-wildcard-cert:
     - aliases:
         - "*.ffmuc.net"
         - "*.ext.ffmuc.net"
+        - "ffmeet.net"
+        - "ffmuc.bayern"
+        - "*.ffmuc.bayern"
+        - "freifunk-muenchen.de"
+        - "*.freifunk-muenchen.de"
+        - "freifunk-muenchen.net"
+        - "*.freifunk-muenchen.net"
+        - "xn--freifunk-mnchen-8vb.de"
+        - "*.xn--freifunk-mnchen-8vb.de"
     - email: hilfe@ffmuc.net
     - dns_plugin: cloudflare
     - dns_plugin_credentials: /var/lib/cache/salt/dns_plugin_credentials.ini
