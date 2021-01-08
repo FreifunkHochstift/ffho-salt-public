@@ -1,5 +1,5 @@
 # FFMUC-SALT-PUBLIC Repo
-This repo is a fork of Public FFHO configuration for Salt-Orchestrated OpenSource based Software Defined Freifunk Infrastructure :)
+This is the salt repo for Freifunk Munich
 
 ## Dependencies
 This repo makes heavy use of Netbox based ext-pillar information especially config_contexts, services and ip information
