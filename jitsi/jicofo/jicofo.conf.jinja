@@ -2,15 +2,14 @@
 # Jicofo HOCON configuration. See /usr/share/jicofo/jicofo.jar/reference.conf for
 #available options, syntax, and default values.
 jicofo {
-    brewery-jid = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
     bridge {
         selection-strategy = {{ jitsi.jicofo.bridge_selection_strategy }}
+        health-checks {
+            enabled = true
+            max-check-duration = 60 seconds
+        }
     }
-    health {
-        enabled = true
-        max-check-duration = 60 seconds
-    }
-{%- if jitsi.jibri_enabled %}
+{%- if jitsi.jibri_enabled and false %}{# not working yet #}
     jibri {
         brewery-jid = "{{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}"
         pending-timeout = 90 seconds
@@ -20,6 +19,7 @@ jicofo {
         enabled = true
         id = 42
     }
+{%- if false %}{# not working yet #}
 # currently handled via /etc/jitsi/jicofo/config. For future use
 #    xmpp {
 #        client {
@@ -30,4 +30,5 @@ jicofo {
 #            password = {{ jitsi.jicofo.password }}
 #        }
 #    }
+{%- endif %}
 }

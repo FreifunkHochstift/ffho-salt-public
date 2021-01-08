@@ -1,0 +1,5 @@
+{%- from "jitsi/map.jinja" import jitsi with context %}
+org.jitsi.jicofo.BRIDGE_MUC={{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}
+{%- if jitsi.jibri_enabled %}
+org.jitsi.jicofo.jibri.BREWERY={{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}
+{% endif %}
