@@ -25,23 +25,25 @@ jibri:
       - pkgrepo: jitsi-repo
   service.running:
     - enable: True
-    - reload: True
     - require:
       - file: /etc/jitsi/jibri/config.json
     - watch:
       - file: /etc/jitsi/jibri/config.json
 
 google-chrome-stable:
-  pkg.installed:
+  pkg.latest:
     - require:
       - pkgrepo: google-chrome-repo
 
-chromedriver-binary:
-  archive.extracted:
-    - name: /usr/local/bin/
-    - source: https://chromedriver.storage.googleapis.com/{{ jitsi.jibri.chromedriver_version }}/chromedriver_linux64.zip
-    - skip_verify: True
-    - enforce_toplevel: False
+setup_chromedriver_update_script:
+  file.managed:
+    - name: /usr/local/bin/update_chromedriver.sh
+    - source: salt://jitsi/jibri/update_chromedriver.sh
+    - mode: 0755
+
+execute_chromedriver_update:
+  cmd.run:
+    - name: /usr/local/bin/update_chromedriver.sh
 
 /etc/jitsi/jibri/config.json:
   file.managed:
