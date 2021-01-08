@@ -19,12 +19,12 @@ generate-dhparam:
     - name: openssl dhparam -out /etc/ssl/dhparam.pem 2048
     - creates: /etc/ssl/dhparam.pem
 
-# Install FFHO internal CA into Debian CA certificate mangling mechanism so
+# Install FFMUC internal CA into Debian CA certificate mangling mechanism so
 # libraries (read: openssl) can use the CA cert when validating internal
 # service certificates. By installing the cert into the local ca-certificates
 # directory and calling update-ca-certificates two symlinks will be installed
 # into /etc/ssl/certs which will both point to the crt file:
-#  * ffho-cacert.pem
+#  * ffmuc-cacert.pem
 #  * <cn-hash>.pem
 # The latter is use by openssl for validation.
 /usr/local/share/ca-certificates/ffmuc-cacert.crt:
@@ -63,7 +63,7 @@ generate-dhparam:
 
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
 {% set cloudflare_token = salt['pillar.get']('netbox:config_context:cloudflare:api_token') %}
-{% if "webserver-external" in role and cloudflare_token %}
+{% if ("webserver-external" in role or "jitsi meet" in role) and cloudflare_token %}
 
 certbot:
   pkg.installed
@@ -91,6 +91,7 @@ dns_credentials:
 
 ffmuc-wildcard-cert:
   acme.cert:
+  {% if "webserver-external" in role %}
     - name: ffmuc.net
     - aliases:
         - "*.ffmuc.net"
@@ -104,13 +105,22 @@ ffmuc-wildcard-cert:
         - "*.freifunk-muenchen.net"
         - "xn--freifunk-mnchen-8vb.de"
         - "*.xn--freifunk-mnchen-8vb.de"
+  {% else %}{# "jitsi meet" in role #}
+    - name: meet.ffmuc.net
+    - aliases:
+        - "ffmeet.de"
+        - "*.ffmeet.de"
+        - "ffmeet.net"
+        - "*.ffmeet.net"
+  {% endif %}
     - email: hilfe@ffmuc.net
     - dns_plugin: cloudflare
     - dns_plugin_credentials: /var/lib/cache/salt/dns_plugin_credentials.ini
+    #- renew: True
     - require:
         - pkg: certbot
         - pip: certbot-dns-cloudflare
         - pip: acme-client
         - file: dns_credentials
 
-{% endif %}{# if "webserver-external" in role and cloudflare_token #}
+{% endif %}{# if ("webserver-external" in role or "jitsi meet" in role) and cloudflare_token #}

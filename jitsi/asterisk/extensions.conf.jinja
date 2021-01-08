@@ -4,7 +4,10 @@ exten => s,1,Hangup()
 
 [von-voip-provider]
 exten => {{ jitsi.asterisk.sip.username }},1,Answer()
-same => n,Read(confid,hello&conf-getpin&astcc-followed-by-pound)
+same => n,Playback(hello)
+same => n,Playback(conf-getpin)
+same => n,Playback(astcc-followed-by-pound)
+same => n(getmeeting),Read(confid)
 same => n,Log(NOTICE, query conferenceMapper for pin ${confid});
 same => n,Set(CURL_RESULT=${SHELL(curl --silent {{ jitsi.conference_mapper_url }}?id=${confid} | jq -r .conference)})
 same => n,Log(NOTICE, conferenceMapper result is ${CURL_RESULT});
@@ -23,7 +26,7 @@ same => n,GotoIf($["${DIALSTATUS}" = "INVALIDARGS"]?error)
 same => n,Hangup()
 same => n(conf-unknown),Playback(conf-invalid)
 same => n,Log(ERROR, conferenceMapper did not find a conference for pin ${confid});
-same => n,Hangup()
+same => n,Goto(getmeeting)
 same => n(error),Playback(an-error-has-occured&pls-try-call-later)
 same => n,Log(ERROR, joining conference ${confid}, status is ${DIALSTATUS});
 same => n,Hangup()
