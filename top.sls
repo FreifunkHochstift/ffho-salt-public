@@ -72,6 +72,11 @@ base:
     - match: pillar
     - gogs
 
+  # graylog
+  nodes:{{ grains['id'] }}:roles:graylog:
+    - match: pillar
+    - graylog
+
   # KVM hosts
   nodes:{{ grains['id'] }}:roles:kvm:
     - match: pillar
