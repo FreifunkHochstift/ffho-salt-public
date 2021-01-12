@@ -18,6 +18,7 @@ base:
     - tmux
     - unattended-upgrades
     - vim
+    - ssh
   '*.in.ffmuc.net':
     - apt
     - certs
@@ -31,7 +32,6 @@ base:
     - kvm
     - ntp
     - snmpd
-    - ssh
   '*.meet.ffmuc.net':
     - nebula-meet
     - jitsi.base
