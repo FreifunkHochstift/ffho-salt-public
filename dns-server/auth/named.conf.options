@@ -18,7 +18,7 @@ options {
 
 	auth-nxdomain no;    # conform to RFC1035
 	{%- if salt["service.enabled"]("dnsdist") %}
-	listen-on port {{ listening_port }} { 127.0.0.1; };
+	listen-on port {{ listening_port }} { 127.0.0.1; {{ salt['grains.get']('ip4_interfaces:nebula0')[0] }}; };
 	listen-on-v6 port {{ listening_port }} { ::1; };
 	{% else %}
 	listen-on-v6 { any; };
