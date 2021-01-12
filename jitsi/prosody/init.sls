@@ -16,6 +16,8 @@ prosody-repo:
 prosody-dependencies:
   pkg.installed:
     - pkgs:
+      - libssl-dev
+      - gcc
       - lua-basexx
       - lua-event
       - lua-luaossl
@@ -23,7 +25,6 @@ prosody-dependencies:
       - luarocks
       - lua5.2
       - liblua5.2-dev
-      - patch
 
 # Hacks for enabling token auth in jitsi
 # https://community.jitsi.org/t/jitsi-meet-tokens-chronicles-on-debian-buster/76756
@@ -35,9 +36,8 @@ prosody-dependencies:
       - cmd: luarocks-/tmp/lua-cjson-2.1devel-1.linux-x86_64.rock
 
 {% for luapkg in [
-  "cyrussasl 1.1.0-1",
-  "net-url 0.9-1",
-  "luajwtjitsi 2.0-0"
+  "lbase64",
+  "luajwtjitsi",
   "/tmp/lua-cjson-2.1devel-1.linux-x86_64.rock"] %}
 luarocks-{{ luapkg }}:
   cmd.run:
@@ -55,6 +55,8 @@ prosody:
   service.running:
     - enable: True
     - reload: True
+    - require:
+      - file: remove-temporary-files
     - watch:
       - file: /etc/prosody/prosody.cfg.lua
       - file: /etc/prosody/conf.d/{{ jitsi.public_domain }}.cfg.lua
@@ -69,23 +71,23 @@ download-jitsi-meet-prosody:
 extract_prosody_modules:
   cmd.run:
     - name: dpkg -x /var/cache/apt/archives/jitsi-meet-prosody*.deb /tmp/jitsi-prosody-modules
-    - onchanges:
-      - pkg: download-jitsi-meet-prosody
     - require:
       - pkg: download-jitsi-meet-prosody
 
 copy-prosody-plugins:
-  file.recurse:
-    - name: /usr/share/jitsi-meet/prosody-plugins/
-    - source: /tmp/jitsi-prosody-modules/usr/share/jitsi-meet/prosody-plugins/
-    - onchanges:
-      - cmd: extract_prosody_modules
+  file.rename:
+    - name: /usr/share/jitsi-meet/prosody-plugins
+    - source: /tmp/jitsi-prosody-modules/usr/share/jitsi-meet/prosody-plugins
+    - makedirs: True
+    - force: True
     - require:
-      - pkg: extract_prosody_modules
+      - cmd: extract_prosody_modules
 
 patch_muc_owner_allow_kick:
-  cmd.run:
-    - name: patch -d /usr/lib/prosody/modules/muc -p0 < /usr/share/jitsi-meet/prosody-plugins/muc_owner_allow_kick.patch
+  file.patch:
+    - name: /usr/lib/prosody/modules/muc
+    - source: /usr/share/jitsi-meet/prosody-plugins/muc_owner_allow_kick.patch
+    - strip: 0
     - require:
       - file: copy-prosody-plugins
 
@@ -94,10 +96,10 @@ remove-temporary-files:
     - names:
       - /var/cache/apt/archives/jitsi-meet-prosody*.deb
       - /tmp/jitsi-prosody-modules
-      - /usr/share/jitsi-meet/prosody-plugins//muc_owner_allow_kick.patch
+      - /usr/share/jitsi-meet/prosody-plugins/muc_owner_allow_kick.patch
     - require:
       - file: copy-prosody-plugins
-      - cmd: patch_muc_owner_allow_kick
+      - file: patch_muc_owner_allow_kick
 
 /etc/prosody/prosody.cfg.lua:
   file.managed:
