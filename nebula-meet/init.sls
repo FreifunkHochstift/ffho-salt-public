@@ -43,8 +43,8 @@ generate_ssh_host_ed25519_key:
 /etc/nebula-meet/config.yml:
   file.managed:
     - source:
-        - salt://nebula-meet/files/{{ grains['id'] }}-config.yml.jinja
-        - salt://nebula-meet/files/config.yml.jinja
+      - salt://nebula-meet/files/{{ grains['id'] }}-config.yml.jinja
+      - salt://nebula-meet/files/config.yml.jinja
     - makedirs: True
     - template: jinja
     - user: root
@@ -53,11 +53,11 @@ generate_ssh_host_ed25519_key:
     - require:
         - file: /etc/nebula-meet/{{ grains['id'] }}.crt
 
-systemd-reload-nebula:
+systemd-reload-nebula-meet:
   cmd.run:
-   - name: systemctl --system daemon-reload
-   - onchanges:  
-     - file: nebula-meet-service-file
+    - name: systemctl --system daemon-reload
+    - onchanges:
+      - file: nebula-meet-service-file
 
 nebula-meet-service-file:
   file.managed:
@@ -66,18 +66,18 @@ nebula-meet-service-file:
     - require:
         - file: /etc/nebula-meet/{{ grains['id'] }}.crt
 
-nebula-service:
+nebula-meet-service:
   service.running:
     - enable: True
     - running: True
     - reload: True
     - name: nebula-meet
     - require:
-        - file: nebula-meet-service-file
-        - file: /etc/nebula-meet/config.yml
-        - file: /etc/nebula-meet/{{ grains['id'] }}.crt
-        - file: /etc/nebula-meet/{{ grains['id'] }}.key
-        - file: nebula-binary
+      - file: nebula-meet-service-file
+      - file: /etc/nebula-meet/config.yml
+      - file: /etc/nebula-meet/{{ grains['id'] }}.crt
+      - file: /etc/nebula-meet/{{ grains['id'] }}.key
+      - file: nebula-binary
     - watch:
         - file: /etc/nebula-meet/config.yml
 

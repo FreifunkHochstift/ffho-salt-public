@@ -76,7 +76,6 @@ jitsi:
 
   jigasi:
     enabled: False
-    global_ip: "1.2.3.4"
     sip:
       host: "127.0.0.1"
       username: 2000

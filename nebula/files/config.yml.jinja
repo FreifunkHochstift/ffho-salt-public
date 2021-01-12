@@ -1,6 +1,6 @@
 {%- from "nebula/map.jinja" import nebula with context %}
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{%- set roles = salt['pillar.get']('netbox:config_context:roles', []) %}
+{%- set roles = salt['pillar.get']('netbox:config_context:roles', []) -%}
 
 pki:
   ca: /etc/nebula/ca.crt

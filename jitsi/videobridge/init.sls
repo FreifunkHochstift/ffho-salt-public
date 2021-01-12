@@ -45,28 +45,28 @@ stats.in.ffmuc.net:
     - source: salt://jitsi/videobridge/config.jinja
     - template: jinja
     - watch_in:
-        - service: jitsi-videobridge2
+      - service: jitsi-videobridge2
 
 /etc/jitsi/videobridge/jvb.conf:
   file.managed:
     - source: salt://jitsi/videobridge/jvb.conf.jinja
     - template: jinja
     - watch_in:
-        - service: jitsi-videobridge2
+      - service: jitsi-videobridge2
 
 /etc/jitsi/videobridge/sip-communicator.properties:
   file.managed:
     - source: salt://jitsi/videobridge/sip-communicator.properties.jinja
     - template: jinja
     - watch_in:
-        - service: jitsi-videobridge2
+      - service: jitsi-videobridge2
 
 /usr/share/jitsi-videobridge/lib/videobridge.rc:
   file.managed:
     - source: salt://jitsi/videobridge/videobridge.rc
     - template: jinja
     - watch_in:
-        - service: jitsi-videobridge2
+      - service: jitsi-videobridge2
 
 /etc/systemd/system/jitsi-videobridge2.service.d/override.conf:
   file.managed:

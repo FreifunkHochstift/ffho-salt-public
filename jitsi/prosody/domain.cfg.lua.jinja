@@ -102,11 +102,11 @@ Component "lobby.{{ jitsi.public_domain }}" "muc"
 
 {%- if jitsi.jibri_enabled %}
 VirtualHost "recorder.{{ jitsi.public_domain }}"
-  modules_enabled = {
-    "ping";
-  }
-  authentication = "internal_plain"
-  c2s_require_encryption = false
-  allow_empty_token = true
+    modules_enabled = {
+        "ping";
+    }
+    authentication = "internal_plain"
+    c2s_require_encryption = false
+    allow_empty_token = true
 
 {% endif %}{# recorder enabled#}

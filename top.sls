@@ -44,7 +44,7 @@ base:
     - nginx
   'call*':
     - jitsi.asterisk
-    - jisti.jigasi
+    - jitsi.jigasi
   'gw*':
     - fastd
     - dhcp-server
