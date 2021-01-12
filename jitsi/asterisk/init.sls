@@ -30,7 +30,11 @@ asterisk:
 
 asterisk_german_sounds_core:
   archive.extracted:
+{% if grains.oscodename == "debian" %}
     - name: /var/lib/asterisk/sounds/de
+{% else %}{# ubuntu #}
+    - name: /usr/share/asterisk/sounds/de
+{% endif %}
     - source: https://www.asterisksounds.org/de/download/asterisk-sounds-core-de-sln16.zip
     - enforce_toplevel: False
     - skip_verify: True
@@ -39,7 +43,11 @@ asterisk_german_sounds_core:
 
 asterisk_german_sounds_extra:
   archive.extracted:
+{% if grains.oscodename == "debian" %}
     - name: /var/lib/asterisk/sounds/de
+{% else %}{# ubuntu #}
+    - name: /usr/share/asterisk/sounds/de
+{% endif %}
     - source: https://www.asterisksounds.org/de/download/asterisk-sounds-extra-de-sln16.zip
     - enforce_toplevel: False
     - skip_verify: True
