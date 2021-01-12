@@ -28,6 +28,8 @@ jitsi:
     username: "jvb"
     password: "THIS_IS_SUPER_SECRET_JVB"
     brewery_room: JvbBrewery
+    load_management:
+      packet_rate: 50000
     octo:
       enabled: false
       interface: tun0 # or "ip_addr: 127.0.0.1"

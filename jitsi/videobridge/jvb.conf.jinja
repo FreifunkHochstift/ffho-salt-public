@@ -35,6 +35,15 @@ videobridge {
             enabled = true
         }
     }
+    load-management {
+        reducer-enabled = false
+        load-measurements {
+            packet-rate {
+                load-threshold = {{ jitsi.videobridge.load_management.packet_rate }}
+                recovery-threshold = {{ ( jitsi.videobridge.load_management.packet_rate * 0.8 ) | round | int }}
+            }
+        }
+    }
     {%- if jitsi.videobridge.octo.enabled %}
     octo {
         enabled = true
