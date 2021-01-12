@@ -1,0 +1,18 @@
+###
+# Cloudflare IPs (Salt managed)
+###
+
+{% set cf_v4 = salt["http.query"]("https://www.cloudflare.com/ips-v4") %}
+{%- for ip in cf_v4.body.split("\n") %}
+{%- if "" != ip %}
+set_real_ip_from {{ ip }};
+{%- endif %}
+{%- endfor %}
+{% set cf_v6 = salt["http.query"]("https://www.cloudflare.com/ips-v6") %}
+{%- for ip in cf_v6.body.split("\n") %}
+{%- if "" != ip %}
+set_real_ip_from {{ ip }};
+{%- endif %}
+{%- endfor %}
+
+real_ip_header CF-Connecting-IP;

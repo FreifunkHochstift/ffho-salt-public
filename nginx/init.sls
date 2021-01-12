@@ -90,6 +90,16 @@ nginx-module-{{module}}:
       - cmd: nginx-configtest
 {% endfor %}{# stream #}
 
+/etc/nginx/conf.d/cloudflare-realips.conf:
+  file.managed:
+    - source: salt://nginx/files/cloudflare-realips.conf.jinja
+    - makedirs: True
+    - template: jinja
+    - require:
+      - pkg: nginx
+    - require_in:
+      - service: nginx
+
 /etc/nginx/conf.d/log_json.conf:
   file.managed:
     - source: salt://nginx/files/log_json.conf.jinja
