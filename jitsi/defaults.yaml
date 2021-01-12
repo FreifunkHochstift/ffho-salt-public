@@ -9,8 +9,18 @@ jitsi:
   conference_mapper_url: "https://meet.example.com/conferencemapper"
 
   xmpp:
+    # for shardingaware components
+    shard-example:
+      auth_domain: auth.example.com
+      server_host: localhost
+      brewery_domain: internal.auth.meet.ffmuc.net
+
+    # for components which cannot be sharded
+    auth_domain: auth.example.com
     server_host: localhost
     xmpp_domain: test.meet.ffmuc.net
+    brewery_domain: internal.auth.meet.ffmuc.net
+
     auth_domain: auth.example.com
     port: 5347
     brewery_domain: internal.auth.meet.ffmuc.net

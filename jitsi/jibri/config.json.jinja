@@ -1,13 +1,17 @@
 {%- from "jitsi/map.jinja" import jitsi with context %}
+{%- set server_hosts = [] %}
+{%- for shard in jitsi.xmpp.keys() %}
+    {%- if "shard" in shard %}
+        {%- do server_hosts.append(jitsi.xmpp[shard].server_host) %}
+    {%- endif %}
+{%- endfor %}
 {
     "recording_directory":"{{ jitsi.jibri.recording_directory }}",
     "finalize_recording_script_path": "{{ jitsi.jibri.finalize_recording_script_path }}",
     "xmpp_environments": [
         {
             "name": "{{ jitsi.jibri.xmpp.environment_name }}",
-            "xmpp_server_hosts": [
-                "{{ jitsi.xmpp.server_host }}"
-            ],
+            "xmpp_server_hosts": {{ server_hosts | replace("'",'"') }},
             "xmpp_domain": "{{ jitsi.xmpp.xmpp_domain }}",
             "control_login": {
                 "domain": "{{ jitsi.jibri.xmpp.control_login.domain }}",

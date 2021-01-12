@@ -12,6 +12,9 @@
     merge=_config,
 )
 %}
+{# some cleanups caused by documentation #}
+{% do jitsi.xmpp.pop("shard-example", None) %}
+
 {# some fallbacks #}
 {% if not jitsi.xmpp.get('muc_nickname') %}
 {% do jitsi.xmpp.update({'muc_nickname' : grains.id.split('.')[0] + "." + jitsi.xmpp.xmpp_domain }) %}

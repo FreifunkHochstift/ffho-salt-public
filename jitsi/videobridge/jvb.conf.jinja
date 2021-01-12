@@ -7,15 +7,19 @@ videobridge {
         }
         xmpp-client {
             configs {
-                shard1 {
-                    hostname = "{{ jitsi.xmpp.server_host }}"
-                    domain   = "{{ jitsi.xmpp.auth_domain }}"
+{%- for shard in jitsi.xmpp.keys() %}
+    {%- if "shard" in shard %}
+                {{ shard }} {
+                    hostname = "{{ jitsi.xmpp[shard].server_host }}"
+                    domain   = "{{ jitsi.xmpp[shard].auth_domain }}"
                     username = "{{ jitsi.videobridge.username }}"
                     password = "{{ jitsi.videobridge.password }}"
-                    muc_jids = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
+                    muc_jids = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp[shard].brewery_domain }}"
                     muc_nickname = "{{ jitsi.xmpp.muc_nickname }}"
                     disable_certificate_verification = true
                 }
+    {%- endif %}
+{%- endfor %}
             }
         }
     }
