@@ -2,16 +2,18 @@ user www-data;
 
 pid /run/nginx.pid;
 
+include /etc/nginx/modules-enabled/*.conf;
+
 load_module /usr/lib/nginx/modules/ngx_http_fancyindex_module.so;
 load_module /usr/lib/nginx/modules/ngx_http_brotli_filter_module.so;
 load_module /usr/lib/nginx/modules/ngx_http_brotli_static_module.so;
 
-{% set worker_connections = 10768 -%}
-worker_processes       {{ grains.num_cpus }};
-worker_rlimit_nofile   {{ worker_connections * grains.num_cpus }}; # worker_connections * cpu-count
+{% set worker_connections = 100768 -%}
+worker_processes       {{ salt["pillar.get"]("netbox:config_context:nginx:worker_processes", grains.num_cpus) }};
+worker_rlimit_nofile   {{ worker_connections }}; # We need to allow as many openfiles as worker_connections
 events {
 	multi_accept       on;
-	worker_connections {{ worker_connections }};
+	worker_connections {{ worker_connections }}; # Raise as much as we think is needed
 	use                epoll;
 }
 
