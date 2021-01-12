@@ -66,6 +66,34 @@ del_telegraf_from_pdns_group:
     - watch_in:
           service: telegraf
 
+{% if salt["pillar.get"]("netbox:config_context:jitsi:asterisk:enabled", False) %}
+/usr/local/bin/get_asterisk_calls.sh:
+  file.managed:
+    - contents: |
+        #!/bin/bash
+        asterisk -x "core show channels" | awk '/active call/ {print $1}'
+    - mode: 0750
+    - user: root
+
+/etc/sudoers.d/telegraf_asterisk:
+  file.managed:
+    - contents: |
+        telegraf    ALL=(ALL:ALL) NOPASSWD:/usr/local/bin/get_asterisk_calls.sh
+
+/etc/telegraf/telegraf.d/in-asterisk.conf:
+  file.managed:
+    - source: salt://telegraf/files/in_asterisk.conf
+    - watch_in:
+          service: telegraf
+{% else %}
+remove_asterisk_monitoring:
+  file.absent:
+    - names:
+      - /usr/local/bin/get_asterisk_calls.sh
+      - /etc/sudoers.d/telegraf_asterisk
+      - /etc/telegraf/telegraf.d/in-asterisk.conf
+{% endif %}
+
 {% if salt["service.enabled"]("coturn") %}
 /usr/local/bin/coturn_sessions:
   file.managed:
