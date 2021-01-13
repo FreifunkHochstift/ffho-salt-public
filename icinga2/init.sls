@@ -25,12 +25,22 @@ icinga2:
 
 # Add override for ExecStart to close stdio
 /etc/systemd/system/icinga2.service.d/override.conf:
+{% if grains.oscodename == "buster" %}
   file.managed:
     - source: salt://icinga2/systemd.override.conf
     - require:
       - file: /etc/systemd/system/icinga2.service.d
     - watch_in:
       - service: icinga2
+{% else %}
+  file.absent
+{% endif %}
+
+systemd-reload:
+  cmd.run:
+    - name: systemctl daemon-reload
+    - watch:
+      - file: /etc/systemd/system/icinga2.service.d/override.conf
 
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
