@@ -15,6 +15,15 @@ jitsi-videobridge2:
   service.running:
     - enable: True
 
+jvb-ffmuc-version:
+  pkg.installed:
+    - require:
+      - pkg: jitsi-videobridge2 # for dependencies
+    - required_in:
+      - service: jitsi-videobridge2 # only start if this version got installed
+    - sources:
+      - jitsi-videobridge2: https://download.jitsi.org/unstable/jitsi-videobridge2_2.1-411-g9754898e-1_all.deb
+
 systemd-reload-jvb:
   cmd.run:
     - name: systemctl --system daemon-reload
@@ -27,23 +36,13 @@ systemd-reload-jvb:
 stats.in.ffmuc.net:
   host.present:
     - ip: 10.111.0.254
-#jicofo-and-xmpp-ip:
-#  host.present:
-#    - names:
-#       - {{ jitsi.videobridge.jicofo.hostname }}
-#    - ip: 10.111.0.1
-#
-#videobridge-system-config:
-#  network.system:
-#    - enabled: True
-#    - hostname: "{{ grains.id.split('.')[0] }}.{{jitsi.videobridge.jicofo.hostname}}"
-#    - nisdomain: "{{jitsi.videobridge.jicofo.hostname}}"
-#    - apply_hostname: True
 
 /etc/jitsi/videobridge/config:
   file.managed:
     - source: salt://jitsi/videobridge/config.jinja
     - template: jinja
+    - require:
+      - pkg: jvb-ffmuc-version # only start if this version got installed
     - watch_in:
       - service: jitsi-videobridge2
 
@@ -51,6 +50,8 @@ stats.in.ffmuc.net:
   file.managed:
     - source: salt://jitsi/videobridge/jvb.conf.jinja
     - template: jinja
+    - require:
+      - pkg: jvb-ffmuc-version # only start if this version got installed
     - watch_in:
       - service: jitsi-videobridge2
 
@@ -58,6 +59,8 @@ stats.in.ffmuc.net:
   file.managed:
     - source: salt://jitsi/videobridge/sip-communicator.properties.jinja
     - template: jinja
+    - require:
+      - pkg: jvb-ffmuc-version # only start if this version got installed
     - watch_in:
       - service: jitsi-videobridge2
 
@@ -65,6 +68,8 @@ stats.in.ffmuc.net:
   file.managed:
     - source: salt://jitsi/videobridge/videobridge.rc
     - template: jinja
+    - require:
+      - pkg: jvb-ffmuc-version # only start if this version got installed
     - watch_in:
       - service: jitsi-videobridge2
 
