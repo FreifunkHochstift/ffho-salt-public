@@ -143,6 +143,14 @@ firewall:
   - port: 8087
     proto: tcp
     host: any
+  # Allow connections for conferencemapper.ffmuc.net
+  - port: 8001
+    proto: tcp
+    group: webfrontend
+  # RTMP Backend for tv.ffmuc.net
+  - port: 1935
+    proto: tcp
+    host: any
 {%- endif %}
 {%- if "docker05.in.ffmuc.net" == grains["id"] %}
   # Allow connections for chat.ffmuc.net
