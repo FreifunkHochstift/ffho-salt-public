@@ -15,6 +15,7 @@ base:
     - ntp
     - postfix
     - rsyslog
+    - salt-minion
     - screen
     - snmpd
     - ssh

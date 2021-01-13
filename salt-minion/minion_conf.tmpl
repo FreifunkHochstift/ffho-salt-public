@@ -1,0 +1,42 @@
+#
+# Salt minion config (Salt managed)
+#
+
+master: {{ salt_config['master'] }}
+master_port: {{ salt_config['master_port'] }}
+ipv6: {{ salt_config['ipv6'] }}
+
+# When waiting for a master to accept the minion's public key, salt will
+# continuously attempt to reconnect until successful. This is the time, in
+# seconds, between those reconnection attempts.
+acceptance_wait_time: 10
+
+# If this is nonzero, the time between reconnection attempts will increase by
+# acceptance_wait_time seconds per iteration, up to this maximum. If this is
+# set to zero, the time between reconnection attempts will stay constant.
+acceptance_wait_time_max: 0
+
+# Cache rendered pillar data on the minion. Default is False.
+# This may cause 'cachedir'/pillar to contain sensitive data that should be
+# protected accordingly.
+minion_pillar_cache: False
+
+# Set this option to 'True' to force a 'KeyError' to be raised whenever an
+# attempt to retrieve a named value from pillar fails. When this option is set
+# to 'False', the failed attempt returns an empty string. Default is 'False'.
+pillar_raise_on_missing: True
+
+# The state_verbose and state_output settings can be used to change the way
+# state system data is printed to the display. By default all data is printed.
+# The state_verbose setting can be set to True or False, when set to False
+# all data that has a result of True and no changes will be suppressed.
+state_verbose: False
+
+# The state_output_diff setting changes whether or not the output from
+# successful states is returned. Useful when even the terse output of these
+# states is cluttering the logs. Set it to True to ignore them.
+#state_output_diff: False
+
+# The state_output_profile setting changes whether profile information
+# will be shown for each state run.
+#state_output_profile: True
