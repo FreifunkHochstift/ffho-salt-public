@@ -71,6 +71,44 @@ firewall:
   - port: 60001-60010
     proto: udp
     host: any
+{%- if "docker05.in.ffmuc.net" == grains["id"] %}
+  # Allow salt access for any host in the network
+  - port: 4505-4506
+    proto: tcp
+    host: any
+{% elif "jicofo" in grains["id"] %}
+  # Allow XMPP
+  - port: 5222
+    proto: any
+    group: jvb
+  - port: 5347
+    proto: any
+    group: jvb
+  - port: 5222
+    proto: any
+    group: jibri
+  # allow jibris to connect (websocket)
+  - port: 443
+    proto: tcp
+    group: jibri
+  - port: 443
+    proto: tcp
+    group: jvb
+{%- elif "stats.in.ffmuc.net" == grains["id"] %}
+  # Allow stats incoming
+  - port: 8086
+    proto: tcp
+    group: jibri
+  - port: 8086
+    proto: tcp
+    group: jicofo
+  - port: 8086
+    proto: tcp
+    group: jigasi
+  - port: 8086
+    proto: tcp
+    group: jvb
+{%- else %}
   # Allow tcp/443 from any host with BOTH laptop and home group
   - port: 9090
     proto: tcp
@@ -82,3 +120,4 @@ firewall:
   - port: 10000
     proto: udp
     group: jibri
+{%- endif %}
