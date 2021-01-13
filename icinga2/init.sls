@@ -8,33 +8,29 @@ include:
   - sudo
   - needrestart
 
+/etc/apt/trusted.gpg.d/icinga.gpg:
+  file.managed:
+    - source: salt://icinga2/icinga.gpg
+
+/etc/apt/sources.list.d/icinga.list:
+  file.managed:
+    - source: salt://icinga2/icinga.list.tmpl
+    - template: jinja
+    - require:
+      - file: /etc/apt/trusted.gpg.d/icinga.gpg
 
 # Install icinga2 package
 icinga2:
   pkg.installed:
     - name: icinga2
+    - require:
+      - file: /etc/apt/sources.list.d/icinga.list
   service.running:
     - enable: True
     - reload: True
 
-# Create directory for systemd overrides
-/etc/systemd/system/icinga2.service.d:
-  file.directory:
-    - require:
-      - pkg: icinga2
-
-# Add override for ExecStart to close stdio
 /etc/systemd/system/icinga2.service.d/override.conf:
-{% if grains.oscodename == "buster" %}
-  file.managed:
-    - source: salt://icinga2/systemd.override.conf
-    - require:
-      - file: /etc/systemd/system/icinga2.service.d
-    - watch_in:
-      - service: icinga2
-{% else %}
   file.absent
-{% endif %}
 
 systemd-reload:
   cmd.run:
