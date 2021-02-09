@@ -77,6 +77,13 @@ nginx-module-{{module}}:
     - watch_in:
       - cmd: nginx-configtest
 
+{% if domain == "recorder.ffmuc.net" %}
+/srv/www/recorder.ffmuc.net:
+  file.recurse:
+    - source: salt://nginx/files/recorder.ffmuc.net
+    - clean: True
+{% endif %}{# if domain == "recorder.ffmuc.net" #}
+
 {% endfor %}{# domain #}
 
 {% for stream in salt['pillar.get']('netbox:config_context:webserver:streams') %}
