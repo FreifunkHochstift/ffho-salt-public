@@ -412,3 +412,6 @@ callback_url = https://stats.ffmuc.net/
 # Concurrent render request limit affects when the /render HTTP endpoint is used. Rendering many images at the same time can overload the server,
 # which this setting can help protect against by only allowing a certain amount of concurrent requests.
 concurrent_render_request_limit = 30
+
+[plugin.grafana-image-renderer]
+rendering_ignore_https_errors = true
