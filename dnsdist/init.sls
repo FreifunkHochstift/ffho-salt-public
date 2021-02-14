@@ -1,7 +1,7 @@
 #
 # dnsdist
 #
-{% if 'dnsdist' in salt['pillar.get']('netbox:config_context:roles') %}
+{% if 'dnsdist' in salt['pillar.get']('netbox:tag_list', []) %}
 
 dnsdist-repo:
   pkgrepo.managed:
