@@ -9,7 +9,7 @@ python3-pyroute2:
   git.latest:
     - name: https://github.com/freifunkMUC/wgkex
     - target: /srv/wgkex
-    - rev: master
+    - rev: main
 
 /etc/systemd/system/wgkex.service:
   file.managed:
