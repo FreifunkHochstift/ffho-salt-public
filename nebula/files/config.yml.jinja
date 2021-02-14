@@ -28,6 +28,19 @@ punchy:
   respond: true
   delay: 1s
 
+{%- if nebula.loophole.enabled %}
+sshd:
+  enabled: true
+  listen: 127.0.0.1:2222
+  host_key: /etc/nebula/ssh_host_ed25519_key
+  authorized_users:
+    - user: loop
+      keys:
+      {% for key in nebula.loophole.keys %}
+       - {{ key }}
+      {%- endfor %}
+{%- endif %}
+
 local_range: "{{ nebula.local_range }}"
 
 tun:
