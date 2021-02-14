@@ -99,6 +99,9 @@ ffmuc-wildcard-cert:
         - "ffmeet.net"
         - "ffmuc.bayern"
         - "*.ffmuc.bayern"
+        - "fnmuc.net"
+        - "*.fnmuc.net"
+        - freie-netze.org
         - "freifunk-muenchen.de"
         - "*.freifunk-muenchen.de"
         - "freifunk-muenchen.net"
