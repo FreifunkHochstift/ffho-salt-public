@@ -20,7 +20,6 @@ map $ip_anonym1$ip_anonym2 $ip_anonymized {
 log_format json_{{ flavor }} escape=json '{'
    {#- just to see something human friendly #}
    '"message":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %} $host - $request_method $request_uri - $status",'
-   {#- now the "future" variables #}
    '"timestamp": "$time_iso8601",'
    '"http_host":"$host",'
    '"port":"$server_port",'

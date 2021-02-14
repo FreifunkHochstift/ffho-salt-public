@@ -94,7 +94,7 @@ firewall:
   - port: 443
     proto: tcp
     group: jvb
-{%- elif "stats.in.ffmuc.net" == grains["id"] %}
+{%- elif "metrics.in.ffmuc.net" == grains["id"] %}
   # Allow stats incoming
   - port: 8086
     proto: tcp
@@ -108,7 +108,15 @@ firewall:
   - port: 8086
     proto: tcp
     group: jvb
-{%- else %}
+{%- elif "docker06.in.ffmuc.net" == grains["id"] %}
+  # Graylog in
+  - port: 9000
+    proto: tcp
+    group: any
+  - port: 5044
+    proto: tcp
+    group: any
+{%- elif "jvb" in grains["id"] %}
   # Allow tcp/443 from any host with BOTH laptop and home group
   - port: 9090
     proto: tcp
