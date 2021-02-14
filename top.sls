@@ -54,7 +54,7 @@ base:
     - respondd
 #  'webfrontend03.in.ffmuc.net':
 #    - cloudflare
-  'webfrontend0[3-4].in.ffmuc.net':
+  'webfrontend0[3-6].in.ffmuc.net':
     - dns-server/auth
   'vpn0*.in.ffmuc.net':
     - wireguard
