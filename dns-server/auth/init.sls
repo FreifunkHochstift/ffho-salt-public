@@ -9,7 +9,7 @@
 {% set cnames = salt['pillar.get']('netbox:config_context:dns_zones:cnames') %}
 {%- set node_has_overlay = [] %}{# List of node[0] #}
 
-{%- if salt["service.enabled"]("dnsdist") %}
+{%- if 'dnsdist' in salt['pillar.get']('netbox:tag_list', []) %}
 {%- set listening_port = 553 %}
 {%- else %}
 {%- set listening_port = 53 %}

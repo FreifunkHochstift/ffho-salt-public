@@ -119,6 +119,9 @@ ffmuc-wildcard-cert:
     - email: hilfe@ffmuc.net
     - dns_plugin: cloudflare
     - dns_plugin_credentials: /var/lib/cache/salt/dns_plugin_credentials.ini
+    - owner: root
+    - group: ssl-cert
+    - mode: 0640
     #- renew: True
     - require:
         - pkg: certbot
@@ -127,3 +130,14 @@ ffmuc-wildcard-cert:
         - file: dns_credentials
 
 {% endif %}{# if ("webserver-external" in role or "jitsi meet" in role) and cloudflare_token #}
+
+{% if "webfrontend" in grains.id %}
+/etc/letsencrypt/archive/:
+  file.directory:
+    - group: ssl-cert
+    - mode: 0750
+/etc/letsencrypt/live/:
+  file.directory:
+    - group: ssl-cert
+    - mode: 0750
+{% endif %}
