@@ -3,6 +3,8 @@
 ---
 jitsi:
   public_domain: example.com
+  subdomains:
+    - exampledomain
   authentication: False
   lobby_enabled: True
   jibri_enabled: False

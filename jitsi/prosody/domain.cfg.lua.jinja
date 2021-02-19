@@ -8,6 +8,9 @@ cross_domain_websocket = true;
 cross_domain_bosh = false;
 consider_bosh_secure = true;
 
+-- domain mapper options, must at least have domain base set to use the mapper
+muc_mapper_domain_base = "{{ jitsi.public_domain }}";
+
 VirtualHost "{{ jitsi.xmpp.xmpp_domain }}"
     authentication = {% if jitsi.authentication %}"internal_plain"{% else %}"token"{% endif %}
     ssl = {
@@ -108,5 +111,9 @@ VirtualHost "recorder.{{ jitsi.public_domain }}"
     authentication = "internal_plain"
     c2s_require_encryption = false
     allow_empty_token = true
-
 {% endif %}{# recorder enabled#}
+
+{%- for domain in jitsi.subdomains %}
+Component "conference.{{ domain }}.{{ jitsi.public_domain }}" "muc"
+    modules_enabled = { "muc_domain_mapper" }
+{% endfor %}
