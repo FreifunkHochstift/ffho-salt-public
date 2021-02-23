@@ -127,16 +127,6 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "docker01.in.ffmuc.net" == grains["id"] %}
-    # Graylog Webfrontend
-  - port: 9000
-    proto: tcp
-    host: any
-  # Allow pushing to graylog via filebeat
-  - port: 5044
-    proto: tcp
-    host: any
-{%- endif %}
 {%- if "docker04.in.ffmuc.net" == grains["id"] %}
   # Allow connections for draw
   - port: 5001
@@ -190,7 +180,7 @@ firewall:
   - port: 8002
     proto: tcp
     group: webfrontend
-  # Allow connections for ffmuc.net/speed
+  # Allow connections for speed.ffmuc.net
   - port: 8888
     proto: tcp
     group: webfrontend
@@ -233,18 +223,8 @@ firewall:
   - port: 5044
     proto: tcp
     host: any
-  # Allow forwarding from deprecated graylog instance
-  - port: 12201
-    proto: udp
-    host: docker01.in.ffmuc.net
 {%- endif %}
-{%- if "map.in.ffmuc.net" == grains["id"] %}
-  # Allow stats access
-  - port: 80
-    proto: tcp
-    group: webfrontend
-{%- endif %}
-{%- if "stats.in.ffmuc.net" == grains["id"] or 'metrics.in.ffmuc.net' == grains["id"] %}
+{%- if 'metrics.in.ffmuc.net' == grains["id"] %}
   # Allow stats access
   - port: 3000
     proto: tcp
@@ -254,15 +234,6 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "icinga2.in.ffmuc.net" == grains["id"] %}
-  # Allow icinga2
-  - port: 5665
-    proto: tcp
-    host: any
-{%- endif %}
-  - port: 5665
-    proto: tcp
-    host: icinga2.in.ffmuc.net
 {%- if "dnsserver" == role or "dnsdist" in roles or "gateway" in role %}
   - port: 53
     proto: udp
