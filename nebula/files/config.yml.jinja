@@ -1,6 +1,6 @@
 {%- from "nebula/map.jinja" import nebula with context %}
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
-{%- set roles = salt['pillar.get']('netbox:config_context:roles', []) -%}
+{%- set tags = salt['pillar.get']('netbox:tag_list', []) %}
 
 pki:
   ca: /etc/nebula/ca.crt
@@ -121,12 +121,6 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "salt_master" in roles %}
-    # Allow salt access for any host in the network
-  - port: 4505-4506
-    proto: tcp
-    host: any
-{%- endif %}
 {%- if "docker04.in.ffmuc.net" == grains["id"] %}
   # Allow connections for draw
   - port: 5001
@@ -234,7 +228,7 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "dnsserver" == role or "dnsdist" in roles or "gateway" in role %}
+{%- if "dnsserver" == role or "dnsdist" in tags or "gateway" in role %}
   - port: 53
     proto: udp
     host: any
@@ -252,7 +246,7 @@ firewall:
     proto: tcp
     host: any
 {%- endif %}
-{%- if "dnsdist" in roles %}
+{%- if "dnsdist" in tags %}
   - port: 8083
     proto: tcp
     host: any
