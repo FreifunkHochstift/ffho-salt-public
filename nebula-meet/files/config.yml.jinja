@@ -89,11 +89,15 @@ firewall:
   - port: 4505-4506
     proto: tcp
     host: any
-{% elif "jicofo" in grains["id"] %}
+{% elif "jicofo" in grains["id"] or "jvb0.meet" in grains["id"] %}
   # Allow XMPP
   - port: 5222
     proto: any
     group: jvb
+  # reverse proxy websocket internally
+  - port: 5280
+    proto: tcp
+    group: jicofo
   - port: 5347
     proto: any
     group: jvb
