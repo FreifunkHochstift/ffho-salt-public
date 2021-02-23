@@ -47,6 +47,18 @@ Component "conference.{{ jitsi.public_domain }}" "muc"
     muc_room_locking = false
     muc_room_default_public_jids = true
 
+{% for domain in jitsi.subdomains %}
+Component "conference.{{ domain }}.{{ jitsi.public_domain }}" "muc"
+    storage = "memory"
+    modules_enabled = {
+        "muc_meeting_id";
+        "muc_domain_mapper";
+    }
+    muc_room_cache_size = 10000
+    muc_room_locking = false
+    muc_room_default_public_jids = true
+{% endfor %}
+
 -- internal muc component
 Component "internal.auth.{{ jitsi.public_domain }}" "muc"
     storage = "memory"
@@ -71,7 +83,7 @@ Component "speakerstats.{{ jitsi.public_domain }}" "speakerstats_component"
 Component "conferenceduration.{{ jitsi.public_domain }}" "conference_duration_component"
     muc_component = "conference.{{ jitsi.public_domain }}"
 
-{% if jitsi.authentication %}
+{%- if jitsi.authentication %}
 -- to allow guests to be able to join as well
 VirtualHost "guest.{{ jitsi.public_domain }}"
     authentication = "anonymous"
@@ -112,8 +124,3 @@ VirtualHost "recorder.{{ jitsi.public_domain }}"
     c2s_require_encryption = false
     allow_empty_token = true
 {% endif %}{# recorder enabled#}
-
-{%- for domain in jitsi.subdomains %}
-Component "conference.{{ domain }}.{{ jitsi.public_domain }}" "muc"
-    modules_enabled = { "muc_domain_mapper" }
-{% endfor %}
