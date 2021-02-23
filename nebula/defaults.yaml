@@ -15,7 +15,6 @@ nebula:
         host: 0.0.0.0
         port: 0
 
-    local_range: 127.0.0.1/8
     loophole:
         enabled: false
         ssh_keys:

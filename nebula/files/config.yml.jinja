@@ -36,12 +36,24 @@ sshd:
   authorized_users:
     - user: loop
       keys:
-      {% for key in nebula.loophole.keys %}
+      {%- for key in nebula.loophole.ssh_keys %}
        - {{ key }}
       {%- endfor %}
 {%- endif %}
 
-local_range: "{{ nebula.local_range }}"
+
+{%- set local_prefixes = salt['pillar.get']("netbox:site:prefixes") %}
+preferred_ranges:
+{%- for prefix in local_prefixes %}
+  {%- if prefix.status.value == "active" and prefix.family.value == 4 and prefix.role and prefix.role.slug == "pop-internal" %}
+  - "{{ prefix.prefix }}"
+  {%- endif %}
+{%- endfor %}
+{%- for prefix in local_prefixes %}
+  {%- if prefix.status.value == "active" and prefix.family.value == 4 and prefix.role and prefix.role.slug == "public" %}
+  - "{{ prefix.prefix }}"
+  {%- endif %}
+{%- endfor %}
 
 tun:
   dev: {{ nebula.interface }}
