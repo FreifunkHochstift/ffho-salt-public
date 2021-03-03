@@ -19,6 +19,13 @@ lighthouse:
     - {{ lighthouse }}
 {%- endfor %}
 
+  local_allow_list:
+    interfaces:
+      lo: false
+{%- if 'docker' in grains.id %}{# dont filter gw*-networks#}
+      'br-.*': false
+{%- endif %}
+
 listen:
   host: {{ nebula.listen.host }}
   port: {{ nebula.listen.port }}
