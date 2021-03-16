@@ -50,12 +50,6 @@ add_telegraf_pdns_group:
     - name: pdns
     - addusers:
       - telegraf
-{% else %}
-del_telegraf_from_pdns_group:
-  group.present:
-    - name: pdns
-    - delusers:
-      - telegraf
 {% endif %}
 
 /etc/telegraf/telegraf.conf:
