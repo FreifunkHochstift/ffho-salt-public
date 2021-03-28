@@ -148,7 +148,7 @@ ff_fastd_con_pkgs:
 
 /usr/local/bin/ff_fastd_conn:
   file.managed:
-    - source: salt://fastd/ff_fastd_con
+    - source: salt://fastd/ff_fastd_conn
     - mode: 755
     - user: root
     - group: root
