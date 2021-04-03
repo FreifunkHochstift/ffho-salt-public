@@ -2,20 +2,12 @@
 # Linux Kernel
 #
 
-{% set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
-{% set version_fallback = "amd64" %}
-{% set version_global = salt['pillar.get']('ffho:kernel_version', version_fallback) %}
-{% set version = node_config.get('kernel_version', version_global) %}
-
 linux-kernel:
   pkg.latest:
-    - name: linux-image-{{ version }}
+    - name: linux-image-{{ grains.osarch }}
 
-{#
- # Install kernel headers if we might need to compile a batman_adv module on this node.
- #}
-{% if 'batman' in node_config.get('roles', []) and 'v14' in grains['id'] %}
-linux-headers:
-  pkg.latest:
-    - name: linux-headers-{{ version }}
+# On buster we go for the Kernel from backports (current 5.10.x)
+# as it includes B.A.T.M.A.N. hop-penalty per interface
+{% if grains.oscodename == 'buster' %}
+    - fromrepo: buster-backports
 {% endif %}
