@@ -357,7 +357,7 @@ bird6-configure:
 #
 # RAdvd (for B.A.T.M.A.N. Gateways / L3-Access)
 #
-{% if status == 'active' and ('radv' in roles or 'l3-access' in roles or ('batman_gw' in roles and grains.id.startswith('gw'))) %}
+{% if status in [ 'active', 'offline' ] and ('radv' in roles or 'l3-access' in roles or ('batman_gw' in roles and grains.id.startswith('gw'))) %}
 /etc/bird/bird6.d/radv.conf:
   file.managed:
     - source: salt://bird/radv.conf
