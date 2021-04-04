@@ -10,11 +10,9 @@
 
 {%- if 'batman' in roles %}
 batctl:
-  pkg.installed:
+  pkg.latest:
 {% if grains.oscodename == 'buster' %}
     - fromrepo: buster-backports
-{% else %}
-    - fromrepo: {{ grains.oscodename }}
 {% endif %}
 
 
