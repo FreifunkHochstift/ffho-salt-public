@@ -6,9 +6,6 @@ salt-minion:
   pkg.installed:
     - pkgs:
       - salt-minion
-{% if grains.oscodename == "buster" %}
-      - python3-tornado
-{% endif %}
   service.running:
     - enable: true
 #    - reload: true
