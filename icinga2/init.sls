@@ -29,17 +29,6 @@ icinga2:
     - enable: True
     - reload: True
 
-/etc/systemd/system/icinga2.service.d/override.conf:
-  file.absent
-
-systemd-reload:
-  cmd.run:
-    - name: systemctl daemon-reload
-    - watch:
-      - file: /etc/systemd/system/icinga2.service.d/override.conf
-    - watch_in:
-      - service: icinga2
-
 # Install plugins (official + our own)
 monitoring-plugin-pkgs:
   pkg.installed:
