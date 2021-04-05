@@ -20,6 +20,7 @@ base:
     - snmpd
     - ssh
     - sysctl
+    - systemd
     - timezone
     - vim
     - unattended-upgrades
