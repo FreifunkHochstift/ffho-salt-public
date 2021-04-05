@@ -11,6 +11,7 @@ timeout=30
 # Wait for IPv4 default route to emerge
 (
 	for n in $(seq 1 $timeout); do
+		# If there is an IPv4 default route, stop waiting
 		if ip -4 route | grep -q "^default"; then
 			break
 		fi
@@ -22,15 +23,28 @@ timeout=30
 # Wait for IPv6 default route to emerge
 (
 	for n in $(seq 1 $timeout); do
+		# If there is an IPv6 default route, stop waiting
 		if ip -6 route | grep -q "^default"; then
 			break
 		fi
 
 		sleep 1
 	done
-
 )&
 
+# Wait for IPv6 IPs do leave tentative state
+# This will most likely be only relevant for nodes with static IPs/route
+(
+	for n in $(seq 1 $timeout); do
+		# If there is an IPv6 in state tentative, wait on
+		if ip -6 addr | grep -q "tentative"; then
+			sleep 1
+		else
+			break
+		fi
+	done
+
+)&
 
 # WAit for both sub-shells to finish
 wait
