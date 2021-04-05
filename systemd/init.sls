@@ -7,3 +7,25 @@ systemctl-daemon-reload:
   cmd.wait:
     - name: systemctl daemon-reload
     - watch: []
+
+
+#
+# Install service to wait for routing adjancies to come up (if needed)
+#
+/etc/systemd/system/wait-for-routes.service:
+  file.managed:
+    - source: salt://systemd/wait-for-routes.service
+    - watch_in:
+      - cmd: systemctl-daemon-reload
+
+wait-for-routes.service:
+  service.running:
+    - enable: true
+    - require:
+      - file: /etc/systemd/system/wait-for-routes.service
+      - file: /usr/local/sbin/wait-for-routes
+
+/usr/local/sbin/wait-for-routes:
+  file.managed:
+   - source: salt://systemd/wait-for-routes
+   - mode: 755

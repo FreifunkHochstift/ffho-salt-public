@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# Wait for routing adjacencies to come up and produce a default route
+#
+# Maximilian Wilhelm <max@sdn.clinic>
+#  -- Mon, 05 Apr 2021 02:31:58 +0200
+
+# Wait for this amount of seconds before giving up
+timeout=30
+
+# Wait for IPv4 default route to emerge
+(
+	for n in $(seq 1 $timeout); do
+		if ip -4 route | grep -q "^default"; then
+			break
+		fi
+
+		sleep 1
+	done
+)&
+
+# Wait for IPv6 default route to emerge
+(
+	for n in $(seq 1 $timeout); do
+		if ip -6 route | grep -q "^default"; then
+			break
+		fi
+
+		sleep 1
+	done
+
+)&
+
+
+# WAit for both sub-shells to finish
+wait
+
+exit 0

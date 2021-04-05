@@ -1,0 +1,15 @@
+[Unit]
+Description=Wait for routing adjacencies to come up
+DefaultDependencies=no
+Conflicts=shutdown.target
+Requisite=networking.service
+After=networking.service
+Before=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/wait-for-routes
+RemainAfterExit=yes
+
+[Install]
+WantedBy=network-online.target
