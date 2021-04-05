@@ -4,6 +4,7 @@
 
 include:
   - network
+  - systemd
 
 #
 # Install and start SNMPd
@@ -18,6 +19,13 @@ snmpd:
     - enable: true
     - reload: true
 
+# Add dependecy on network-online.target
+/etc/systemd/system/snmpd.service.d/override.conf:
+  file.managed:
+    - makedirs: true
+    - source: salt://snmpd/service-override.conf
+    - watch_in:
+      - cmd: systemctl-daemon-reload
 
 /etc/default/snmpd:
   file.managed:
@@ -36,7 +44,3 @@ snmpd:
       - pkg: snmpd
     - watch_in:
       - service: snmpd
-
-
-/etc/snmp/ifAlias:
-  file.absent
