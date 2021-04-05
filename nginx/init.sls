@@ -2,6 +2,9 @@
 # Nginx
 #
 
+include:
+ - systemd
+
 {% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
 {% set nginx_pkg = node_config.get('nginx:pkg', 'nginx') %}
 {% set acme_thumbprint = salt['pillar.get']('acme:thumbprint') %}
@@ -16,6 +19,14 @@ nginx:
       - pkg: nginx
     - watch:
       - cmd: nginx-configtest
+
+# Add dependecy on network-online.target
+/etc/systemd/system/nginx.service.d/override.conf:
+  file.managed:
+    - makedirs: true
+    - source: salt://nginx/service-override.conf
+    - watch_in:
+      - cmd: systemctl-daemon-reload
 
 # Add cache directory
 nginx-cache:
