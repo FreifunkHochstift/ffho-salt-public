@@ -23,7 +23,6 @@ dnsdist:
       - file: /var/lib/dnsdist
       - file: dnsdist-service-override
     - watch:
-      - file: /etc/dnsdist/dnsdist.conf
       - file: dnsdist-service-override
 
 /etc/dnsdist/dnsdist.conf:

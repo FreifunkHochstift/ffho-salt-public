@@ -15,6 +15,7 @@
 nginx:
   pkg.installed:
     - name: nginx
+    - fromrepo: deb http://nginx.org/packages/{{ grains.os | lower}} {{ grains.oscodename }} nginx
     - require:
       - pkgrepo: /etc/apt/sources.list.d/nginx.list
   service.running:

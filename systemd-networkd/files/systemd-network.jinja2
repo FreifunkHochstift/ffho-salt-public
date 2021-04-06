@@ -15,7 +15,10 @@ VLAN={{ vlan['vid'] }}
 {%- for ipaddress in ipaddresses %}
 Address={{ ipaddress['address'] }}
 {%- endfor %}
-DNS=1.1.1.1
+DNS=5.1.66.255
+DNS=185.150.99.255
+DNS=2001:678:e68:f000::
+DNS=2001:678:ed0:f000::
 
 {%- if interface in gateway %}
 # We install the route provided for the site with a low metric

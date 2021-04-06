@@ -9,12 +9,13 @@ end
 setACL({'0.0.0.0/0', '::/0'})
 -- drop ANY queries sent over udp , not useful for DoT and DoH only servers.
 addAction(AndRule({QTypeRule(DNSQType.ANY), TCPRule(false)}), DropAction())
-addAction(RegexRule(".*.(10|168.192|(1[6-9]|2[0-9]|3[0-1]).172).in-addr.arpa$"), DropAction())
+addAction(RegexRule(".*\\.(10|168\\.192|(1[6-9]|2[0-9]|3[0-1])\\.172)\\.in-addr\\.arpa$"), DropAction())
 
 addLocal("0.0.0.0")
 addLocal("::")
 
-addAction(AndRule({NotRule(makeRule({"ffmuc.net"})), NotRule(makeRule({"127.0.0.1","::1","10.80.0.0/16","10.8.0.0/23","5.1.66.0/24","185.150.99.0/24","2001:678:e68::/48","2001:678:ed0::/48"})), DSTPortRule(53)}), DropAction())
+-- limit resolving on Port 53 to "ffmuc-domains"
+-- addAction(AndRule({NotRule(makeRule({"ffmuc.net"})), NotRule(makeRule({"127.0.0.1","::1","10.80.0.0/16","10.8.0.0/23","5.1.66.0/24","185.150.99.0/24","2001:678:e68::/48","2001:678:ed0::/48"})), DSTPortRule(53)}), DropAction())
 
 {%- if 'webfrontend' in grains.id %}
 ssl_cert="/etc/letsencrypt/live/ffmuc.net/fullchain.pem"
@@ -78,7 +79,6 @@ newServer({address="1.1.1.1", name="anycastCF", pool="auth"})
 {%- endif %}{# authoritative #}
 
 addAction({'in.ffmuc.net.', 'ov.ffmuc.net'}, PoolAction("auth"))
-addAction({'ext.ffmuc.net'}, PoolAction("auth"))
 addAction({'ffmuc.net'}, PoolAction("auth"))
 addAction({'ffmuc.bayern'}, PoolAction("auth"))
 addAction({'fnmuc.net'}, PoolAction("auth"))
@@ -109,5 +109,5 @@ setKey("{{ dnsdist_console["key"] }}")
 setMaxUDPOutstanding(65535)
 setMaxTCPClientThreads(2000)        -- set X(int) to handle number of maximum tcp clients
 setMaxTCPConnectionDuration(120)    -- set X(int) for tcp connection duaration from a connected client. X is number of seconds.
-setMaxTCPConnectionsPerClient(30)   -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
+setMaxTCPConnectionsPerClient(50)   -- set X(int) for number of tcp connections from a single client. Useful for rate limiting the concurrent connections.
 setMaxTCPQueriesPerConnection(1000) -- set X(int) , similiar to addAction(MaxQPSIPRule(X), DropAction())

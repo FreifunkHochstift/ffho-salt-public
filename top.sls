@@ -40,6 +40,7 @@ base:
   'jicofo*.meet.ffmuc.net':
     - jitsi.prosody
     - jitsi.jicofo
+    - jitsi.meet
     - certs
     - nginx
   'call*':

@@ -182,7 +182,7 @@ firewall:
     proto: tcp
     group: webfrontend
   # Allow connections for speed.ffmuc.net
-  - port: 8888
+  - port: 80
     proto: tcp
     group: webfrontend
     # Allow connections for unifi (web)
@@ -197,6 +197,22 @@ firewall:
   - port: 8080
     proto: tcp
     group: webfrontend
+    # Allow connections for unifi (inform)
+  - port: 8585
+    proto: tcp
+    host: any
+  - port: 8553
+    proto: tcp
+    host: any
+  - port: 1935
+    proto: tcp
+    host: any
+  - port: 1937
+    proto: tcp
+    host: any
+  - port: 8088
+    proto: tcp
+    host: any
   # Allow salt access for any host in the network
   - port: 4505-4506
     proto: tcp
@@ -213,6 +229,11 @@ firewall:
     group: webfrontend
 {%- endif %}
 {%- if "docker07.in.ffmuc.net" == grains["id"]%}
+  # Elastiflow Logstash
+  - port: 2055
+    proto: udp
+    host: any
+  # Elastiflow Logstash
   - port: 6343
     proto: udp
     host: any
@@ -224,12 +245,19 @@ firewall:
   - port: 5044
     proto: tcp
     host: any
+    # Allow connections for speed.ffmuc.net
+  - port: 8080
+    proto: tcp
+    group: webfrontend
+  - port: 8081
+    proto: tcp
+    group: webfrontend
 {%- endif %}
 {%- if 'metrics.in.ffmuc.net' == grains["id"] %}
   # Allow stats access
   - port: 3000
     proto: tcp
-    group: webfrontend
+    group: any
   # Allow stats incoming
   - port: 8086
     proto: tcp
@@ -270,5 +298,10 @@ firewall:
 {%- if "nms.in.ffmuc.net" == grains["id"]%}
   - port: 80
     proto: tcp
-    host: webfrontend
+    group: webfrontend
+{%- endif %}
+{%- if "roadwarrior" == role %}
+  - port: 8000
+    proto: tcp
+    group: webfrontend
 {%- endif %}
