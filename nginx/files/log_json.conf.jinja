@@ -18,16 +18,8 @@ map $ip_anonym1$ip_anonym2 $ip_anonymized {
 {% for flavor in ["normal", "anonym"] %}
 # the upper params are deprecated but here for migration purposes
 log_format json_{{ flavor }} escape=json '{'
-   {#- just for migration as those fields are used in dashboards currently #}
-   '"http_param":"$request_uri",'
-   '"http_request":"$request_method",'
-   '"http_useragent":"$http_user_agent",'
-   '"http_response":"$status",'
-   '"IP":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %}",'
-   '"http_referrer":"$http_referer",'
    {#- just to see something human friendly #}
    '"message":"{% if "normal" in flavor %}$remote_addr{% else %}$ip_anonymized{% endif %} $host - $request_method $request_uri - $status",'
-   {#- now the "future" variables #}
    '"timestamp": "$time_iso8601",'
    '"http_host":"$host",'
    '"port":"$server_port",'

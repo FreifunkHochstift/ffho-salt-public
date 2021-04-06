@@ -3,6 +3,8 @@
 ---
 jitsi:
   public_domain: example.com
+  subdomains:
+    - exampledomain
   authentication: False
   lobby_enabled: True
   jibri_enabled: False
@@ -14,16 +16,12 @@ jitsi:
       auth_domain: auth.example.com
       server_host: localhost
       brewery_domain: internal.auth.meet.ffmuc.net
-
     # for components which cannot be sharded
-    auth_domain: auth.example.com
     server_host: localhost
     xmpp_domain: test.meet.ffmuc.net
     brewery_domain: internal.auth.meet.ffmuc.net
-
     auth_domain: auth.example.com
     port: 5347
-    brewery_domain: internal.auth.meet.ffmuc.net
 
   jicofo:
     enabled: false

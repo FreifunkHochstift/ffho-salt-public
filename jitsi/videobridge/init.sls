@@ -79,9 +79,12 @@ stats.in.ffmuc.net:
     - makedirs: True
 
 {% else %}
-# stop and disable videobridge
 jitsi-videobridge2:
-  service.dead:
-    - enable: False
+  pkg.removed
+
+/etc/systemd/system/jitsi-videobridge2.service.d:
+  file.removed
+/etc/jitsi/videobridge:
+  file.removed
 
 {% endif %}

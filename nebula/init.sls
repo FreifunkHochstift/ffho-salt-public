@@ -37,7 +37,7 @@ generate_ssh_host_ed25519_key:
     - name: ssh-keygen -t ed25519 -q -N "" -f /etc/nebula/ssh_host_ed25519_key
     - unless: test -f /etc/nebula/ssh_host_ed25519_key
     - require_in:
-        - file: /etc/nebula-meet/config.yml
+      - file: /etc/nebula/config.yml
 {% endif %}
 
 /etc/nebula/config.yml:

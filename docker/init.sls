@@ -3,7 +3,7 @@
 #
 {%- set role = salt['pillar.get']('netbox:role:name', salt['pillar.get']('netbox:device_role:name')) %}
 
-{% if 'docker' in role or 'mailserver' in role %}
+{% if 'docker' in role or 'mailserver' in role or 'roadwarrior' in role %}
 docker-repo:
   pkgrepo.managed:
     - comments: "# Docker.io"
@@ -36,8 +36,8 @@ docker-pkgs:
 
 /usr/local/bin/docker-compose:
   file.managed:
-    - source: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-{{ grains["kernel"] }}-{{ grains["cpuarch"] }}
-    - source_hash: 04216d65ce0cd3c27223eab035abfeb20a8bef20259398e3b9d9aa8de633286d
+    - source: https://github.com/docker/compose/releases/download/1.28.4/docker-compose-{{ grains["kernel"] }}-{{ grains["cpuarch"] }}
+    - source_hash: 9833d8bab4659c76789622777a38aac0c1f6feac8a2cb98e21df029055b7fbab
     - mode: 0755
 
 {#

@@ -25,6 +25,7 @@ prosody-dependencies:
       - luarocks
       - lua5.2
       - liblua5.2-dev
+      - patch
 
 # Hacks for enabling token auth in jitsi
 # https://community.jitsi.org/t/jitsi-meet-tokens-chronicles-on-debian-buster/76756
@@ -111,6 +112,16 @@ remove-temporary-files:
     - source: salt://jitsi/prosody/domain.cfg.lua.jinja
     - makedirs: True
     - template: jinja
+
+/etc/systemd/system/prosody.service.d/override.conf:
+  file.managed:
+    - makedirs: True
+    - contents: |
+        [Unit]
+        Wants=nebula.service
+        After=nebula.service
+        [Service]
+        LimitNOFILE=65000:65000
 
 jicofo-auth:
   cmd.run:

@@ -26,6 +26,19 @@ punchy:
   respond: true
   delay: 1s
 
+{%- if nebula.loophole.enabled %}
+sshd:
+  enabled: true
+  listen: 127.0.0.1:2222
+  host_key: /etc/nebula-meet/ssh_host_ed25519_key
+  authorized_users:
+    - user: loop
+      keys:
+      {% for key in nebula.loophole.keys %}
+       - {{ key }}
+      {%- endfor %}
+{%- endif %}
+
 local_range: "{{ nebula.local_range }}"
 
 tun:
@@ -76,11 +89,15 @@ firewall:
   - port: 4505-4506
     proto: tcp
     host: any
-{% elif "jicofo" in grains["id"] %}
+{% elif "jicofo" in grains["id"] or "jvb0.meet" in grains["id"] %}
   # Allow XMPP
   - port: 5222
     proto: any
     group: jvb
+  # reverse proxy websocket internally
+  - port: 5280
+    proto: tcp
+    group: jicofo
   - port: 5347
     proto: any
     group: jvb
@@ -94,7 +111,7 @@ firewall:
   - port: 443
     proto: tcp
     group: jvb
-{%- elif "stats.in.ffmuc.net" == grains["id"] %}
+{%- elif "metrics.in.ffmuc.net" == grains["id"] %}
   # Allow stats incoming
   - port: 8086
     proto: tcp
@@ -108,7 +125,15 @@ firewall:
   - port: 8086
     proto: tcp
     group: jvb
-{%- else %}
+{%- elif "docker06.in.ffmuc.net" == grains["id"] %}
+  # Graylog in
+  - port: 9000
+    proto: tcp
+    group: any
+  - port: 5044
+    proto: tcp
+    group: any
+{%- elif "jvb" in grains["id"] %}
   # Allow tcp/443 from any host with BOTH laptop and home group
   - port: 9090
     proto: tcp

@@ -32,4 +32,10 @@ jicofo:
     - source: salt://jitsi/jicofo/sip-communicator.properties.jinja
     - template: jinja
 
+/var/log/jitsi:
+  file.directory:
+    - user: jicofo
+    - group: jitsi
+    - mode: 755
+
 {% endif %}

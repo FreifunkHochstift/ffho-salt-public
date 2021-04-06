@@ -14,6 +14,7 @@ duplicity-packages:
 
 duplicity_repo:
   pkgrepo.managed:
+    #- name: deb http://ppa.launchpad.net/duplicity-team/duplicity-release-git {{ grains.lsb_distrib_id | lower }} {{ grains.oscodename }} main
     - ppa: duplicity-team/duplicity-release-git
     - keyid: 8F571BB27A86F4A2
     - keyserver: keyserver.ubuntu.com

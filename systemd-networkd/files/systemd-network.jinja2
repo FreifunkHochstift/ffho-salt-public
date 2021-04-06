@@ -15,7 +15,10 @@ VLAN={{ vlan['vid'] }}
 {%- for ipaddress in ipaddresses %}
 Address={{ ipaddress['address'] }}
 {%- endfor %}
-DNS=1.1.1.1
+DNS=5.1.66.255
+DNS=185.150.99.255
+DNS=2001:678:e68:f000::
+DNS=2001:678:ed0:f000::
 
 {%- if interface in gateway %}
 # We install the route provided for the site with a low metric
@@ -38,10 +41,8 @@ VXLAN={{ interface | regex_replace('wg-', 'vx-') }}
 {%- if wireguard_public_key %}
 {%- set link_local = salt['wireguard_v6.generate'](wireguard_public_key) %}
 {%- set node_location = salt['mine.get'](node, 'minion_location', tgt_type='glob') %}
-{%- if own_location == node_location[node] %}
 [Route]
 Destination={{ link_local }}/128
-{%- endif %}
 {%- endif %}
 {%- endif %}
 {%- endfor %}

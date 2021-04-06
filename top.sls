@@ -40,6 +40,7 @@ base:
   'jicofo*.meet.ffmuc.net':
     - jitsi.prosody
     - jitsi.jicofo
+    - jitsi.meet
     - certs
     - nginx
   'call*':
@@ -52,9 +53,9 @@ base:
     - pdns-recursor
     - radvd
     - respondd
-  'webfrontend03.in.ffmuc.net':
-    - cloudflare
-  'webfrontend0[3-4].in.ffmuc.net':
+#  'webfrontend03.in.ffmuc.net':
+#    - cloudflare
+  'webfrontend0[3-6].in.ffmuc.net':
     - dns-server/auth
   'vpn0*.in.ffmuc.net':
     - wireguard

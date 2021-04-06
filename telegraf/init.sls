@@ -7,7 +7,6 @@
 
 {# There is data available so we think telegraf should be installed #}
 {% set role = salt['pillar.get']('netbox:role:name') %}
-{% set roles = salt['pillar.get']('netbox:config_context:roles', []) %}
 
 influxdb-repo:
   pkgrepo.managed:
@@ -45,17 +44,11 @@ systemd-reload-telegraf:
   file.absent
 {% endif %}
 
-{% if salt["service.enabled"]("pdns-recursor") and 'dnsdist' in roles and false %}{# broken #}
+{% if salt["service.enabled"]("pdns-recursor") and 'dnsdist' in tags and false %}{# broken #}
 add_telegraf_pdns_group:
   group.present:
     - name: pdns
     - addusers:
-      - telegraf
-{% else %}
-del_telegraf_from_pdns_group:
-  group.present:
-    - name: pdns
-    - delusers:
       - telegraf
 {% endif %}
 
@@ -130,7 +123,7 @@ remove_asterisk_monitoring:
           service: telegraf
 
 /etc/telegraf/telegraf.d/in-dnsdist.conf:
-{% if 'dnsdist' in roles %}
+{% if 'dnsdist' in tags %}
   file.managed:
     - source: salt://telegraf/files/in_dnsdist.conf
     - template: jinja

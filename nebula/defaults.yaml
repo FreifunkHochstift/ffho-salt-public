@@ -15,6 +15,7 @@ nebula:
         host: 0.0.0.0
         port: 0
 
-    local_range: 127.0.0.1/8
     loophole:
         enabled: false
+        ssh_keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDVGi00OlOkJo9Dcq/YSNysg7T3u7c2193sBPmkX8TTXJnSRv1e8WZlMWZvNC4U/84mqmfU8ieX/pK9heO9HPnTRlEN2dnKAyRYHkYd4jAnXB4AINabnq86hw7U6T8iYDZwKxAPamUplBHFjM7K1HquJvoS6iPJcsLbDUDSnbqF4ZOPDgH7eu/KPKABN00piMwvk5FhL9q3gMl2zaGEEN7c6XGLqovX/FvMD6gohPOy5LvuwXIXz/t/Y10X8u/P8j30j+3StMdC6ZHsJ2r0WggN4xwhouGnjOqOUskfCpnSOuLaMIpVxTW1QsWlZiO6XTSoytY1Orh8wrWvU/lWK1rlHGJy1vpwMLmIiKBt04jc7ZwGmcrmww+gyk7Vc1s/fD4DfsS+VaLcKq2lYG/Ht/JPDvkF0DOgC9FPoek3EbhkRe3/NV9qWO76h9D6PYAoEBi38kUx2J1YOS1bFfv29RVKLLX+m/rMrC5ZHq1mQzEYbCYy29Oiw8UUqI3+yL5YdIk= lighthouse01

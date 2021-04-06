@@ -3,13 +3,14 @@
 #available options, syntax, and default values.
 jicofo {
     bridge {
+        brewery-jid = "{{ jitsi.videobridge.brewery_room }}@{{ jitsi.xmpp.brewery_domain }}"
         selection-strategy = {{ jitsi.jicofo.bridge_selection_strategy }}
         health-checks {
             enabled = true
             max-check-duration = 60 seconds
         }
     }
-{%- if jitsi.jibri_enabled and false %}{# not working yet #}
+{%- if jitsi.jibri_enabled %}{# not working yet #}
     jibri {
         brewery-jid = "{{ jitsi.jibri.xmpp.control_muc.room_name | default(jitsi.jibri.brewery_room) }}@{{ jitsi.xmpp.brewery_domain }}"
         pending-timeout = 90 seconds
@@ -19,16 +20,17 @@ jicofo {
         enabled = true
         id = 42
     }
-{%- if false %}{# not working yet #}
-# currently handled via /etc/jitsi/jicofo/config. For future use
-#    xmpp {
-#        client {
-#            hostname = {{ jitsi.xmpp.server_host }}
-#            port = {{ jitsi.xmpp.port }}
-#            domain = {{ jitsi.xmpp.xmpp_domain }}
-#            username = {{ jitsi.jicofo.username }}
-#            password = {{ jitsi.jicofo.password }}
-#        }
-#    }
+{%- if false %}{# not working yet; now handled via /etc/jitsi/jicofo/config #}
+    xmpp {
+        client {
+            enabled = true
+            hostname = {{ jitsi.xmpp.server_host }}
+            port = {{ jitsi.xmpp.port }}
+            domain = {{ jitsi.xmpp.xmpp_domain }}
+            username = {{ jitsi.jicofo.username }}
+            password = {{ jitsi.jicofo.password }}
+            disable-certificate-verification = true
+        }
+    }
 {%- endif %}
 }

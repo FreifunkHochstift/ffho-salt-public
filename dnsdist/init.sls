@@ -1,7 +1,7 @@
 #
 # dnsdist
 #
-{% if 'dnsdist' in salt['pillar.get']('netbox:config_context:roles') %}
+{% if 'dnsdist' in salt['pillar.get']('netbox:tag_list', []) %}
 
 dnsdist-repo:
   pkgrepo.managed:
@@ -23,7 +23,6 @@ dnsdist:
       - file: /var/lib/dnsdist
       - file: dnsdist-service-override
     - watch:
-      - file: /etc/dnsdist/dnsdist.conf
       - file: dnsdist-service-override
 
 /etc/dnsdist/dnsdist.conf:
@@ -46,4 +45,13 @@ dnsdist-service-override:
     - source: salt://dnsdist/dnsdist.override.service
     - makedirs: True
 
-{% endif %}
+{%- if 'webfrontend' in grains.id %}
+# to allow reading ssl cert
+add_dnsdist_group_ssl-cert:
+  user.present:
+    - name: _dnsdist
+    - groups:
+      - ssl-cert
+{% endif %}{# if 'webfrontend' #}
+
+{% endif %}{# if 'dnsdist' in tag_list #}
