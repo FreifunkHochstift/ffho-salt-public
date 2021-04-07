@@ -56,6 +56,3 @@ include_recursive "conf.d"
 
 # Include command defintions
 include_recursive "commands.d"
-
-# Include FFHO server configuration
-include_recursive "ffho-conf.d"

@@ -166,6 +166,15 @@ ffho-plugins:
 ################################################################################
 {% if 'icinga2server' in roles %}
 
+# Link ffho-conf.d as master zone
+/etc/icinga2/zones.d/master:
+  file.symlink:
+    - target: "/etc/icinga2/ffho-conf.d/"
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
+
 # Users and Notifications
 /etc/icinga2/ffho-conf.d/users.conf:
   file.managed:
