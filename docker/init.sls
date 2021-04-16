@@ -36,8 +36,8 @@ docker-pkgs:
 
 /usr/local/bin/docker-compose:
   file.managed:
-    - source: https://github.com/docker/compose/releases/download/1.28.4/docker-compose-{{ grains["kernel"] }}-{{ grains["cpuarch"] }}
-    - source_hash: 9833d8bab4659c76789622777a38aac0c1f6feac8a2cb98e21df029055b7fbab
+    - source: https://github.com/docker/compose/releases/download/1.29.1/docker-compose-Linux-x86_64
+    - source_hash: 8097769d32e34314125847333593c8edb0dfc4a5b350e4839bef8c2fe8d09de7
     - mode: 0755
 
 {#
