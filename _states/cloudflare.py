@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 From: https://github.com/cloudflare/salt-cloudflare
 Manage Cloudflare zone records
 ==============================
@@ -52,7 +52,7 @@ with the list of regular expressions that will mark records that are
 managed externally.
 
 This state supports test mode. It makes sense to run it only on one node.
-'''
+"""
 
 from collections import namedtuple
 
@@ -77,7 +77,7 @@ def manage_zone_records(name, zone):
             "name": name,
             "changes": {},
             "result": False,
-            "comment": "{0}".format(err)
+            "comment": "{0}".format(err),
         }
 
     diff = managed.diff()
@@ -115,16 +115,24 @@ def _changes(diff):
     changes = {}
     actions = map(lambda op: "{0} {1}".format(op["action"], str(op["record"])), diff)
     if actions:
-        changes['diff'] = "\n".join(actions)
+        changes["diff"] = "\n".join(actions)
     return changes
+
 
 def validate_record(record):
     if "name" not in record:
         raise salt.exceptions.SaltInvocationError("'name' is required")
     if "content" not in record:
-        raise salt.exceptions.SaltInvocationError("Required field 'content' is missing for entry <{0}>".format(record["name"]))
+        raise salt.exceptions.SaltInvocationError(
+            "Required field 'content' is missing for entry <{0}>".format(record["name"])
+        )
     if "type" in record and record["type"] == "MX" and "priority" not in record:
-        raise salt.exceptions.SaltInvocationError("Required field 'priority' is missing for MX entry <{0}>".format(record["name"]))
+        raise salt.exceptions.SaltInvocationError(
+            "Required field 'priority' is missing for MX entry <{0}>".format(
+                record["name"]
+            )
+        )
+
 
 def record_from_dict(record):
     record.setdefault("type", "A")
@@ -147,7 +155,8 @@ def record_from_dict(record):
 
 class Record(
     namedtuple(
-        "Record", ("id", "type", "name", "content", "priority", "proxied", "ttl", "salt_managed")
+        "Record",
+        ("id", "type", "name", "content", "priority", "proxied", "ttl", "salt_managed"),
     )
 ):
     def pure(self):
@@ -198,10 +207,17 @@ class Record(
             }
 
     def __str__(self):
-        ttl_str = 'auto' if self.ttl == 1 else '{0}s'.format(self.ttl)
-        priority_string = 'priority: {0}, '.format(self.priority) if self.type == "MX" else ''
+        ttl_str = "auto" if self.ttl == 1 else "{0}s".format(self.ttl)
+        priority_string = (
+            "priority: {0}, ".format(self.priority) if self.type == "MX" else ""
+        )
         return "{0} {1} -> '{2}' (proxied: {3}, ttl: {4})".format(
-            self.type, self.name, self.content, priority_string, str(self.proxied).lower(), ttl_str
+            self.type,
+            self.name,
+            self.content,
+            priority_string,
+            str(self.proxied).lower(),
+            ttl_str,
         )
 
     def json(self):
@@ -248,10 +264,12 @@ class Zone(object):
         self.auth_key = zone.get("auth_key", None)
         self.zone_id = zone["zone_id"]
         self.records = zone["records"]
-        self.exclude = zone.get('exclude', [])
+        self.exclude = zone.get("exclude", [])
 
         if not self.api_token and not (self.auth_email and self.auth_key):
-            raise Exception("Either api_token or auth_email and auth_key must be provided")
+            raise Exception(
+                "Either api_token or auth_email and auth_key must be provided"
+            )
 
     def _request(self, uri, method="GET", json=None):
         if self.api_token:
@@ -282,8 +300,8 @@ class Zone(object):
     def _add_record(self, record):
         self._request(
             self.ADD_RECORD_URI_TEMPLATE.format(zone_id=self.zone_id),
-                method="POST",
-                json=record.json(),
+            method="POST",
+            json=record.json(),
         )
 
     def _remove_record(self, record):
