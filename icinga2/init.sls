@@ -96,31 +96,45 @@ ffho-plugins:
       - service: icinga2
 
 
-# Install host cert + key readable for icinga
-{% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ grains['id'] %}
-/etc/icinga2/pki/ffhohost.cert.pem:
+# Install CA cert + host cert + key readable for icinga
+/var/lib/icinga2/certs:
+  file.directory:
+    - makedirs: True
+
+/var/lib/icinga2/certs/ca.crt:
   file.managed:
-    {% if salt['pillar.get'](pillar_name ~ ':cert') == "file" %}
-    - source: salt://certs/certs/{{ cn }}.cert.pem
-    {% else %}
-    - contents_pillar: {{ pillar_name }}:cert
-    {% endif %}
-    - user: root
-    - group: root
+    - source: salt://certs/ffho-cacert.pem
+    - user: nagios
+    - group: nagios
     - mode: 644
     - require:
       - pkg: icinga2
+      - file: /var/lib/icinga2/certs
+    - watch_in:
+      - sevice: icinga2
+
+{% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ grains['id'] %}
+/var/lib/icinga2/certs/{{ grains['id'] }}.crt:
+  file.managed:
+    - contents_pillar: {{ pillar_name }}:cert
+    - user: nagios
+    - group: nagios
+    - mode: 644
+    - require:
+      - pkg: icinga2
+      - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2
 
-/etc/icinga2/pki/ffhohost.key.pem:
+/var/lib/icinga2/certs/{{ grains['id'] }}.key:
   file.managed:
     - contents_pillar: {{ pillar_name }}:privkey
-    - user: root
+    - user: nagios
     - group: nagios
     - mode: 440
     - require:
       - pkg: icinga2
+      - file: /var/lib/icinga2/certs
     - watch_in:
       - service: icinga2
 
@@ -130,6 +144,8 @@ ffho-plugins:
 /etc/icinga2/features-enabled/{{ feature }}.conf:
   file.symlink:
     - target: "../features-available/{{ feature }}.conf"
+    - user: nagios
+    - group: nagios
     - require:
       - pkg: icinga2
     - watch_in:
