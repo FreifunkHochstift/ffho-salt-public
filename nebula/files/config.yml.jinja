@@ -127,6 +127,10 @@ firewall:
   - port: 5044
     proto: tcp
     host: any
+    # Allow pushing to graylog via gelf
+  - port: 12201
+    proto: tcp
+    host: any
 {%- endif %}
 {%- if "docker04.in.ffmuc.net" == grains["id"] %}
   # Allow connections for draw
