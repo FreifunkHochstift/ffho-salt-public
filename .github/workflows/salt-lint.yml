@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Salt Lint Action Demo
+    name: Salt Lint
     steps:
     - uses: actions/checkout@v1
     - name: Run salt-lint
