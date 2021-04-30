@@ -1,0 +1,20 @@
+
+name: Salt-lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Salt Lint Action Demo
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run salt-lint
+      uses: roaldnefs/salt-lint-action@master
+      env:
+        ACTION_STATE_FIND_PATTERN: '^.*\.(sls|jinja|j2|tmpl|tst)$'
+        ACTION_STATE_FIND_TYPE: 'regex'
+        SALT_LINT_EXTRA_PARAMS: '-v'
+    
