@@ -36,7 +36,7 @@ push "route remote_host  255.255.255.255 net_gateway"
 ca      /etc/ssl/certs/ffho-cacert.pem
 cert    /etc/ssl/certs/{{ host_config.get ('cert_cn', grains['id']) }}.cert.pem
 key     /etc/ssl/private/{{ host_config.get ('cert_cn', grains['id']) }}.key.pem
-dh      /etc/openvpn/dh1024.pem
+dh      /etc/ssl/dhparam.pem
 
 script-security 2
 up      /etc/openvpn/ifup
