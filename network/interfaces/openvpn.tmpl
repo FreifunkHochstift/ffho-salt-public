@@ -15,7 +15,6 @@
 # {{ network_config.get ('_desc') }}
   {%- set interface = host_config.get ('interface', network_config.get ('interface')) %}
   {%- if network_config.get ('dev-type', 'tap') == 'tap' %}
-auto {{ interface }}
 iface {{ interface }}
     {%- for ip in host_stanza.get ('ip', []) %}
       {%- set netmask = network_config['netmask_v6'] if ':' in ip else network_config['netmask_v4'] %}
