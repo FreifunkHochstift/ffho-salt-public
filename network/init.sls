@@ -16,10 +16,6 @@ network-pkg:
   pkg.installed:
     - pkgs:
       - iproute2
-      - tcpdump
-      - mtr-tiny
-      - iperf
-      - dnsutils
       - ipv6calc
     - require_in:
       - file: /etc/network/interfaces

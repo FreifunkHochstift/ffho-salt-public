@@ -24,6 +24,7 @@ base:
     - timezone
     - vim
     - unattended-upgrades
+    - utils
 
 #
 # Roles
