@@ -316,6 +316,8 @@ Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
 # Client should not notify by themselves
 /etc/icinga2/features-enabled/notification.conf:
   file.absent:
+    - require:
+      - pkg: icinga2
     - watch_in:
       - service: icinga2
 
