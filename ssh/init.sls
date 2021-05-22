@@ -43,7 +43,7 @@ ssh-{{ user }}:
     - shell: /bin/bash
     - home: {{ path }}
     - createhome: True
-    - gid_from_name: True
+    - usergroup: True
     - system: False
 
 {# Create .ssh dir #}
