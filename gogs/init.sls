@@ -8,8 +8,8 @@ gogs-repo:
   pkgrepo.managed:
     - comments: "# gogs repo"
     - human_name: gogs repository
-    - name: "deb https://deb.packager.io/gh/pkgr/gogs {{ grains.oscodename }} pkgr"
-    - dist: {{grains.oscodename}}
+    - name: "deb https://dl.packager.io/srv/deb/gogs/gogs/main/debian {{ grains.osmajorrelease }} main"
+    - dist: {{grains.osmajorrelease}}
     - file: /etc/apt/sources.list.d/gogs.list
     - key_url: salt://gogs/gogs-repo.apt.key
 
