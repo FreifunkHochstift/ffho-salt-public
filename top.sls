@@ -56,6 +56,15 @@ base:
     - match: pillar
     - build
 
+  # burp client/server
+  nodes:{{ grains['id'] }}:tags:backup:
+    - match: pillar
+    - burp.client
+
+  nodes:{{ grains['id'] }}:roles:burp.server:
+    - match: pillar
+    - burp.server
+
   # Fastd
   nodes:{{ grains['id'] }}:roles:fastd:
     - match: pillar
