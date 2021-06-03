@@ -30,10 +30,6 @@ base:
 # Roles
 #
 
-# Roles no relevant here are
-# - batman_gw (require role "batman")
-# - bbr (require role "router")
-
   # Router
   nodes:{{ grains['id'] }}:roles:router:
     - match: pillar
