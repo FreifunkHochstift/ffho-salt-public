@@ -11,6 +11,7 @@
 {%- if 'batman' in roles %}
 batctl:
   pkg.latest:
+    - name: batctl
 {% if grains.oscodename == 'buster' %}
     - fromrepo: buster-backports
 {% endif %}
