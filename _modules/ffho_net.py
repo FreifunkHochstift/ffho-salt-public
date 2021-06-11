@@ -952,6 +952,10 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		config = ifaces.get (interface)
 		iface_type = config.get ('type', 'inet')
 
+		# Remove any disable interfaces here as they aren't relevant for /e/n/i
+		if config.get ('enabled', True) == False:
+			del ifaces[interface]
+
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
 			_update_batman_config (node_config, interface, sites_config)
 
@@ -988,7 +992,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 			# or set the default, when no automtu is present.
 			config['mtu'] = config.get ('automtu', MTU['default'])
 
-		for key in [ 'automtu', 'batman_connect_sites', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans' ]:
+		for key in [ 'automtu', 'enabled', 'batman_connect_sites', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans' ]:
 			if key in config:
 				config.pop (key)
 
