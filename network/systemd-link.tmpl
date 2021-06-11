@@ -1,10 +1,14 @@
 {%- set mac = iface_config.get ('mac') -%}
+{%- set driver = iface_config.get ('driver') -%}
 #
 # {{ interface }} / {{ desc }}
 #
 
 [Match]
 MACAddress={{ mac }}
+{%- if driver %}
+Driver={{ driver }}
+{%- endif %}
 
 [Link]
 Name={{ interface }}
