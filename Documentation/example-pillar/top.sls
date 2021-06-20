@@ -2,14 +2,13 @@ base:
   '*':
     # Site wide options
     - globals
+    - network
 
     - net
     - nodes
     - sites
     - regions
     - cert
-
-    # SSH authorized_keys configuration
     - ssh
 
     #
@@ -17,6 +16,9 @@ base:
 
     # Automatic Certificate Management
     - acme
+
+    # Burp backup
+    - burp
 
     # Traffic engineering
     - te
@@ -32,3 +34,12 @@ base:
 
     # Frontend Config
     - frontend
+
+    # Logging
+    - logging
+
+    # LDAP
+    - ldap
+
+    # Icinga2
+    - monitoring
