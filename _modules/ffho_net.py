@@ -955,6 +955,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		# Remove any disable interfaces here as they aren't relevant for /e/n/i
 		if config.get ('enabled', True) == False:
 			del ifaces[interface]
+			continue
 
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
 			_update_batman_config (node_config, interface, sites_config)
