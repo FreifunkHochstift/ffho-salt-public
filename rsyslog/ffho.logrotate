@@ -8,6 +8,7 @@
 /var/log/ntpd.log
 /var/log/openvpn.log
 /var/log/salt-master.log
+/var/log/slapd.log
 /var/log/snmpd.log
 /var/log/wbbl.log
 /var/log/yanic.log
