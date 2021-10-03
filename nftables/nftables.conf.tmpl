@@ -6,7 +6,7 @@
 {%- set acls = salt['pillar.get']('firewall:acls') %}
 {%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
 {%- set ssh = salt['pillar.get']("firewall:ssh") %}
-{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services') %}
+{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services', []) %}
 {#- TODO: Get RR IPs from netbox #}
 {%- set bgp = { 4: { '10.132.255.1' : 'cr01.in.ffho.net',
                      '10.132.255.2' : 'cr02.in.ffho.net',
