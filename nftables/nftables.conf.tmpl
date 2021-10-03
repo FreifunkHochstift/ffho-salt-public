@@ -1,0 +1,147 @@
+#!/usr/sbin/nft -f
+#
+# /etc/nftables.conf - FFHO packet filter configuration
+#
+{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{%- set acls = salt['pillar.get']('firewall:acls') %}
+{%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
+{%- set ssh = salt['pillar.get']("firewall:ssh") %}
+{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services') %}
+{#- TODO: Get RR IPs from netbox #}
+{%- set bgp = { 4: { '10.132.255.1' : 'cr01.in.ffho.net',
+                     '10.132.255.2' : 'cr02.in.ffho.net',
+                     '10.132.255.3' : 'cr03.in.ffho.net', },
+                6: { '2a03:2260:2342:ffff::1' : 'cr01.in.ffho.net',
+                     '2a03:2260:2342:ffff::2' : 'cr02.in.ffho.net',
+                     '2a03:2260:2342:ffff::3' : 'cr03.in.ffho.net', }} %}
+
+flush ruleset
+
+table ip filter {
+	chain input {
+		type filter hook input priority 0; policy drop;
+		iifname "lo" counter accept
+		ip protocol icmp counter jump icmp_chain
+		ct state invalid counter drop
+		counter jump admin_access
+		tcp dport 22 counter jump ssh
+{%- if 'router' in roles %}
+		ip daddr { 224.0.0.5, 224.0.0.6 } meta l4proto ospf accept
+		tcp dport 179 counter jump bgp
+{%- endif %}
+		ct state related,established counter accept
+		counter jump services
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
+		counter drop
+	}
+
+	chain icmp_chain {
+		icmp type { echo-request, destination-unreachable, time-exceeded } counter accept
+	}
+
+	chain admin_access {
+{%- for pfx in admin_access[4].keys()|sort %}
+  {%- set comment = admin_access[4][pfx] %}
+		ip saddr {{ pfx }} counter accept comment "{{ comment }}"
+{%- endfor %}
+	}
+
+{%- if 'router' in roles %}
+	chain bgp {
+  {%- for ip in bgp[4].keys()|sort %}
+    {%- set comment = bgp[4][ip] %}
+		ip saddr {{ ip }} counter accept comment "{{ comment }}"
+  {%- endfor %}
+	}
+{%- endif %}
+
+	chain ssh {
+{%- for pfx in ssh[4].keys()|sort %}
+  {%- set comment = ssh[4][pfx] %}
+		ip saddr {{ pfx }} counter accept comment "{{ comment }}"
+{%- endfor %}
+	}
+
+	chain services {
+{%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 4) %}
+		{{ rule }}
+{%- endfor %}
+	}
+
+	chain log-drop {
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		counter drop
+	}
+
+	chain log-reject {
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
+		counter drop
+	}
+}
+
+table ip6 filter {
+	chain input {
+		type filter hook input priority 0; policy drop;
+		iifname "lo" counter accept
+		ip6 nexthdr icmpv6 counter jump icmp_chain
+		ct state invalid counter drop comment "Drop packets that do not make sense."
+		counter jump admin_access
+		tcp dport 22 counter jump ssh
+{%- if 'router' in roles %}
+		ip6 saddr fe80::/64 ip6 daddr { ff02::5, ff02::6 } meta l4proto ospf accept
+		tcp dport 179 counter jump bgp
+{%- endif %}
+		ct state related,established counter accept comment "Allow established connections."
+		counter jump services
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		limit rate 1/second burst 3 packets counter reject with icmpv6 type admin-prohibited
+		counter drop
+	}
+
+	chain icmp_chain {
+		icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, echo-request, echo-reply } counter accept
+		icmpv6 type { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert } ip6 hoplimit 255 counter accept
+	}
+
+	chain admin_access {
+{%- for pfx in admin_access[6].keys()|sort %}
+  {%- set comment = admin_access[6][pfx] %}
+		ip6 saddr {{ pfx }} counter accept comment "{{ comment }}"
+{%- endfor %}
+	}
+
+{%- if 'router' in roles %}
+	chain bgp {
+  {%- for ip in bgp[6].keys()|sort %}
+    {%- set comment = bgp[6][ip] %}
+		ip6 saddr {{ ip }} counter accept comment "{{ comment }}"
+  {%- endfor %}
+	}
+{%- endif %}
+
+	chain ssh {
+{%- for pfx in ssh[6].keys()|sort %}
+  {%- set comment = ssh[6][pfx] %}
+		ip6 saddr {{ pfx }} counter accept comment "{{ comment }}"
+{%- endfor %}
+	}
+
+	chain services {
+{%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 6) %}
+		{{ rule }}
+{%- endfor %}
+	}
+
+	chain log-drop {
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		counter drop
+	}
+
+	chain log-reject {
+		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		limit rate 1/second burst 3 packets counter reject with icmpv6 type admin-prohibited
+		counter drop
+	}
+}
