@@ -22,6 +22,7 @@ table ip filter {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		ip protocol icmp counter jump icmp_chain
+		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop
 		counter jump admin_access
 		tcp dport 22 counter jump ssh
@@ -86,6 +87,7 @@ table ip6 filter {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		ip6 nexthdr icmpv6 counter jump icmp_chain
+		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop comment "Drop packets that do not make sense."
 		counter jump admin_access
 		tcp dport 22 counter jump ssh
