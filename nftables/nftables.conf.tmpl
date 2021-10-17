@@ -6,22 +6,25 @@
 {%- set acls = salt['pillar.get']('firewall:acls') %}
 {%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
 {%- set ssh = salt['pillar.get']("firewall:ssh") %}
-{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services') %}
-{#- TODO: Get RR IPs from netbox #}
-{%- set bgp = { 4: { '10.132.255.1' : 'cr01.in.ffho.net',
-                     '10.132.255.2' : 'cr02.in.ffho.net',
-                     '10.132.255.3' : 'cr03.in.ffho.net', },
-                6: { '2a03:2260:2342:ffff::1' : 'cr01.in.ffho.net',
-                     '2a03:2260:2342:ffff::2' : 'cr02.in.ffho.net',
-                     '2a03:2260:2342:ffff::3' : 'cr03.in.ffho.net', }} %}
+{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services', []) %}
 
 flush ruleset
 
 table ip filter {
+	set ibgp-peers {
+		type ipv4_addr
+		elements = {
+			10.132.255.1,	# cr01.in.ffho.net
+			10.132.255.2,	# cr02.in.ffho.net
+			10.132.255.3,	# cr03.in.ffho.net
+		}
+	}
+
 	chain input {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		ip protocol icmp counter jump icmp_chain
+		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop
 		counter jump admin_access
 		tcp dport 22 counter jump ssh
@@ -49,10 +52,8 @@ table ip filter {
 
 {%- if 'router' in roles %}
 	chain bgp {
-  {%- for ip in bgp[4].keys()|sort %}
-    {%- set comment = bgp[4][ip] %}
-		ip saddr {{ ip }} counter accept comment "{{ comment }}"
-  {%- endfor %}
+		ip saddr @ibgp-peers counter accept comment "iBGP peers"
+		# TODO: Add external BGP peers, if any
 	}
 {%- endif %}
 
@@ -82,15 +83,25 @@ table ip filter {
 }
 
 table ip6 filter {
+	set ibgp-peers {
+		type ipv6_addr
+		elements = {
+			2a03:2260:2342:ffff::1,	# cr01.in.ffho.net
+			2a03:2260:2342:ffff::2,	# cr02.in.ffho.net
+			2a03:2260:2342:ffff::3,	# cr03.in.ffho.net
+		}
+	}
+
 	chain input {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		ip6 nexthdr icmpv6 counter jump icmp_chain
+		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop comment "Drop packets that do not make sense."
 		counter jump admin_access
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
-		ip6 saddr fe80::/64 ip6 daddr { ff02::5, ff02::6 } meta l4proto ospf accept
+		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept comment "Allow established connections."
@@ -114,10 +125,8 @@ table ip6 filter {
 
 {%- if 'router' in roles %}
 	chain bgp {
-  {%- for ip in bgp[6].keys()|sort %}
-    {%- set comment = bgp[6][ip] %}
-		ip6 saddr {{ ip }} counter accept comment "{{ comment }}"
-  {%- endfor %}
+		ip6 saddr @ibgp-peers counter accept comment "iBGP peers"
+		# TODO: Add external BGP peers, if any
 	}
 {%- endif %}
 
