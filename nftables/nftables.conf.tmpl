@@ -92,7 +92,7 @@ table ip6 filter {
 		counter jump admin_access
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
-		ip6 saddr fe80::/64 ip6 daddr { ff02::5, ff02::6 } meta l4proto ospf accept
+		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept comment "Allow established connections."
