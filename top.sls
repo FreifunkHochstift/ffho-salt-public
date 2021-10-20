@@ -27,6 +27,13 @@ base:
     - utils
 
 #
+# Tags
+#
+  nodes:{{ grains['id'] }}:tags:nftables:
+    - match: pillar
+    - nftables
+
+#
 # Roles
 #
 
