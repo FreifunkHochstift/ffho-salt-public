@@ -7,6 +7,7 @@
 {%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
 {%- set ssh = salt['pillar.get']("firewall:ssh") %}
 {%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services', []) %}
+{%- set icinga2_queriers = salt['pillar.get']('monitoring:icinga2:queriers', []) %}
 {%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
 
 flush ruleset
@@ -60,6 +61,9 @@ table ip filter {
 {%- endif %}
 
 	chain monitoring {
+{%- for ip in icinga2_queriers if not ":" in ip %}
+		ip saddr {{ ip }} counter accept comment "Icinga2"
+{%- endfor %}
 {%- for ip in nms_list if not ":" in ip %}
 		ip saddr {{ ip }} udp dport 161 counter accept comment "NMS"
 {%- endfor %}
@@ -140,6 +144,9 @@ table ip6 filter {
 {%- endif %}
 
 	chain monitoring {
+{%- for ip in icinga2_queriers if ":" in ip %}
+		ip6 saddr {{ ip }} counter accept comment "Icinga2"
+{%- endfor %}
 {%- for ip in nms_list if ":" in ip %}
 		ip6 saddr {{ ip }} udp dport 161 counter accept comment "NMS"
 {%- endfor %}
