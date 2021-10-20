@@ -7,6 +7,7 @@
 {%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
 {%- set ssh = salt['pillar.get']("firewall:ssh") %}
 {%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services', []) %}
+{%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
 
 flush ruleset
 
@@ -27,6 +28,7 @@ table ip filter {
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop
 		counter jump admin_access
+		counter jump monitoring
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
 		ip daddr { 224.0.0.5, 224.0.0.6 } meta l4proto ospf accept
@@ -56,6 +58,12 @@ table ip filter {
 		# TODO: Add external BGP peers, if any
 	}
 {%- endif %}
+
+	chain monitoring {
+{%- for ip in nms_list if not ":" in ip %}
+		ip saddr {{ ip }} udp dport 161 counter accept comment "NMS"
+{%- endfor %}
+	}
 
 	chain ssh {
 {%- for pfx in ssh[4].keys()|sort %}
@@ -99,6 +107,7 @@ table ip6 filter {
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop comment "Drop packets that do not make sense."
 		counter jump admin_access
+		counter jump monitoring
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
 		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf accept
@@ -129,6 +138,12 @@ table ip6 filter {
 		# TODO: Add external BGP peers, if any
 	}
 {%- endif %}
+
+	chain monitoring {
+{%- for ip in nms_list if ":" in ip %}
+		ip6 saddr {{ ip }} udp dport 161 counter accept comment "NMS"
+{%- endfor %}
+	}
 
 	chain ssh {
 {%- for pfx in ssh[6].keys()|sort %}
