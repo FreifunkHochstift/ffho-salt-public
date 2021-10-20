@@ -10,6 +10,7 @@ def generate_service_rules (services, acls, af):
 	for srv in services:
 		rule = ""
 		comment = srv['descr']
+		acl_comment = ""
 		src_prefixes = []
 
 		# If there are no DST IPs set at all or DST IPs for this AF set, we have a rule to build,
