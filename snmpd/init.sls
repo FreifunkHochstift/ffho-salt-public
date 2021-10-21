@@ -17,7 +17,7 @@ snmpd:
       - file: /etc/network/interfaces
   service.running:
     - enable: true
-    - reload: true
+    - restart: true
 
 # Add dependecy on network-online.target
 /etc/systemd/system/snmpd.service.d/override.conf:
