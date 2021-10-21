@@ -19,3 +19,9 @@ nftables:
      - pkg: nftables
    - watch_in:
      - service: nftables
+
+purge-iptables:
+  pkg.purged:
+    - pkgs:
+      - iptables-persistent
+      - iptables
