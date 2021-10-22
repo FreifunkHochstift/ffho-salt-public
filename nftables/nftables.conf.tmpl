@@ -34,6 +34,7 @@ table ip filter {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		ip protocol icmp counter jump icmp_chain
+		udp dport 0 counter drop
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		ct state invalid counter drop
 		counter jump admin_access
