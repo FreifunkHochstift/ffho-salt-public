@@ -122,3 +122,23 @@ def generate_forward_policy (policy, roles, config_context):
 		pass
 
 	return fp
+
+
+def generate_nat_policy (roles, config_context):
+	np = {
+		4 : {},
+		6 : {},
+	}
+
+	# Any custom rules?
+	cc_nat = config_context.get ('nat')
+	if cc_nat:
+		for chain in ['output', 'prerouting', 'postrouting']:
+			if chain not in cc_nat:
+				continue
+
+			for af in [ 4, 6 ]:
+				if str (af) in cc_nat[chain]:
+					np[4][chain] = cc_nat[chain][str (af)]
+
+	return np

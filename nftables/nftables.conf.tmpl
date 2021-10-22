@@ -16,6 +16,7 @@
 {%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
 
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_policy, roles, nf_cc) %}
+{%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](roles, nf_cc) %}
 
 flush ruleset
 
@@ -205,3 +206,22 @@ table ip6 filter {
 		counter drop
 	}
 }
+
+{#-
+ # NAT
+ #}
+{%- for af in [ 4, 6 ] %}
+  {%- if nat_policy[af] %}
+    {%- set af_name = "ip" if af == 4 else "ip6" %}
+table {{ af_name }} nat {
+    {%- for chain in ['output', 'prerouting', 'postrouting'] if chain in nat_policy[af] %}
+	chain {{ chain }} {
+		type nat hook {{ chain }} priority 0; policy accept;
+      {%- for rule in nat_policy[af][chain] %}
+		{{ rule }}
+      {%- endfor %}
+	}
+    {%- endfor %}
+}
+  {%- endif %}
+{%- endfor %}
