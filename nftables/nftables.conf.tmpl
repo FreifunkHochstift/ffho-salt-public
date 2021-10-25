@@ -17,6 +17,7 @@
 
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_policy, roles, nf_cc) %}
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](roles, nf_cc) %}
+{%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
 
 flush ruleset
 
@@ -53,9 +54,22 @@ table ip filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{#- custom rules #}
 {%- for rule in forward['rules'].get ('4', []) %}
 		{{ rule }}
 {%- endfor %}
+
+{#- uRPF #}
+{%- for iface_cfg in urpf  %}
+  {%- if loop.first %}
+		# uRPF
+  {%- endif %}
+  {%- for pfx in iface_cfg[4] %}
+		iif {{ iface_cfg['iface'] }} ip saddr {{ pfx }} accept
+  {%- endfor %}
+		iif {{ iface_cfg['iface'] }} counter drop
+{%- endfor %}
+
 {%- if forward['policy'] == 'drop' %}
 		limit rate 1/second burst 3 packets counter log prefix "nf forward: "
 		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
@@ -146,9 +160,22 @@ table ip6 filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{#- custom rules #}
 {%- for rule in forward['rules'].get ('6', []) %}
 		{{ rule }}
 {%- endfor %}
+
+{#- uRPF #}
+{%- for iface_cfg in urpf  %}
+  {%- if loop.first %}
+		# uRPF
+  {%- endif %}
+  {%- for pfx in iface_cfg[6] %}
+		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} accept
+  {%- endfor %}
+		iif {{ iface_cfg['iface'] }} counter drop
+{%- endfor %}
+
 {%- if forward['policy'] == 'drop' %}
 		limit rate 1/second burst 3 packets counter log prefix "nf forward: "
 		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited

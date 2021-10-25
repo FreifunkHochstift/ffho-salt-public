@@ -3,6 +3,9 @@
 #
 
 import ipaddress
+import re
+
+import ffho_net
 
 def generate_service_rules (services, acls, af):
 	rules = []
@@ -142,3 +145,61 @@ def generate_nat_policy (roles, config_context):
 					np[4][chain] = cc_nat[chain][str (af)]
 
 	return np
+
+
+def generate_urpf_policy (interfaces):
+	urpf = {}
+
+	vlan_re = re.compile (r'^vlan(\d+)$')
+
+	for iface in sorted (interfaces.keys ()):
+		iface_config = interfaces[iface]
+
+		# Ignore loopback and VPNs
+		if iface == "lo" or iface.startswith ("ovpn-") or iface.startswith ("wg-"):
+			continue
+
+		# No addres, no uRPF
+		if not iface_config.get ('prefixes'):
+			continue
+
+		# Interface in vrf_external connect to the Internet
+		if iface_config.get ('vrf') in ['vrf_external']:
+			continue
+
+		# Ignore interfaces by VLAN
+		match = vlan_re.search (iface)
+		if match:
+			vid = int (match.group (1))
+
+			# Magic
+			if 900 <= vid <= 999:
+				continue
+
+			# Wired infrastructure stuff
+			if 1000 <= vid <= 1499:
+				continue
+
+			# Wireless infrastructure stuff
+			if 2000 <= vid <= 2299:
+				continue
+
+		# Ok this seems to be and edge interface
+		urpf[iface] = {
+			'iface' : iface,
+			'desc' : iface_config.get ('desc', ''),
+			4 : [],
+			6 : [],
+		}
+
+		# Gather configure prefixes
+		for address in iface_config.get ('prefixes'):
+			pfx = ipaddress.ip_network (address, strict = False)
+			urpf[iface][pfx.version].append ("%s/%s" % (pfx.network_address, pfx.prefixlen))
+
+	sorted_urpf = []
+
+	for iface in ffho_net.get_interface_list (urpf):
+		sorted_urpf.append (urpf[iface])
+
+	return sorted_urpf
