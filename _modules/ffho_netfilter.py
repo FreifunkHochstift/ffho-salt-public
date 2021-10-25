@@ -80,7 +80,7 @@ def generate_service_rules (services, acls, af):
 
 		# Multiple ports?
 		if len (srv['ports']) > 1:
-			ports = "{ %s }" % ", ".join (map (str, sorted (srv['ports'])))
+			ports = "{ %s }" % ", ".join (map (str, srv['ports']))
 		else:
 			ports = srv['ports'][0]
 
