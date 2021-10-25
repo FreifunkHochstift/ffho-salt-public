@@ -37,6 +37,7 @@ table ip filter {
 		ip protocol icmp counter jump icmp_chain
 		udp dport 0 counter drop
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
+		udp dport 4789 jump vxlan
 		ct state invalid counter drop
 		counter jump admin_access
 		counter jump monitoring
@@ -116,6 +117,13 @@ table ip filter {
 {%- endfor %}
 	}
 
+	chain vxlan {
+{%- for iface in node_config['ifaces'] if node_config['ifaces'][iface].get ('batman_connect_sites') %}
+		iif {{ iface }} accept
+{%- endfor %}
+		counter drop
+	}
+
 	chain log-drop {
 		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
 		counter drop
@@ -143,6 +151,7 @@ table ip6 filter {
 		iifname "lo" counter accept
 		ip6 nexthdr icmpv6 counter jump icmp_chain
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
+		udp dport 4789 jump vxlan
 		ct state invalid counter drop comment "Drop packets that do not make sense."
 		counter jump admin_access
 		counter jump monitoring
@@ -221,6 +230,13 @@ table ip6 filter {
 {%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 6) %}
 		{{ rule }}
 {%- endfor %}
+	}
+
+	chain vxlan {
+{%- for iface in node_config['ifaces'] if node_config['ifaces'][iface].get ('batman_connect_sites') %}
+		iif {{ iface }} accept
+{%- endfor %}
+		counter drop
 	}
 
 	chain log-drop {
