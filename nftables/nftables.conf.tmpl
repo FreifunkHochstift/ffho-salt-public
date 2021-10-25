@@ -2,13 +2,20 @@
 #
 # /etc/nftables.conf - FFHO packet filter configuration
 #
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{%- set nf_cc = node_config.get ('nftables', {}) %}
+{%- set roles = node_config.get ('roles', []) %}
+{%- set services = node_config.get ('services', []) %}
+
+{%- set fw_policy = salt['pillar.get']('firewall:policy', {}) %}
 {%- set acls = salt['pillar.get']('firewall:acls') %}
 {%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
 {%- set ssh = salt['pillar.get']("firewall:ssh") %}
-{%- set services = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':services', []) %}
+
 {%- set icinga2_queriers = salt['pillar.get']('monitoring:icinga2:queriers', []) %}
 {%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
+
+{%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_policy, roles, nf_cc) %}
 
 flush ruleset
 
@@ -37,9 +44,20 @@ table ip filter {
 {%- endif %}
 		ct state related,established counter accept
 		counter jump services
-		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
+		limit rate 1/second burst 3 packets counter log prefix "nf input: "
 		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
 		counter drop
+	}
+
+	chain forward {
+		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{%- for rule in forward['rules'].get ('4', []) %}
+		{{ rule }}
+{%- endfor %}
+{%- if forward['policy'] == 'drop' %}
+		limit rate 1/second burst 3 packets counter log prefix "nf forward: "
+		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
+{%- endif %}
 	}
 
 	chain icmp_chain {
@@ -122,6 +140,17 @@ table ip6 filter {
 		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
 		limit rate 1/second burst 3 packets counter reject with icmpv6 type admin-prohibited
 		counter drop
+	}
+
+	chain forward {
+		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{%- for rule in forward['rules'].get ('6', []) %}
+		{{ rule }}
+{%- endfor %}
+{%- if forward['policy'] == 'drop' %}
+		limit rate 1/second burst 3 packets counter log prefix "nf forward: "
+		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
+{%- endif %}
 	}
 
 	chain icmp_chain {

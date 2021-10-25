@@ -85,3 +85,40 @@ def generate_service_rules (services, acls, af):
 		rules.append (rule)
 
 	return rules
+
+
+def generate_forward_policy (policy, roles, config_context):
+	fp = {
+		# Get default policy for packets to be forwarded
+		'policy' : 'drop',
+		'policy_reason' : 'default',
+		'rules': {
+			4 : [],
+			6 : [],
+		},
+	}
+
+	if 'forward_default_policy' in policy:
+		fp['policy'] = policy['forward_default_policy']
+		fp['policy_reason'] = 'forward_default_policy'
+
+	# Does any local role warrants for forwarding packets?
+	accept_roles = [role for role in policy.get ('forward_accept_roles', []) if role in roles]
+	if accept_roles:
+		fp['policy'] = 'accept'
+		fp['policy_reason'] = "roles: " + ",".join (accept_roles)
+
+	try:
+		cust_rules = config_context['filter']['forward']
+		for af in [ 4, 6 ]:
+			if af not in cust_rules:
+				continue
+
+			if type (cust_rules[af]) != list:
+				raise ValueError ("nftables:filter:forward:%d in config context expected to be a list!" % af)
+
+				fp['rules'][af] = cust_rules[af]
+	except KeyError:
+		pass
+
+	return fp
