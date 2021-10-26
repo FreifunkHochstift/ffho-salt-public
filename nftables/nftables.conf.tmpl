@@ -236,6 +236,7 @@ table ip6 filter {
 	}
 
 	chain urpf {
+		ip6 saddr fe80::/64 return
 {%- for iface_cfg in urpf  %}
   {%- for pfx in iface_cfg[6] %}
 		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} return
