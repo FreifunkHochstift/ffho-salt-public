@@ -18,6 +18,7 @@
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_policy, roles, nf_cc) %}
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](roles, nf_cc) %}
 {%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
+{%- set allow_dhcp = salt['ffho_netfilter.allow_dhcp'](fw_policy, roles) %}
 
 flush ruleset
 
@@ -112,6 +113,10 @@ table ip filter {
 	}
 
 	chain services {
+{%- if allow_dhcp %}
+		udp dport 67 counter accept comment "DHCP"
+{%- endif %}
+
 {%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 4) %}
 		{{ rule }}
 {%- endfor %}

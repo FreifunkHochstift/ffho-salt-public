@@ -203,3 +203,13 @@ def generate_urpf_policy (interfaces):
 		sorted_urpf.append (urpf[iface])
 
 	return sorted_urpf
+
+
+#
+# Check if at least one of the node roles are supposed to run DHCP
+def allow_dhcp (fw_policy, roles):
+	for dhcp_role in fw_policy.get ('dhcp_roles', []):
+		if dhcp_role in roles:
+			return True
+
+	return False
