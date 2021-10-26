@@ -35,10 +35,11 @@ table ip filter {
 	chain input {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
-		ip protocol icmp counter jump icmp_chain
 		udp dport 0 counter drop
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		udp dport 4789 jump vxlan
+		jump urpf
+		ip protocol icmp counter jump icmp_chain
 		ct state invalid counter drop
 		counter jump admin_access
 		counter jump monitoring
@@ -154,10 +155,11 @@ table ip6 filter {
 	chain input {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
-		ip6 nexthdr icmpv6 counter jump icmp_chain
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		udp dport 4789 jump vxlan
-		ct state invalid counter drop comment "Drop packets that do not make sense."
+		jump urpf
+		ip6 nexthdr icmpv6 counter jump icmp_chain
+		ct state invalid counter drop
 		counter jump admin_access
 		counter jump monitoring
 		tcp dport 22 counter jump ssh
