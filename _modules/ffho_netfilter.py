@@ -3,6 +3,14 @@
 #
 
 import ipaddress
+import re
+
+import ffho_net
+
+
+# Prepare regex to match VLAN intefaces / extract IDs
+vlan_re = re.compile (r'^vlan(\d+)$')
+
 
 def generate_service_rules (services, acls, af):
 	rules = []
@@ -77,7 +85,7 @@ def generate_service_rules (services, acls, af):
 
 		# Multiple ports?
 		if len (srv['ports']) > 1:
-			ports = "{ %s }" % ", ".join (map (str, sorted (srv['ports'])))
+			ports = "{ %s }" % ", ".join (map (str, srv['ports']))
 		else:
 			ports = srv['ports'][0]
 
@@ -85,3 +93,142 @@ def generate_service_rules (services, acls, af):
 		rules.append (rule)
 
 	return rules
+
+
+def generate_forward_policy (policy, roles, config_context):
+	fp = {
+		# Get default policy for packets to be forwarded
+		'policy' : 'drop',
+		'policy_reason' : 'default',
+		'rules': {
+			4 : [],
+			6 : [],
+		},
+	}
+
+	if 'forward_default_policy' in policy:
+		fp['policy'] = policy['forward_default_policy']
+		fp['policy_reason'] = 'forward_default_policy'
+
+	# Does any local role warrants for forwarding packets?
+	accept_roles = [role for role in policy.get ('forward_accept_roles', []) if role in roles]
+	if accept_roles:
+		fp['policy'] = 'accept'
+		fp['policy_reason'] = "roles: " + ",".join (accept_roles)
+
+	try:
+		cust_rules = config_context['filter']['forward']
+		for af in [ 4, 6 ]:
+			if af not in cust_rules:
+				continue
+
+			if type (cust_rules[af]) != list:
+				raise ValueError ("nftables:filter:forward:%d in config context expected to be a list!" % af)
+
+				fp['rules'][af] = cust_rules[af]
+	except KeyError:
+		pass
+
+	return fp
+
+
+def generate_nat_policy (roles, config_context):
+	np = {
+		4 : {},
+		6 : {},
+	}
+
+	# Any custom rules?
+	cc_nat = config_context.get ('nat')
+	if cc_nat:
+		for chain in ['output', 'prerouting', 'postrouting']:
+			if chain not in cc_nat:
+				continue
+
+			for af in [ 4, 6 ]:
+				if str (af) in cc_nat[chain]:
+					np[af][chain] = cc_nat[chain][str (af)]
+
+	return np
+
+
+def _active_urpf (iface, iface_config):
+	# Ignore loopback
+	if iface == "lo":
+		return False
+
+	# Forcefully enable uRPF via tags on Netbox interface?
+	if 'urpf_enable' in iface_config.get ('tags', []):
+		return True
+
+	# No uRPF on infra VPNs
+	for vpn_prefix in ["gre_", "ovpn-", "wg-"]:
+		if iface.startswith (vpn_prefix):
+			return False
+
+	# No address, no uRPF
+	if not iface_config.get ('prefixes'):
+		return False
+
+	# Interface in vrf_external connect to the Internet
+	if iface_config.get ('vrf') in ['vrf_external']:
+		return False
+
+	# Ignore interfaces by VLAN
+	match = vlan_re.search (iface)
+	if match:
+		vid = int (match.group (1))
+
+		# Magic
+		if 900 <= vid <= 999:
+			return False
+
+		# Wired infrastructure stuff
+		if 1000 <= vid <= 1499:
+			return False
+
+		# Wireless infrastructure stuff
+		if 2000 <= vid <= 2299:
+			return False
+
+	return True
+
+
+def generate_urpf_policy (interfaces):
+	urpf = {}
+
+	for iface in sorted (interfaces.keys ()):
+		iface_config = interfaces[iface]
+
+		if not _active_urpf (iface, iface_config):
+			continue
+
+		# Ok this seems to be and edge interface
+		urpf[iface] = {
+			'iface' : iface,
+			'desc' : iface_config.get ('desc', ''),
+			4 : [],
+			6 : [],
+		}
+
+		# Gather configure prefixes
+		for address in iface_config.get ('prefixes'):
+			pfx = ipaddress.ip_network (address, strict = False)
+			urpf[iface][pfx.version].append ("%s/%s" % (pfx.network_address, pfx.prefixlen))
+
+	sorted_urpf = []
+
+	for iface in ffho_net.get_interface_list (urpf):
+		sorted_urpf.append (urpf[iface])
+
+	return sorted_urpf
+
+
+#
+# Check if at least one of the node roles are supposed to run DHCP
+def allow_dhcp (fw_policy, roles):
+	for dhcp_role in fw_policy.get ('dhcp_roles', []):
+		if dhcp_role in roles:
+			return True
+
+	return False

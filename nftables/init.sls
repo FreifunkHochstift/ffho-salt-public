@@ -24,4 +24,6 @@ purge-iptables:
   pkg.purged:
     - pkgs:
       - iptables-persistent
+{%- if not 'docker' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
       - iptables
+{%- endif %}
