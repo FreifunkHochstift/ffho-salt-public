@@ -7,6 +7,11 @@ import re
 
 import ffho_net
 
+
+# Prepare regex to match VLAN intefaces / extract IDs
+vlan_re = re.compile (r'^vlan(\d+)$')
+
+
 def generate_service_rules (services, acls, af):
 	rules = []
 
@@ -147,42 +152,56 @@ def generate_nat_policy (roles, config_context):
 	return np
 
 
+def _active_urpf (iface, iface_config):
+	# Ignore loopback
+	if iface == "lo":
+		return False
+
+	# Forcefully enable uRPF via tags on Netbox interface?
+	if 'urpf_enable' in iface_config.get ('tags', []):
+		return True
+
+	# No uRPF on infra VPNs
+	for vpn_prefix in ["gre_", "ovpn-", "wg-"]:
+		if iface.startswith (vpn_prefix):
+			return False
+
+	# No address, no uRPF
+	if not iface_config.get ('prefixes'):
+		return False
+
+	# Interface in vrf_external connect to the Internet
+	if iface_config.get ('vrf') in ['vrf_external']:
+		return False
+
+	# Ignore interfaces by VLAN
+	match = vlan_re.search (iface)
+	if match:
+		vid = int (match.group (1))
+
+		# Magic
+		if 900 <= vid <= 999:
+			return False
+
+		# Wired infrastructure stuff
+		if 1000 <= vid <= 1499:
+			return False
+
+		# Wireless infrastructure stuff
+		if 2000 <= vid <= 2299:
+			return False
+
+	return True
+
+
 def generate_urpf_policy (interfaces):
 	urpf = {}
-
-	vlan_re = re.compile (r'^vlan(\d+)$')
 
 	for iface in sorted (interfaces.keys ()):
 		iface_config = interfaces[iface]
 
-		# Ignore loopback and VPNs
-		if iface == "lo" or iface.startswith ("ovpn-") or iface.startswith ("wg-"):
+		if not _active_urpf (iface, iface_config):
 			continue
-
-		# No addres, no uRPF
-		if not iface_config.get ('prefixes'):
-			continue
-
-		# Interface in vrf_external connect to the Internet
-		if iface_config.get ('vrf') in ['vrf_external']:
-			continue
-
-		# Ignore interfaces by VLAN
-		match = vlan_re.search (iface)
-		if match:
-			vid = int (match.group (1))
-
-			# Magic
-			if 900 <= vid <= 999:
-				continue
-
-			# Wired infrastructure stuff
-			if 1000 <= vid <= 1499:
-				continue
-
-			# Wireless infrastructure stuff
-			if 2000 <= vid <= 2299:
-				continue
 
 		# Ok this seems to be and edge interface
 		urpf[iface] = {
