@@ -147,7 +147,7 @@ def generate_nat_policy (roles, config_context):
 
 			for af in [ 4, 6 ]:
 				if str (af) in cc_nat[chain]:
-					np[4][chain] = cc_nat[chain][str (af)]
+					np[af][chain] = cc_nat[chain][str (af)]
 
 	return np
 
