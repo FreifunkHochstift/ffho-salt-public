@@ -49,6 +49,7 @@ table ip filter {
 {%- endif %}
 		ct state related,established counter accept
 		counter jump services
+		meta pkttype broadcast counter drop comment "Drop broadcasts before logging"
 		limit rate 1/second burst 3 packets counter log prefix "nf input: "
 		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
 		counter drop
