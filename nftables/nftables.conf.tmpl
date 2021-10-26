@@ -158,7 +158,7 @@ table ip6 filter {
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		udp dport 4789 jump vxlan
 		jump urpf
-		ip6 nexthdr icmpv6 counter jump icmp_chain
+		meta l4proto icmpv6 counter jump icmp_chain
 		ct state invalid counter drop
 		counter jump admin_access
 		counter jump monitoring
@@ -191,6 +191,7 @@ table ip6 filter {
 	chain icmp_chain {
 		icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, echo-request, echo-reply } counter accept
 		icmpv6 type { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert } ip6 hoplimit 255 counter accept
+		icmpv6 type { mld-listener-query, mld-listener-report } ip6 saddr fe80::/64 counter accept
 	}
 
 	chain admin_access {
