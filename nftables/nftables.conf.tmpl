@@ -57,20 +57,10 @@ table ip filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+		jump urpf
 {#- custom rules #}
 {%- for rule in forward['rules'].get ('4', []) %}
 		{{ rule }}
-{%- endfor %}
-
-{#- uRPF #}
-{%- for iface_cfg in urpf  %}
-  {%- if loop.first %}
-		# uRPF
-  {%- endif %}
-  {%- for pfx in iface_cfg[4] %}
-		iif {{ iface_cfg['iface'] }} ip saddr {{ pfx }} accept
-  {%- endfor %}
-		iif {{ iface_cfg['iface'] }} counter drop
 {%- endfor %}
 
 {%- if forward['policy'] == 'drop' %}
@@ -120,6 +110,15 @@ table ip filter {
 
 {%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 4) %}
 		{{ rule }}
+{%- endfor %}
+	}
+
+	chain urpf {
+{%- for iface_cfg in urpf  %}
+  {%- for pfx in iface_cfg[4] %}
+		iif {{ iface_cfg['iface'] }} ip saddr {{ pfx }} return
+  {%- endfor %}
+		iif {{ iface_cfg['iface'] }} counter drop
 {%- endfor %}
 	}
 
@@ -175,20 +174,10 @@ table ip6 filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+		jump urpf
 {#- custom rules #}
 {%- for rule in forward['rules'].get ('6', []) %}
 		{{ rule }}
-{%- endfor %}
-
-{#- uRPF #}
-{%- for iface_cfg in urpf  %}
-  {%- if loop.first %}
-		# uRPF
-  {%- endif %}
-  {%- for pfx in iface_cfg[6] %}
-		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} accept
-  {%- endfor %}
-		iif {{ iface_cfg['iface'] }} counter drop
 {%- endfor %}
 
 {%- if forward['policy'] == 'drop' %}
@@ -241,6 +230,15 @@ table ip6 filter {
 {%- if 'batman_gw' in roles %}
 		ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"
 {%- endif %}
+	}
+
+	chain urpf {
+{%- for iface_cfg in urpf  %}
+  {%- for pfx in iface_cfg[6] %}
+		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} return
+  {%- endfor %}
+		iif {{ iface_cfg['iface'] }} counter drop
+{%- endfor %}
 	}
 
 	chain vxlan {
