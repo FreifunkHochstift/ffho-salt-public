@@ -236,6 +236,11 @@ table ip6 filter {
 {%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 6) %}
 		{{ rule }}
 {%- endfor %}
+
+{#- Allow respondd queries on gateways #}
+{%- if 'batman_gw' in roles %}
+		ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"
+{%- endif %}
 	}
 
 	chain vxlan {
