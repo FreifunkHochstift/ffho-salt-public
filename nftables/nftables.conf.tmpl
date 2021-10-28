@@ -19,6 +19,7 @@
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](roles, nf_cc) %}
 {%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
 {%- set allow_dhcp = salt['ffho_netfilter.allow_dhcp'](fw_policy, roles) %}
+{%- set vxlan_ifaces = salt['ffho_netfilter.get_vxlan_interfaces'](node_config['ifaces']) %}
 
 flush ruleset
 
@@ -37,7 +38,9 @@ table ip filter {
 		iifname "lo" counter accept
 		udp dport 0 counter drop
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
+{%- if vxlan_ifaces %}
 		udp dport 4789 jump vxlan
+{%- endif %}
 		jump urpf
 		ip protocol icmp jump icmp_chain
 		ct state invalid counter drop
@@ -123,12 +126,14 @@ table ip filter {
 {%- endfor %}
 	}
 
+{%- if vxlan_ifaces %}
 	chain vxlan {
-{%- for iface in node_config['ifaces'] if node_config['ifaces'][iface].get ('batman_connect_sites') %}
+  {%- for iface in vxlan_ifaces %}
 		iif {{ iface }} accept
-{%- endfor %}
+  {%- endfor %}
 		counter drop
 	}
+{%- endif %}
 
 	chain log-drop {
 		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
@@ -156,7 +161,9 @@ table ip6 filter {
 		type filter hook input priority 0; policy drop;
 		iifname "lo" counter accept
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
+{%- if vxlan_ifaces %}
 		udp dport 4789 jump vxlan
+{%- endif %}
 		jump urpf
 		meta l4proto icmpv6 jump icmp_chain
 		ct state invalid counter drop
@@ -245,12 +252,14 @@ table ip6 filter {
 {%- endfor %}
 	}
 
+{%- if vxlan_ifaces %}
 	chain vxlan {
-{%- for iface in node_config['ifaces'] if node_config['ifaces'][iface].get ('batman_connect_sites') %}
+  {%- for iface in vxlan_ifaces %}
 		iif {{ iface }} accept
-{%- endfor %}
+  {%- endfor %}
 		counter drop
 	}
+{%- endif %}
 
 	chain log-drop {
 		limit rate 1/second burst 3 packets counter log prefix "netfilter: "

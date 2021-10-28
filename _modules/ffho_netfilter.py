@@ -153,8 +153,8 @@ def generate_nat_policy (roles, config_context):
 
 
 def _active_urpf (iface, iface_config):
-	# Ignore loopback
-	if iface == "lo":
+	# Ignore loopbacks
+	if iface == 'lo' or iface_config.get ('link-type', '') == 'dummy':
 		return False
 
 	# Forcefully enable uRPF via tags on Netbox interface?
@@ -232,3 +232,15 @@ def allow_dhcp (fw_policy, roles):
 			return True
 
 	return False
+
+
+#
+# Get a list of interfaces to allow VXLAN encapsulated traffic on
+def get_vxlan_interfaces (interfaces):
+	vxlan_ifaces = []
+
+	for iface in interfaces:
+		if interfaces[iface].get ('batman_connect_sites'):
+			vxlan_ifaces.append (iface)
+
+	return vxlan_ifaces
