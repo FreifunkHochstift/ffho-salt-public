@@ -39,17 +39,17 @@ table ip filter {
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		udp dport 4789 jump vxlan
 		jump urpf
-		ip protocol icmp counter jump icmp_chain
+		ip protocol icmp jump icmp_chain
 		ct state invalid counter drop
-		counter jump admin_access
-		counter jump monitoring
+		jump admin_access
+		jump monitoring
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
-		ip daddr { 224.0.0.5, 224.0.0.6 } meta l4proto ospf accept
+		ip daddr { 224.0.0.5, 224.0.0.6 } meta l4proto ospf counter accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept
-		counter jump services
+		jump services
 		meta pkttype broadcast counter drop comment "Drop broadcasts before logging"
 		limit rate 1/second burst 3 packets counter log prefix "nf input: "
 		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
@@ -158,13 +158,13 @@ table ip6 filter {
 		tcp dport 7 counter drop comment "Ignore echo protocol queries"
 		udp dport 4789 jump vxlan
 		jump urpf
-		meta l4proto icmpv6 counter jump icmp_chain
+		meta l4proto icmpv6 jump icmp_chain
 		ct state invalid counter drop
-		counter jump admin_access
-		counter jump monitoring
+		jump admin_access
+		jump monitoring
 		tcp dport 22 counter jump ssh
 {%- if 'router' in roles %}
-		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf accept
+		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf counter accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept comment "Allow established connections."
