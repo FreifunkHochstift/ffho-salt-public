@@ -1334,11 +1334,6 @@ def get_ospf_interface_config (node_config, grains_id):
 		for attr, val in ospf_config_pillar.items ():
 			ospf_config[attr] = val
 
-		# Convert boolean values to 'yes' / 'no' string values
-		for attr, val in ospf_config.items ():
-			if type (val) == bool:
-				ospf_config[attr] = 'yes' if val else 'no'
-
 		# Store interface configuration
 		ospf_interfaces[iface] = ospf_config
 
