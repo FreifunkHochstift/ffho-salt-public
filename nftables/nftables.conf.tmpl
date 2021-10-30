@@ -3,22 +3,19 @@
 # /etc/nftables.conf - FFHO packet filter configuration
 #
 {%- set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
-{%- set nf_cc = node_config.get ('nftables', {}) %}
 {%- set roles = node_config.get ('roles', []) %}
-{%- set services = node_config.get ('services', []) %}
 
-{%- set fw_policy = salt['pillar.get']('firewall:policy', {}) %}
-{%- set acls = salt['pillar.get']('firewall:acls') %}
-{%- set admin_access = salt['pillar.get']('firewall:admin_access') %}
-{%- set ssh = salt['pillar.get']("firewall:ssh") %}
+{%- set fw_config = salt['pillar.get']('firewall', {}) %}
+{%- set admin_access = fw_config.get ('admin_access') %}
+{%- set ssh = fw_config.get ('ssh') %}
 
 {%- set icinga2_queriers = salt['pillar.get']('monitoring:icinga2:queriers', []) %}
 {%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
 
-{%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_policy, roles, nf_cc) %}
-{%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](roles, nf_cc) %}
+{%- set services = salt['ffho_netfilter.generate_service_rules'](fw_config, node_config) %}
+{%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_config, node_config) %}
+{%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](node_config) %}
 {%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
-{%- set allow_dhcp = salt['ffho_netfilter.allow_dhcp'](fw_policy, roles) %}
 {%- set vxlan_ifaces = salt['ffho_netfilter.get_vxlan_interfaces'](node_config['ifaces']) %}
 
 flush ruleset
@@ -108,11 +105,7 @@ table ip filter {
 	}
 
 	chain services {
-{%- if allow_dhcp %}
-		udp dport 67 counter accept comment "DHCP"
-{%- endif %}
-
-{%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 4) %}
+{%- for rule in services[4] %}
 		{{ rule }}
 {%- endfor %}
 	}
@@ -232,14 +225,9 @@ table ip6 filter {
 	}
 
 	chain services {
-{%- for rule in salt['ffho_netfilter.generate_service_rules'](services, acls, 6) %}
+{%- for rule in services[6] %}
 		{{ rule }}
 {%- endfor %}
-
-{#- Allow respondd queries on gateways #}
-{%- if 'batman_gw' in roles %}
-		ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"
-{%- endif %}
 	}
 
 	chain urpf {

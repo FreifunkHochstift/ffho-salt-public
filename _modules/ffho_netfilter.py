@@ -11,8 +11,22 @@ import ffho_net
 # Prepare regex to match VLAN intefaces / extract IDs
 vlan_re = re.compile (r'^vlan(\d+)$')
 
+################################################################################
+#                          Internal helper functions                           #
+################################################################################
 
-def generate_service_rules (services, acls, af):
+#
+# Check if at least one of the node roles are supposed to run DHCP
+def _allow_dhcp (fw_policy, roles):
+	for dhcp_role in fw_policy.get ('dhcp_roles', []):
+		if dhcp_role in roles:
+			return True
+
+	return False
+
+
+# Generate services rules for the given AF
+def _generate_service_rules (services, acls, af):
 	rules = []
 
 	for srv in services:
@@ -95,7 +109,46 @@ def generate_service_rules (services, acls, af):
 	return rules
 
 
-def generate_forward_policy (policy, roles, config_context):
+################################################################################
+#                               Public functions                               #
+################################################################################
+
+#
+# Generate rules to allow access to services running on this node.
+# Services can either be allow programmatically here or explicitly
+# as Services applied to the device/VM in Netbox
+def generate_service_rules (fw_config, node_config):
+	acls = fw_config.get ('acls', {})
+	fw_policy = fw_config.get ('policy', {})
+
+	services = node_config.get ('services', [])
+	roles = node_config.get ('roles', [])
+
+	rules = {
+		4 : [],
+		6 : [],
+	}
+
+	# Does this node run a DHCP server?
+	if _allow_dhcp (fw_policy, roles):
+		rules[4].append ('udp dport 67 counter accept comment "DHCP"')
+
+	# Allow respondd queries on gateways
+	if 'batman_gw' in roles:
+		rules[6].append ('ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"')
+
+	# Generate rules for services from Netbox
+	for af in [ 4, 6 ]:
+		rules[af].extend (_generate_service_rules (services, acls, af))
+
+	return rules
+
+
+def generate_forward_policy (fw_config, node_config):
+	policy = fw_config.get ('policy', {})
+	roles = node_config.get ('roles', [])
+	nf_cc = node_config.get ('nftables', {})
+
 	fp = {
 		# Get default policy for packets to be forwarded
 		'policy' : 'drop',
@@ -117,7 +170,7 @@ def generate_forward_policy (policy, roles, config_context):
 		fp['policy_reason'] = "roles: " + ",".join (accept_roles)
 
 	try:
-		cust_rules = config_context['filter']['forward']
+		cust_rules = nf_cc['filter']['forward']
 		for af in [ 4, 6 ]:
 			if af not in cust_rules:
 				continue
@@ -132,14 +185,17 @@ def generate_forward_policy (policy, roles, config_context):
 	return fp
 
 
-def generate_nat_policy (roles, config_context):
+def generate_nat_policy (node_config):
+	roles = node_config.get ('roles', [])
+	nf_cc = node_config.get ('nftables', {})
+
 	np = {
 		4 : {},
 		6 : {},
 	}
 
 	# Any custom rules?
-	cc_nat = config_context.get ('nat')
+	cc_nat = nf_cc.get ('nat')
 	if cc_nat:
 		for chain in ['output', 'prerouting', 'postrouting']:
 			if chain not in cc_nat:
@@ -222,16 +278,6 @@ def generate_urpf_policy (interfaces):
 		sorted_urpf.append (urpf[iface])
 
 	return sorted_urpf
-
-
-#
-# Check if at least one of the node roles are supposed to run DHCP
-def allow_dhcp (fw_policy, roles):
-	for dhcp_role in fw_policy.get ('dhcp_roles', []):
-		if dhcp_role in roles:
-			return True
-
-	return False
 
 
 #
