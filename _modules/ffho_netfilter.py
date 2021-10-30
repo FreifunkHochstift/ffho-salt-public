@@ -129,6 +129,10 @@ def generate_service_rules (fw_config, node_config):
 		6 : [],
 	}
 
+	#
+	# Add rules based on roles
+	#
+
 	# Does this node run a DHCP server?
 	if _allow_dhcp (fw_policy, roles):
 		rules[4].append ('udp dport 67 counter accept comment "DHCP"')
@@ -137,9 +141,20 @@ def generate_service_rules (fw_config, node_config):
 	if 'batman_gw' in roles:
 		rules[6].append ('ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"')
 
-	# Generate rules for services from Netbox
 	for af in [ 4, 6 ]:
-		rules[af].extend (_generate_service_rules (services, acls, af))
+		comment = "Generated rules" if rules[af] else "No generated rules"
+		rules[af].insert (0, "# %s" % comment)
+
+	#
+	# Generate and add rules for services from Netbox, if any
+	#
+	for af in [ 4, 6 ]:
+		srv_rules = _generate_service_rules (services, acls, af)
+		if not srv_rules:
+			rules[af].append ("# No services defined")
+
+		rules[af].append ("# Services defined in Netbox")
+		rules[af].extend (srv_rules)
 
 	return rules
 
