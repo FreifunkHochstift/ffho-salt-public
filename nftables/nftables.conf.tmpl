@@ -59,7 +59,6 @@ table ip filter {
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
 		jump urpf
-{#- custom rules #}
 {%- for rule in forward['rules'].get ('4', []) %}
 		{{ rule }}
 {%- endfor %}
@@ -167,7 +166,7 @@ table ip6 filter {
 		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf counter accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
-		ct state related,established counter accept comment "Allow established connections."
+		ct state related,established counter accept
 		counter jump services
 		limit rate 1/second burst 3 packets counter log prefix "netfilter: "
 		limit rate 1/second burst 3 packets counter reject with icmpv6 type admin-prohibited
@@ -177,7 +176,6 @@ table ip6 filter {
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
 		jump urpf
-{#- custom rules #}
 {%- for rule in forward['rules'].get ('6', []) %}
 		{{ rule }}
 {%- endfor %}
