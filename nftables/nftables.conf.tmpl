@@ -16,6 +16,7 @@
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_config, node_config) %}
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](node_config) %}
 {%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
+{%- set ospf_ifaces = salt['ffho_netfilter.get_ospf_active_interface'](node_config) %}
 {%- set vxlan_ifaces = salt['ffho_netfilter.get_vxlan_interfaces'](node_config['ifaces']) %}
 
 flush ruleset
@@ -44,8 +45,11 @@ table ip filter {
 		jump admin_access
 		jump monitoring
 		tcp dport 22 counter jump ssh
+{%- if ospf_ifaces %}
+		{#- ifname sets are introduced in nftables 2.11 #}
+		meta l4proto ospf iif { {{ ospf_ifaces|join(', ') }} } counter accept
+{%- endif %}
 {%- if 'router' in roles %}
-		ip daddr { 224.0.0.5, 224.0.0.6 } meta l4proto ospf counter accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept
@@ -162,8 +166,11 @@ table ip6 filter {
 		jump admin_access
 		jump monitoring
 		tcp dport 22 counter jump ssh
+{%- if ospf_ifaces %}
+		{#- ifname sets are introduced in nftables 2.11 #}
+		meta l4proto ospf iif { {{ ospf_ifaces|join(', ') }} } counter accept
+{%- endif %}
 {%- if 'router' in roles %}
-		ip6 saddr fe80::/64 ip6 daddr { fe80::/10, ff02::5, ff02::6 } meta l4proto ospf counter accept
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept
