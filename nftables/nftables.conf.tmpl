@@ -198,7 +198,7 @@ table ip6 filter {
 	chain icmp_chain {
 		icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, echo-request, echo-reply } counter accept
 		icmpv6 type { nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert } ip6 hoplimit 255 counter accept
-		icmpv6 type { mld-listener-query, mld-listener-report } ip6 saddr fe80::/64 counter accept
+		icmpv6 type { mld-listener-query, mld-listener-report, mld-listener-reduction } ip6 saddr fe80::/64 counter accept
 	}
 
 	chain admin_access {
