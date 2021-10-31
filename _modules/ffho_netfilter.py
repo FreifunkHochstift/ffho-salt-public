@@ -229,9 +229,9 @@ def _active_urpf (iface, iface_config):
 	if iface == 'lo' or iface_config.get ('link-type', '') == 'dummy':
 		return False
 
-	# Forcefully enable uRPF via tags on Netbox interface?
-	if 'urpf_enable' in iface_config.get ('tags', []):
-		return True
+	# Forcefully enable/disable uRPF via tags on Netbox interface?
+	if 'urpf' in iface_config:
+		return iface_config['urpf']
 
 	# No uRPF on infra VPNs
 	for vpn_prefix in ["gre_", "ovpn-", "wg-"]:

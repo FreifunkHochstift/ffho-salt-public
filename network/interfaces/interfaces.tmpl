@@ -71,7 +71,7 @@ iface {{ interface }}
     {%- set argument = config.get (keyword) %}
     {%- if argument is none %}
     {%- elif keyword.startswith ("_") %}
-    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'mac', 'method', 'vlan', 'vxlan', 'desc', 'prefixes', 'status', 'tagged_vlans', 'has_gateway' ] %}
+    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'mac', 'method', 'vlan', 'vxlan', 'desc', 'prefixes', 'status', 'tagged_vlans', 'urpf', 'has_gateway' ] %}
     {%- elif argument is string or argument is number %}
 	{{ keyword }} {{ argument }}
     {%- else %}
