@@ -15,7 +15,7 @@
 {%- set services = salt['ffho_netfilter.generate_service_rules'](fw_config, node_config) %}
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_config, node_config) %}
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](node_config) %}
-{%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config['ifaces']) %}
+{%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config) %}
 {%- set ospf_ifaces = salt['ffho_netfilter.get_ospf_active_interface'](node_config) %}
 {%- set vxlan_ifaces = salt['ffho_netfilter.get_vxlan_interfaces'](node_config['ifaces']) %}
 
@@ -39,7 +39,9 @@ table ip filter {
 {%- if vxlan_ifaces %}
 		udp dport 4789 jump vxlan
 {%- endif %}
+{%- if urpf %}
 		jump urpf
+{%- endif %}
 		ip protocol icmp jump icmp_chain
 		ct state invalid counter drop
 		jump admin_access
@@ -62,7 +64,9 @@ table ip filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{%- if urpf %}
 		jump urpf
+{%- endif %}
 {%- for rule in forward['rules'].get ('4', []) %}
 		{{ rule }}
 {%- endfor %}
@@ -113,14 +117,16 @@ table ip filter {
 {%- endfor %}
 	}
 
+{%- if urpf %}
 	chain urpf {
-{%- for iface_cfg in urpf  %}
-  {%- for pfx in iface_cfg[4] %}
+  {%- for iface_cfg in urpf  %}
+    {%- for pfx in iface_cfg[4] %}
 		iif {{ iface_cfg['iface'] }} ip saddr {{ pfx }} return
-  {%- endfor %}
+    {%- endfor %}
 		iif {{ iface_cfg['iface'] }} counter drop
-{%- endfor %}
+  {%- endfor %}
 	}
+{%- endif %}
 
 {%- if vxlan_ifaces %}
 	chain vxlan {
@@ -160,7 +166,9 @@ table ip6 filter {
 {%- if vxlan_ifaces %}
 		udp dport 4789 jump vxlan
 {%- endif %}
+{%- if urpf %}
 		jump urpf
+{%- endif %}
 		meta l4proto icmpv6 jump icmp_chain
 		ct state invalid counter drop
 		jump admin_access
@@ -182,7 +190,9 @@ table ip6 filter {
 
 	chain forward {
 		type filter hook forward priority 0; policy {{ forward['policy'] }}; # {{ forward['policy_reason'] }}
+{%- if urpf %}
 		jump urpf
+{%- endif %}
 {%- for rule in forward['rules'].get ('6', []) %}
 		{{ rule }}
 {%- endfor %}
@@ -235,15 +245,17 @@ table ip6 filter {
 {%- endfor %}
 	}
 
+{%- if urpf %}
 	chain urpf {
 		ip6 saddr fe80::/64 return
-{%- for iface_cfg in urpf  %}
-  {%- for pfx in iface_cfg[6] %}
+  {%- for iface_cfg in urpf  %}
+    {%- for pfx in iface_cfg[6] %}
 		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} return
-  {%- endfor %}
+    {%- endfor %}
 		iif {{ iface_cfg['iface'] }} counter drop
-{%- endfor %}
+  {%- endfor %}
 	}
+{%- endif %}
 
 {%- if vxlan_ifaces %}
 	chain vxlan {

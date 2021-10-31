@@ -266,8 +266,17 @@ def _active_urpf (iface, iface_config):
 	return True
 
 
-def generate_urpf_policy (interfaces):
+def generate_urpf_policy (node_config):
+	roles = node_config.get ('roles', [])
+
+	# If this box is not a router, all traffic will come in via the internal/
+	# external interface an uRPF doesn't make any sense here, so we don't even
+	# have to look at the interfaces.
+	if 'router' not in roles:
+		return {}
+
 	urpf = {}
+	interfaces = node_config['ifaces']
 
 	for iface in sorted (interfaces.keys ()):
 		iface_config = interfaces[iface]
