@@ -189,7 +189,7 @@ table ip6 filter {
 
 {%- if forward['policy'] == 'drop' %}
 		limit rate 1/second burst 3 packets counter log prefix "nf forward: "
-		limit rate 1/second burst 3 packets counter reject with icmp type admin-prohibited
+		limit rate 1/second burst 3 packets counter reject with icmpv6 type admin-prohibited
 {%- endif %}
 	}
 
