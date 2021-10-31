@@ -151,7 +151,8 @@ def generate_service_rules (fw_config, node_config):
 	for af in [ 4, 6 ]:
 		srv_rules = _generate_service_rules (services, acls, af)
 		if not srv_rules:
-			rules[af].append ("# No services defined")
+			rules[af].append ("# No services defined in Netbox")
+			continue
 
 		rules[af].append ("# Services defined in Netbox")
 		rules[af].extend (srv_rules)
