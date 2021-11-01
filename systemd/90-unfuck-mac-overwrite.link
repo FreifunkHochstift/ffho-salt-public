@@ -1,0 +1,11 @@
+#
+# Overwrite MACAddressPolicy=persistent which is set in defautl config file
+#  /lib/systemd/network/99-default.link  so systemd-udevd will NOT fiddle
+# around with interfaces it has no businss in touching at all.
+#
+
+[Match]
+OriginalName=*
+
+[Link]
+MACAddressPolicy=none

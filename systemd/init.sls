@@ -29,3 +29,15 @@ wait-for-routes.service:
   file.managed:
    - source: salt://systemd/wait-for-routes
    - mode: 755
+
+
+#
+# Unfuck systemd defaults likely to break stuff
+#
+{% if grains.oscodename == "bullseye" %}
+/etc/systemd/network/90-unfuck-mac-overwrite.link:
+  file.managed:
+    - source: salt://systemd/90-unfuck-mac-overwrite.link
+    - watch_in:
+      - cmd: systemctl-daemon-reload
+{% endif %}
