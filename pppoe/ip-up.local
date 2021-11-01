@@ -33,21 +33,8 @@ ip link set ${1} master vrf_external
 ip link set ${1} up
 ip route add default via ${5} table 1023
 
-{%- if grains['id'] == 'bbr-kt.in.ffho.net' %}
-# Reload backbone GRE tunnels to rebind them to VRF master device
-for pop in ber dus fra; do
-	for x in a b; do
-		ifdown gre_ffrl_\${pop}_\${x}
-		ifup gre_ffrl_\${pop}_\${x}
-	done
-done
-{%- endif %}
-
-{%- if grains['id'] == 'bbr-wagsh.in.ffho.net' %}
-# Reload OpenVPN tunnels
-systemctl restart openvpn.service
-#systemctl restart fastd@hx-sued_intergw.service
-{%- endif %}
+# ET... Phone... Home.
+ip vrf exec vrf_external wget --max-redirect=0 --header="Host: noc.ffho.net" http://80.70.180.55/et-phone-home/$(hostname -f)
 EOF
 
 chmod 755 /usr/local/sbin/fix_ppp_vrf.gen
