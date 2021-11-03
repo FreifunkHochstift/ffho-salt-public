@@ -137,8 +137,8 @@ def generate_service_rules (fw_config, node_config):
 	if _allow_dhcp (fw_policy, roles):
 		rules[4].append ('udp dport 67 counter accept comment "DHCP"')
 
-	# Allow respondd queries on gateways
-	if 'batman_gw' in roles:
+	# Allow respondd queries on B.A.T.M.A.N. adv. nodes
+	if 'batman' in roles:
 		rules[6].append ('ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"')
 
 	for af in [ 4, 6 ]:
