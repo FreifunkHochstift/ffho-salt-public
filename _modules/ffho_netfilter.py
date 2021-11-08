@@ -141,6 +141,10 @@ def generate_service_rules (fw_config, node_config):
 	if 'batman' in roles:
 		rules[6].append ('ip6 saddr fe80::/64 ip6 daddr ff05::2:1001 udp dport 1001 counter accept comment "responnd"')
 
+	# Allow respondd replies to yanic
+	if 'yanic' in roles:
+		rules[6].append ('ip6 saddr fe80::/64 udp sport 1001 counter accept comment "respondd replies to yanic"')
+
 	for af in [ 4, 6 ]:
 		comment = "Generated rules" if rules[af] else "No generated rules"
 		rules[af].insert (0, "# %s" % comment)
