@@ -3,6 +3,5 @@
 #
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO={{ salt['pillar.get']('globals:ops_mail') }}
 
 * * * * *       root    /usr/local/sbin/ff_fix_default_route

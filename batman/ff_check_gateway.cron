@@ -3,6 +3,5 @@
 #
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO={{ salt['pillar.get']("ffho:tech_c_mail") }}
 
 * * * * *       root    /usr/local/sbin/ff_check_gateway
