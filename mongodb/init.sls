@@ -15,3 +15,20 @@ mongodb:
   service.running:
     - name: mongod
     - enable: True
+
+# Install cronjob, backup script and corresponding config file
+/etc/cron.d/mongodb_backup:
+  file.managed:
+    - source: salt://mongodb/mongodb_backup.cron
+
+/usr/local/sbin/mongodb_backup:
+  file.managed:
+    - source: salt://mongodb/mongodb_backup
+    - mode: 755
+
+/etc/mongodb_backup.conf:
+  file.managed:
+    - source: salt://mongodb/mongodb_backup.conf
+    - mode: 600
+    - user: root
+    - group: root

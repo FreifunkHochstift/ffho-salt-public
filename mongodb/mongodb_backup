@@ -1,0 +1,130 @@
+#!/usr/bin/python3
+# mongodb backup script
+# Copyright (C) 2021 Philipp Fromme
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import ast
+import datetime, time
+import os, sys, pwd
+import string
+import subprocess
+import configparser
+
+config_file = '/etc/mongodb_backup.conf'
+
+config = configparser.ConfigParser()
+if os.path.exists(config_file):
+    config.read(config_file)
+
+# Set variables from config file if available, otherwise default
+mdb_conf = config['mongodb-backup']
+BAKDIR = mdb_conf.get('BAKDIR', '/var/mongodb_bak')
+MAXAGE = mdb_conf.getint('MAXAGE', 1)
+MONGODB_OPT = mdb_conf.get('MONGODB_OPT')
+CLEANUPBEFORE = mdb_conf.getboolean('CLEANUPBEFORE', False)
+USERNAME = mdb_conf.get('USERNAME')
+PASSWORD = mdb_conf.get('PASSWORD')
+QUIET = mdb_conf.getboolean('QUIET', True)
+
+DB_IGNORE = dict(config.items('db_ignore'))
+DB_IGNORE_LIST = []
+for key, db in DB_IGNORE.items():
+    DB_IGNORE_LIST.append(db)
+
+CURDIR = str(datetime.date.today())
+
+def backup(databases):
+    dest_dir = os.path.join(BAKDIR, CURDIR)
+    mongodump_cmd = ['/usr/bin/mongodump', '--out', dest_dir]
+    if MONGODB_OPT:
+        mongodump_cmd += [MONGODB_OPT]
+    if QUIET:
+        mongodump_cmd += ['--quiet']
+    if USERNAME:
+        mongodump_cmd += ['--username=' + USERNAME]
+    if PASSWORD:
+        mongodump_cmd += ['--password=' + PASSWORD]
+    for db in databases:
+        if db not in DB_IGNORE_LIST:
+            db_arg = '--db=' + db
+            mongodump_cmd += [db_arg]
+            subprocess.run(mongodump_cmd)
+
+def cleanup():
+    if not QUIET:
+        print('Cleaning up backup directory.')
+    for directory in os.listdir(BAKDIR):
+        if os.path.isdir(directory) and not directory == 'current':
+            if os.path.getmtime(directory) < time.time() - (MAXAGE * 24 * 3600):
+                # if backup is older than MAXAGE. delete it.
+                dirpath = os.path.join(BAKDIR, directory)
+                for root, dirs, files in os.walk(dirpath, topdown=False):
+                    for f in files:
+                        rm_file = os.path.join(root, f)
+                        if not QUIET:
+                            print('removing file %s' % rm_file)
+                        os.remove(rm_file)
+                    for d in dirs:
+                        rm_dir = os.path.join(root, d)
+                        if not QUIET:
+                            print('removing directory %s' % rm_dir)
+                        os.rmdir(rm_dir)
+                if not QUIET:
+                    print('removing directory %s' % dirpath)
+                os.rmdir(dirpath)
+            else:
+                if not QUIET:
+                    print('skip directory %s' % directory)
+    if os.path.islink('current'):
+        os.remove('current')
+    os.symlink(CURDIR, 'current')
+
+def main():
+    # get databases
+    get_db_cmd = ['mongo', '--quiet', '--eval', 'db.getMongo().getDBNames()']
+    if USERNAME:
+        get_db_cmd += ['--username=' + USERNAME]
+    if PASSWORD:
+        get_db_cmd += ['--password=' + PASSWORD]
+    get_db_output = subprocess.check_output(get_db_cmd)
+    db_list = ast.literal_eval(get_db_output.decode().strip())
+
+    if not os.path.exists(BAKDIR):
+        os.makedirs(BAKDIR)
+        os.chmod(BAKDIR, mode=0o700)
+
+    os.umask(0o177)
+
+    os.chdir(BAKDIR)
+
+    if not QUIET:
+        print('Backup directory is %s' % (os.path.join(BAKDIR, CURDIR)))
+
+    if CLEANUPBEFORE:
+        cleanup()
+
+    if not os.path.exists(CURDIR):
+        os.mkdir(CURDIR)
+    elif not QUIET:
+        print('Folder already exists. Overwriting old backup from same day')
+
+    if CLEANUPBEFORE:
+        backup(db_list)
+    else:
+        backup(db_list)
+        cleanup()
+
+if __name__ == '__main__':
+    main()
