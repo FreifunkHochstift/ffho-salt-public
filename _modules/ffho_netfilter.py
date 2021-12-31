@@ -277,7 +277,7 @@ def generate_urpf_policy (node_config):
 	# external interface an uRPF doesn't make any sense here, so we don't even
 	# have to look at the interfaces.
 	if 'router' not in roles:
-		return {}
+		return []
 
 	urpf = {}
 	interfaces = node_config['ifaces']
