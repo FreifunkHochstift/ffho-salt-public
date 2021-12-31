@@ -109,6 +109,48 @@ def _generate_service_rules (services, acls, af):
 	return rules
 
 
+def _active_urpf (iface, iface_config):
+	# Ignore loopbacks
+	if iface == 'lo' or iface_config.get ('link-type', '') == 'dummy':
+		return False
+
+	# Forcefully enable/disable uRPF via tags on Netbox interface?
+	if 'urpf' in iface_config:
+		return iface_config['urpf']
+
+	# No uRPF on infra VPNs
+	for vpn_prefix in ["gre_", "ovpn-", "wg-"]:
+		if iface.startswith (vpn_prefix):
+			return False
+
+	# No address, no uRPF
+	if not iface_config.get ('prefixes'):
+		return False
+
+	# Interface in vrf_external connect to the Internet
+	if iface_config.get ('vrf') in ['vrf_external']:
+		return False
+
+	# Ignore interfaces by VLAN
+	match = vlan_re.search (iface)
+	if match:
+		vid = int (match.group (1))
+
+		# Magic
+		if 900 <= vid <= 999:
+			return False
+
+		# Wired infrastructure stuff
+		if 1000 <= vid <= 1499:
+			return False
+
+		# Wireless infrastructure stuff
+		if 2000 <= vid <= 2299:
+			return False
+
+	return True
+
+
 ################################################################################
 #                               Public functions                               #
 ################################################################################
@@ -226,48 +268,6 @@ def generate_nat_policy (node_config):
 					np[af][chain] = cc_nat[chain][str (af)]
 
 	return np
-
-
-def _active_urpf (iface, iface_config):
-	# Ignore loopbacks
-	if iface == 'lo' or iface_config.get ('link-type', '') == 'dummy':
-		return False
-
-	# Forcefully enable/disable uRPF via tags on Netbox interface?
-	if 'urpf' in iface_config:
-		return iface_config['urpf']
-
-	# No uRPF on infra VPNs
-	for vpn_prefix in ["gre_", "ovpn-", "wg-"]:
-		if iface.startswith (vpn_prefix):
-			return False
-
-	# No address, no uRPF
-	if not iface_config.get ('prefixes'):
-		return False
-
-	# Interface in vrf_external connect to the Internet
-	if iface_config.get ('vrf') in ['vrf_external']:
-		return False
-
-	# Ignore interfaces by VLAN
-	match = vlan_re.search (iface)
-	if match:
-		vid = int (match.group (1))
-
-		# Magic
-		if 900 <= vid <= 999:
-			return False
-
-		# Wired infrastructure stuff
-		if 1000 <= vid <= 1499:
-			return False
-
-		# Wireless infrastructure stuff
-		if 2000 <= vid <= 2299:
-			return False
-
-	return True
 
 
 def generate_urpf_policy (node_config):
