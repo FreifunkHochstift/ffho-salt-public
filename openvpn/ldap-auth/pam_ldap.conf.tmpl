@@ -1,0 +1,13 @@
+#
+# PAM LDAP configuration (Salt managed)
+#
+
+uri {{ server_uri }}
+base {{ base_dn }}
+
+ldap_version 3
+
+{% if bind_dn and bind_pw %}
+binddn {{ bind_dn }}
+bindpw {{ bind_pw }}
+{% endif %}

@@ -148,6 +148,9 @@ Cleanup /etc/openvpn/{{ netname }}:
 # OPS VPN?
 #
 {% if 'ops-vpn' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', [])  %}
+libpam-ldap:
+  pkg.installed
+
 /etc/pam.d/openvpn:
   file.managed:
     - source: salt://openvpn/ldap-auth/openvpn.pam.d
@@ -159,13 +162,46 @@ Cleanup /etc/openvpn/{{ netname }}:
     - context:
       server_uri: {{ salt['pillar.get']('ldap:global:server_uri') }}
       base_dn: {{ salt['pillar.get']('ldap:global:base_dn') }}
+
+/etc/pam_ldap.conf:
+  file.managed:
+    - source: salt://openvpn/ldap-auth/pam_ldap.conf.tmpl
+    - template: jinja
+    - context:
+      server_uri: {{ salt['pillar.get']('ldap:global:server_uri') }}
+      base_dn: {{ salt['pillar.get']('ldap:global:base_dn') }}
       bind_dn: {{ salt['pillar.get']('ldap:openvpn:bind_dn') }}
       bind_pw: {{ salt['pillar.get']('ldap:openvpn:bind_pw') }}
+
+/etc/openvpn/ops.conf:
+  file.managed:
+    - source: salt://openvpn/ops.conf.tmpl
+    - template: jinja
+    - context:
+      config: {{ salt['pillar.get']('ops:openvpn') }}
+    - require:
+      - pkg: libpam-ldap
+      - file: /etc/pam.d/openvpn
+      - file: /etc/pam_ldap.conf
+      - file: /etc/ldap/ldap.conf
+    - watch_in:
+      - service: openvpn@ops
+
+openvpn@ops:
+  service.running:
+    - enable: True
+    - reload: True
+    - require:
+      - file: /etc/systemd/system/openvpn@.service
+      - file: /etc/openvpn/ops.conf
 {% else %}
 
 /etc/pam.d/openvpn:
   file.absent
 
 /etc/ldap/ldap.conf:
+  file.absent
+
+/etc/pam_ldap.conf:
   file.absent
 {% endif %}

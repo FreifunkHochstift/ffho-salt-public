@@ -1,0 +1,51 @@
+#
+# FFHO OPS VPN
+#
+
+proto {{ config['proto'] }}
+port {{ config['port'] }}
+{%- if "bind-dev" in config %}
+bind-dev        {{ config['bind-dev'] }}
+{% endif %}
+
+tls-server
+
+dev-type tun
+dev tun-ops
+tun-mtu 1400
+
+ca	/etc/ssl/certs/ffho-cacert.pem
+cert	/etc/ssl/certs/{{ config['fqdn'] }}.cert.pem
+key	/etc/ssl/private/{{ config['fqdn'] }}.key.pem
+dh	/etc/ssl/dhparam.pem
+
+# Auth via LDAP
+plugin /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so openvpn
+verify-client-cert none
+username-as-common-name
+
+# Server mode and client subnets
+server {{ config['servers'][grains.id]['prefix_v4'] }}
+server-ipv6 {{ config['servers'][grains.id]['prefix_v6'] }}
+topology subnet
+
+# Push route for aggregates
+{%- for prefix in config['routes'] %}
+  {%- set kw = 'route-ipv6' if ':' in prefix else 'route' %}
+push "{{ kw }} {{ prefix }}"
+{%- endfor %}
+
+# push "dhcp-option DNS 10.132.251.53"
+
+persist-key
+persist-tun
+
+keepalive 10 120
+
+data-ciphers {{ config.get ('data-ciphers', 'AES-256-GCM:AES-128-GCM') }}
+data-ciphers-fallback {{ config.get ('data-ciphers-fallback', 'AES-256-CBC') }}
+
+# Log a short status
+status /var/log/openvpn/openvpn-status-ops.log
+
+verb 1
