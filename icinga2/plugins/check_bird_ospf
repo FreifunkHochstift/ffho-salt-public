@@ -6,6 +6,7 @@
 #  --  Wed 26 Apr 2017 07:26:48 PM CEST
 #
 
+from __future__ import print_function
 import argparse
 import os.path
 import re
@@ -26,8 +27,9 @@ def read_interfaces_from_file (file_path, missing_ok):
 				if not iface.startswith ('#'):
 					interfaces.append (iface.strip ())
 
-	except IOError as (errno, strerror):
-		print "Failed to read interfaces_down_ok from '%s': %s" % (args.interfaces_down_ok_file, strerror)
+	except IOError as err:
+		errno, strerror = err.args
+		print ("Failed to read interfaces_down_ok from '%s': %s" % (args.interfaces_down_ok_file, strerror))
 		sys.exit (1)
 
 	return interfaces
@@ -77,22 +79,22 @@ cmd_neighbors  = [ "/usr/bin/sudo", cmds[args.proto], "show ospf neighbors %s" %
 try:
 	interfaces_fh = subprocess.Popen (cmd_interfaces, bufsize = 4194304, stdout = subprocess.PIPE)
 	if interfaces_fh.returncode:
-		print "Failed to get OSPF interfaces from bird: %s" % str (" ".join ([line.strip () for line in interfaces_fh.stdout.readlines ()]))
+		print ("Failed to get OSPF interfaces from bird: %s" % str (" ".join ([line.strip () for line in interfaces_fh.stdout.readlines ()])))
 		sys.exit (1)
 
 	neighbors_fh  = subprocess.Popen (cmd_neighbors,  bufsize = 4194304, stdout = subprocess.PIPE)
 	if neighbors_fh.returncode:
-		print "Failed to get OSPF neighbors from bird: %s" % str (" ".join ([line.strip () for line in neighbors_fh.stdout.readlines ()]))
+		print ("Failed to get OSPF neighbors from bird: %s" % str (" ".join ([line.strip () for line in neighbors_fh.stdout.readlines ()])))
 		sys.exit (1)
 
 # cmd exited with non-zero code
 except subprocess.CalledProcessError as c:
-	print "Failed to get OSPF information from bird: %s" % c.output
+	print ("Failed to get OSPF information from bird: %s" % c.output)
 	sys.exit (1)
 
 # This should not have happend.
 except Exception as e:
-	print "Unknown error while getting OSPF information from bird: %s" % str (e)
+	print ("Unknown error while getting OSPF information from bird: %s" % str (e))
 	sys.exit (3)
 
 
@@ -111,6 +113,10 @@ interface = None
 for line in interfaces_fh.stdout.readlines ():
 	line = line.strip ()
 
+	# Python3 glue
+	if sys.version_info >= (3, 0):
+		line = str (line, encoding='utf-8')
+
 	# Create empty interface hash
 	match = interface_re.search (line)
 	if match:
@@ -125,7 +131,7 @@ for line in interfaces_fh.stdout.readlines ():
 
 
 # Delete any stub interfaces from our list
-for iface in interfaces.keys ():
+for iface in list (interfaces):
 	if stub_re.search (interfaces[iface]['State']):
 		del interfaces[iface]
 
@@ -139,6 +145,10 @@ neighbor_re = re.compile (r'^([0-9a-fA-F.:]+)\s+(\d+)\s+([\w/-]+)\s+([0-9:]+)\s+
 # Read and check all neighbor states
 for line in neighbors_fh.stdout.readlines ():
 	line = line.strip ()
+
+	# Python3 glue
+	if sys.version_info >= (3, 0):
+		line = str (line, encoding='utf-8')
 
 	match = neighbor_re.search (line)
 	if match:
@@ -185,7 +195,7 @@ ret_code = 0
 # Any down interfaces?
 if len (down) > 0:
 	ret_code = 2
-	print "DOWN: %s" % ", ".join (sorted (down))
+	print ("DOWN: %s" % ", ".join (sorted (down)))
 
 # Any broken sessions?
 if len (broken) > 0:
@@ -193,10 +203,10 @@ if len (broken) > 0:
 	if ret_code < 2:
 		ret_code = 1
 
-	print "BROKEN: %s" % ", ".join (sorted (broken))
+	print ("BROKEN: %s" % ", ".join (sorted (broken)))
 
 # And the good ones
 if len (ok) > 0:
-	print "OK: %s" % ", ".join (sorted (ok))
+	print ("OK: %s" % ", ".join (sorted (ok)))
 
 sys.exit (ret_code)
