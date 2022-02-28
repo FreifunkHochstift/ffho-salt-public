@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Check state of BGP sessions in Bird Internet Routing Daemon
 #
@@ -26,39 +26,95 @@ def read_sessions_from_file (file_path, missing_ok):
 				if not session.startswith ('#'):
 					sessions.append (session.strip ())
 
-	except IOError as (errno, strerror):
-		print "Failed to read sessions_down_ok from '%s': %s" % (args.sessions_down_ok_file, strerror)
+	except IOError as err:
+		errno, strerror = err.args
+		print ("Failed to read sessions_down_ok from '%s': %s" % (args.sessions_down_ok_file, strerror))
 		sys.exit (1)
 
 	return sessions
 
+def validate_range_arg (arg_name):
+	value = getattr (args, arg_name)
+	if not value:
+		return None
+
+	# Check if a RANGE was given
+	limits = value.split (':')
+	if len (limits) != 2:
+		return "Error: Invalid value for --%s, expected RANGE: %s" % (arg_name, value)
+
+	# Try to validate range, on limit might be empty
+	try:
+		# Try to parse range values to integers if present
+		a = None
+		b = None
+		if (limits[0] != ''):
+			a = int (limits[0])
+		if (limits[1] != ''):
+			b = int (limits[1])
+
+		# Validate range if both values were given
+		if (a != None and b != None and a > b):
+			return "Error: Invalid value for --%s, invalid RANGE: %s" % (arg_name, value)
+	except ValueError:
+		return "Error: Expected numeric values in RANGE for --%s: %s" % (arg_name, value)
+
+
+################################################################################
+#                  Argument parsing and basic input validation                 #
+################################################################################
 
 parser = argparse.ArgumentParser (description = 'check bird iBGP sessions')
 
 parser.add_argument ('--proto', '-p', help = 'IP protocol version to check', default = '4', choices = ['4', '6'])
 parser.add_argument ('--asn', '-A', help = "Local AS number", required = True)
 parser.add_argument ('--ibgp', '-i', help = "Check iBGP sessions", action = 'store_true')
-parser.add_argument ('--ibgp_w', help = "Warning interval for down iBGP sessions", default = "1:1", metavar = "RANGE")
-parser.add_argument ('--ibgp_c', help = "Critical interval for down iBGP sessions", default = "2:", metavar = "RANGE")
+parser.add_argument ('--ibgp_warn', '--ibgp_w', help = "Warning interval for down iBGP sessions", default = "1:1", metavar = "RANGE")
+parser.add_argument ('--ibgp_crit', '--ibgp_c', help = "Critical interval for down iBGP sessions", default = "2:", metavar = "RANGE")
 parser.add_argument ('--ebgp', '-e', help = "Check eBGP sessions", action = 'store_true')
-parser.add_argument ('--ebgp_w', help = "Warning interval for down eBGP sessions", default = "1:1", metavar = "RANGE")
-parser.add_argument ('--ebgp_c', help = "Critical interval for down eBGP sessions", default = "2:", metavar = "RANGE")
+parser.add_argument ('--ebgp_warn', '--ebgp_w', help = "Warning interval for down eBGP sessions", default = "1:1", metavar = "RANGE")
+parser.add_argument ('--ebgp_crit', '--ebgp_c', help = "Critical interval for down eBGP sessions", default = "2:", metavar = "RANGE")
 parser.add_argument ('--disabled_ok', help = "Treat sessions disabled in bird as OK.", action = 'store_true')
 parser.add_argument ('--sessions_down_ok', metavar = "LIST", help = "List of sessions which are OK to be down. Provide a space separated list.")
 parser.add_argument ('--sessions_down_ok_file', metavar = "FILENAME", help = "List of sessions which are OK to be down. Provide one interfaces per line.")
 parser.add_argument ('--ignore_missing_file', help = "Ignore a possible non-existent file given as --interfaces_down_ok_file", action = 'store_true')
-
+parser.add_argument ('--session', help = "Only check for session with given name.")
+parser.add_argument ('--routes_imported_warn', help = "Warning interval for imported routes", metavar = "RANGE")
+parser.add_argument ('--routes_imported_crit', help = "Critical interval for imported routes", metavar = "RANGE")
+parser.add_argument ('--routes_exported_warn', help = "Warning interval for exported routes", metavar = "RANGE")
+parser.add_argument ('--routes_exported_crit', help = "Critical interval for exported routes", metavar = "RANGE")
+parser.add_argument ('--routes_preferred_warn', help = "Warning interval for preferred routes", metavar = "RANGE")
+parser.add_argument ('--routes_preferred_crit', help = "Critical interval for preferred routes", metavar = "RANGE")
 
 args = parser.parse_args ()
 
 if not args.ibgp and not args.ebgp:
-	print >> sys.stderr, "Error: You have to enable at least one of iBGP and eBGP checking.\n"
+	print ("Error: You have to enable at least one of iBGP and eBGP checking.\n", file=sys.stderr)
 	parser.print_help ()
 	sys.exit (3)
 
+if args.session and args.ibgp and args.ebgp:
+	print ("Error: A single session can't be iBGP and eBGP at the same time!")
+	parser.print_help ()
+	sys.exit (3)
+
+# Validate limit arguments
+for item in ('ibgp', 'ebgp', 'routes_imported', 'routes_exported', 'routes_preferred'):
+	for severity in ('warn', 'crit'):
+		msg = validate_range_arg ("%s_%s" % (item, severity))
+		if msg:
+			print (msg)
+			sys.exit (3)
+
+
 session_down_codes = {
-	'w' : 1,
-	'c' : 2,
+	'warn' : [ 1, 'WARNING' ],
+	'crit' : [ 2, 'CRITICAL'],
+}
+route_codes = {
+	'routes_exported'  : 'Exported',
+	'routes_imported'  : 'Imported',
+	'routes_preferred' : 'Preferred',
 }
 
 # Are some sessions ok being down?
@@ -77,19 +133,24 @@ cmds = {
 	'6' : '/usr/sbin/birdc6',
 }
 
-cmd = [ "/usr/bin/sudo", cmds[args.proto], "show protocols all" ]
+# Check for one specific session only
+if args.session:
+	cmd = [ "/usr/bin/sudo", cmds[args.proto], "show protocol all %s" % args.session ]
+# Check for all sessions and filter later
+else:
+	cmd = [ "/usr/bin/sudo", cmds[args.proto], "show protocols all" ]
 
 try:
 	protocols = subprocess.Popen (cmd, bufsize = 4194304, stdout = subprocess.PIPE).stdout
 
 # cmd exited with non-zero code
 except subprocess.CalledProcessError as c:
-	print "Failed to run %s: %s" % (" ".join (cmd), c.output)
+	print ("Failed to run %s: %s" % (" ".join (cmd), c.output))
 	sys.exit (1)
 
 # This should not have happend.
 except Exception as e:
-	print "Unknown error while running %s: %s" % (" ".join (cmd), str (e))
+	print ("Unknown error while running %s: %s" % (" ".join (cmd), str (e)))
 	sys.exit (3)
 
 
@@ -168,6 +229,10 @@ proto_dict = None
 for line in protocols.readlines ():
 	line = line.strip ()
 
+	# Python3 glue
+	if sys.version_info >= (3, 0):
+		line = str (line, encoding='utf-8')
+
 	# Preamble or empty string
 	if ignore_re.search (line):
 		protocol = None
@@ -225,22 +290,46 @@ down_by_proto = {
 	'ebgp' : []
 }
 
-for protoname, config in sorted (bgp_sessions.items ()):
-	# Skip iBGP/eBGP sessions when not asked to check them
-	session_args = config.get ('Session', [])
-	if (args.ibgp != True and (('internal' in session_args) or (config['Neighbor AS'] == args.asn))) or \
-	   (args.ebgp != True and (('external' in session_args) or (config['Neighbor AS'] != args.asn))):
-		continue
+proto_str = {
+	'ibgp' : 'iBGP',
+	'ebgp' : 'eBGP'
+}
 
+sessions_up = {}
+
+for protoname, config in sorted (bgp_sessions.items ()):
+	session_args = config.get ('Session', [])
+
+	# Check if user gave us a remote ASN as local AS
+	if ('external' in session_args) and (config['Neighbor AS'] == args.asn):
+		print ("ERROR: Session %s is eBGP but has our ASN! The given local ASN seems wrong!" % protoname)
+		ret_code = 3
+
+	if ('internal' in session_args) and (config['Neighbor AS'] != args.asn):
+		print ("ERROR: Session %s is iBGP but does not have our ASN! The given local ASN seems wrong!" % protoname)
+		ret_code = 3
+
+	# Determine session type
 	session_type = "ibgp"
 	if ('external' in session_args) or (config['Neighbor AS'] != args.asn):
 		session_type = "ebgp"
 	remote_as = "I" if session_type == "ibgp" else config.get ('Neighbor AS')
 	session_desc = "%s/%s" % (protoname, remote_as)
 
+	# Skip iBGP/eBGP sessions when not asked to check them, but check for specific session, if given
+	if (args.ibgp != True and (('internal' in session_args) or (config['Neighbor AS'] == args.asn))) or \
+	   (args.ebgp != True and (('external' in session_args) or (config['Neighbor AS'] != args.asn))):
+		if not args.session:
+			continue
+
+		expected = "iBGP" if args.ibgp else "eBGP"
+		print ("ERROR: Session %s is %s but %s was expected!" % (args.session, proto_str[session_type], expected))
+		ret_code = 2
+
 	bgp_state = config['BGP state']
 	if bgp_state == 'Established':
 		up.append (session_desc)
+		sessions_up[session_desc] = config['Routes']
 
 	# Session disable and we don't care
 	elif bgp_state == 'Down' and args.disabled_ok:
@@ -252,33 +341,60 @@ for protoname, config in sorted (bgp_sessions.items ()):
 
 	# Something's broken
 	else:
-		last_error = 'Disabled' if bgp_state == 'Down' else config.get ('Last error', 'unkown')
+		last_error = 'Disabled' if bgp_state == 'Down' else config.get ('Last error', 'unknown')
 		session_desc += " (%s)" % last_error
 
 		down.append (session_desc)
 		down_by_proto[session_type].append (session_desc)
 
 
+# Check down iBGP / eBGP sessions limits
 for proto, sessions in down_by_proto.items ():
 	down_sessions = len (sessions)
 	if down_sessions == 0:
 		continue
 
-	for level in [ 'w', 'c' ]:
+	for level in [ 'warn', 'crit' ]:
 		limits = getattr (args, "%s_%s" % (proto, level)).split (":")
-		code = session_down_codes[level]
+		code, code_name = session_down_codes[level]
 
-		# Check if
+		# Check if number of down sessions is within warning or critical limits
 		if (limits[0] == '' or down_sessions >= int (limits[0])) and \
 		   (limits[1] == '' or down_sessions <= int (limits[1])):
 			if ret_code < code:
 				ret_code = code
 
+# Check routes for up sessions
+for session, routes in sessions_up.items ():
+		session_info = {}
+		session_info['routes_imported'], session_info['routes_exported'], session_info['routes_preferred'] = routes.split (' ')
+
+		for r_type in route_codes.keys():
+			for level in [ 'crit', 'warn' ]:
+				try:
+					limits = getattr (args, "%s_%s" % (r_type, level)).split (":")
+				except:
+					pass
+				else:
+					code, code_name = session_down_codes[level]
+					if (limits[0] == '' or int(session_info[r_type]) >= int (limits[0])) and \
+						 (limits[1] == '' or int(session_info[r_type]) <= int (limits[1])):
+						if ret_code < code:
+							ret_code = code
+						print("%s Routes: %s with %s route(s) is %s" % (route_codes[r_type],session,session_info[r_type],code_name))
+						break
+
+# Special handling for session given by name
+if args.session:
+	# Check is given session name was found
+	if len (bgp_sessions) == 0:
+		print ("ERROR: Given session %s not present in configuration!" % args.session)
+		sys.exit (2)
 
 if len (down) > 0:
-	print "DOWN: %s" % ", ".join (down)
+	print ("DOWN: %s" % ", ".join (down))
 
 if len (up) > 0:
-	print "OK: %s" % ", ".join (up)
+	print ("OK: %s" % ", ".join (up))
 
 sys.exit (ret_code)
