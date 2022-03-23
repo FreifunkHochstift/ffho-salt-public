@@ -39,7 +39,7 @@ snmpd:
 /etc/snmp/snmpd.conf:
   file.managed:
     - template: jinja
-    - source: salt://snmpd/snmpd.conf
+    - source: salt://snmpd/snmpd.conf.tmpl
     - require:
       - pkg: snmpd
     - watch_in:

@@ -52,6 +52,8 @@ interface	{{ iface }}	6	500000000	# 500 Mb/s
 {%- if "fastd" in node_config.get ('roles') %}
   {%- for site in node_config.get ('sites') %}
 interface	{{ site }}_intergw	6	500000000	# 500 Mb/s
+interface	{{ site }}_nodes4	6	500000000	# 500 Mb/s
+interface	{{ site }}_nodes6	6	500000000	# 500 Mb/s
   {%- endfor %}
 {%- endif %}
 
