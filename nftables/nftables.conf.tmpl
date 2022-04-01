@@ -49,7 +49,7 @@ table ip filter {
 		tcp dport 22 counter jump ssh
 {%- if ospf_ifaces %}
 		{#- ifname sets are introduced in nftables 2.11 #}
-		meta l4proto ospf iif { {{ ospf_ifaces|join(', ') }} } counter accept
+		meta l4proto ospf iifname { {{ ospf_ifaces|join(', ') }} } counter accept
 {%- endif %}
 {%- if 'router' in roles %}
 		tcp dport 179 counter jump bgp
@@ -121,9 +121,9 @@ table ip filter {
 	chain urpf {
   {%- for iface_cfg in urpf  %}
     {%- for pfx in iface_cfg[4] %}
-		iif {{ iface_cfg['iface'] }} ip saddr {{ pfx }} return
+		iifname {{ iface_cfg['iface'] }} ip saddr {{ pfx }} return
     {%- endfor %}
-		iif {{ iface_cfg['iface'] }} counter drop
+		iifname {{ iface_cfg['iface'] }} counter drop
   {%- endfor %}
 	}
 {%- endif %}
@@ -131,7 +131,7 @@ table ip filter {
 {%- if vxlan_ifaces %}
 	chain vxlan {
   {%- for iface in vxlan_ifaces %}
-		iif {{ iface }} accept
+		iifname {{ iface }} accept
   {%- endfor %}
 		counter drop
 	}
@@ -176,7 +176,7 @@ table ip6 filter {
 		tcp dport 22 counter jump ssh
 {%- if ospf_ifaces %}
 		{#- ifname sets are introduced in nftables 2.11 #}
-		meta l4proto ospf iif { {{ ospf_ifaces|join(', ') }} } counter accept
+		meta l4proto ospf iifname { {{ ospf_ifaces|join(', ') }} } counter accept
 {%- endif %}
 {%- if 'router' in roles %}
 		tcp dport 179 counter jump bgp
@@ -250,9 +250,9 @@ table ip6 filter {
 		ip6 saddr fe80::/64 return
   {%- for iface_cfg in urpf  %}
     {%- for pfx in iface_cfg[6] %}
-		iif {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} return
+		iifname {{ iface_cfg['iface'] }} ip6 saddr {{ pfx }} return
     {%- endfor %}
-		iif {{ iface_cfg['iface'] }} counter drop
+		iifname {{ iface_cfg['iface'] }} counter drop
   {%- endfor %}
 	}
 {%- endif %}
@@ -260,7 +260,7 @@ table ip6 filter {
 {%- if vxlan_ifaces %}
 	chain vxlan {
   {%- for iface in vxlan_ifaces %}
-		iif {{ iface }} accept
+		iifname {{ iface }} accept
   {%- endfor %}
 		counter drop
 	}
