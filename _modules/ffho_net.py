@@ -1320,6 +1320,16 @@ def get_ospf_interface_config (node_config, grains_id):
 			elif iface.startswith ('ovpn-er-'):
 				ospf_config['type'] = 'broadcast'
 
+		# Active OSPF on Wireguard tunnels, cost 10000
+		elif iface.startswith ('wg-'):
+			ospf_on = True
+			ospf_config['stub'] = False
+			ospf_config['cost'] = 10000
+
+			# Inter-Core links should have cost 5000
+			if iface.startswith ('wg-cr') and grains_id.startswith ('cr'):
+				ospf_config['cost'] = 5000
+
 		# OSPF explicitly enabled for interface
 		elif 'ospf' in iface_config:
 			ospf_on = True
