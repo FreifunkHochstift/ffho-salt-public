@@ -60,6 +60,12 @@ iface {{ interface }}
     {%- endfor %}
 	#
   {%- endfor %}
+  {#- Wireguard tunnel? #}
+  {%- if 'wireguard' in config %}
+	use wireguard
+	up echo 0 > /proc/sys/net/ipv6/conf/$IFACE/addr_gen_mode
+	#
+  {%- endif %}
 
   {#- Configure IP addresses #}
   {%- for prefix in config.get ('prefixes', []) %}
@@ -71,7 +77,7 @@ iface {{ interface }}
     {%- set argument = config.get (keyword) %}
     {%- if argument is none %}
     {%- elif keyword.startswith ("_") %}
-    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'driver', 'mac', 'method', 'vlan', 'vxlan', 'desc', 'prefixes', 'status', 'tagged_vlans', 'urpf', 'has_gateway' ] %}
+    {%- elif keyword in [ 'auto', 'batman', 'bond', 'bridge', 'driver', 'mac', 'method', 'vlan', 'vxlan', 'desc', 'prefixes', 'status', 'tagged_vlans', 'urpf', 'has_gateway', 'wireguard' ] %}
     {%- elif argument is string or argument is number %}
 	{{ keyword }} {{ argument }}
     {%- else %}
