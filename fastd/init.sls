@@ -76,6 +76,7 @@ fastd:
     {% set network_type = 'nodes' if network.startswith ('nodes') else network %}
     {% set instance_name = site ~ '_' ~ network %}
     {% set mac_address = salt['ffho_net.gen_batman_iface_mac'](site_no, device_no, network) %}
+    {% set iface_penalty = salt['ffho_net.get_batman_iface_penalty'](network_type) %}
 
 /etc/fastd/{{ instance_name }}:
   file.directory:
@@ -94,6 +95,7 @@ fastd:
       site: {{ site }}
       site_no: {{ site_no }}
       mac_address: {{ mac_address }}
+      iface_penalty: {{ iface_penalty }}
     {% if 'batman_ext' in node_config.get('roles', []) %}
       bat_iface: bat-{{ site }}-ext
     {% else %}
