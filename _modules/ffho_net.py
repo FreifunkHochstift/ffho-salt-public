@@ -46,14 +46,18 @@ default_hop_penalty_by_role = {
 }
 batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
 
+# By default we do not set any penalty on an interface and rely on the
+# regular hop penalty to do the right thing.  We only want set another
+# penalty, if there are additional paths and we want to influnce which
+# path is being taken.  One example are routers which have a wifi link
+# to the local backbone as well as a VPN link to a gateway, or a fiber
+# link plus a wifi backup link.
 default_batman_iface_penalty_by_role = {
-	'local_wired' : 5,
-	'local_wired_backup' : 10,
-	'WBBL' : 10,
-	'WBBL_backup' : 15,
-	'DCI' : 15,
-	'VPN_intergw' : 50,
-	'VPN_node' : 50,
+	'default'     :   0,
+	'WBBL'        :   5,
+	'WBBL_backup' :  10,
+	'VPN_intergw' :  80,
+	'VPN_node'    : 100,
 }
 
 #
@@ -471,33 +475,6 @@ def _set_mtu_to_iface_and_upper (ifaces, iface_name, mtu):
 
 		vlan_raw_device_config['automtu'] = mtu
 
-#
-#
-#
-def _get_batman_iface_penalty (iface):
-	if iface.startswith ('vlan'):
-		vid = int (re.sub ('vlan', '', iface))
-		if 1000 <= vid < 1100:
-			return default_batman_iface_penalty_by_role.get ('local_wired')
-
-		if 1400 <= vid < 1500:
-			return default_batman_iface_penalty_by_role.get ('DCI')
-
-		if 2000 <= vid < 2100:
-			return default_batman_iface_penalty_by_role.get ('WBBL')
-
-		if 2200 <= vid < 2300:
-			return default_batman_iface_penalty_by_role.get ('WBBL_backup')
-
-	if 'intergw' in iface:
-		return default_batman_iface_penalty_by_role.get ('VPN_intergw')
-
-	if 'nodes' in iface:
-		return default_batman_iface_penalty_by_role.get ('VPN_node')
-
-	return None
-
-
 # Generate configuration entries for any batman related interfaces not
 # configured explicitly, but asked for implicitly by role batman and a
 # (list of) site(s) specified in the node config.
@@ -786,7 +763,7 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 				'mtu'       : MTU['batman_underlay_iface'],
 			}
 
-			iface_penalty = _get_batman_iface_penalty (iface)
+			iface_penalty = get_batman_iface_penalty (iface)
 			if iface_penalty:
 				ifaces[vx_iface]['batman'] = {
 					'batman-hop-penalty' : iface_penalty
@@ -1103,6 +1080,25 @@ def gen_bat_hosts (nodes_config, sites_config):
 					bat_hosts[hwaddress] = "%s/%s/%s" % (node_name, network, site)
 
 	return bat_hosts
+
+
+# Return the appropriate hop penalty to configure for the given interface.
+def get_batman_iface_penalty (iface):
+	if iface.startswith ('vlan'):
+		vid = int (re.sub ('vlan', '', iface))
+		if 2000 <= vid < 2100:
+			return default_batman_iface_penalty_by_role.get ('WBBL')
+
+		if 2200 <= vid < 2300:
+			return default_batman_iface_penalty_by_role.get ('WBBL_backup')
+
+	if 'intergw' in iface:
+		return default_batman_iface_penalty_by_role.get ('VPN_intergw')
+
+	if 'nodes' in iface:
+		return default_batman_iface_penalty_by_role.get ('VPN_node')
+
+	return default_batman_iface_penalty_by_role.get ('default', 0)
 
 
 # Generate eBGP session parameters for FFRL Transit from nodes pillar information.
