@@ -1,0 +1,16 @@
+#
+# Wireguard tunnel to {{ config['peer_fqdn'] }} (Salt managed)
+#
+[Interface]
+PrivateKey = {{ config['local_privkey'] }}
+{%- if config['mode'] == 'server' %}
+ListenPort = {{ config['port'] }}
+{%- endif %}
+FwMark = 0x1023
+
+[Peer]
+{%- if config['mode'] == 'client' %}
+Endpoint = {{ config['peer_ip'] }}:{{ config['port'] }}
+{%- endif %}
+PublicKey = {{ config['peer_pubkey'] }}
+AllowedIPs = 0.0.0.0/0, ::/0
