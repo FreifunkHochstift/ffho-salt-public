@@ -109,6 +109,27 @@ def _generate_service_rules (services, acls, af):
 	return rules
 
 
+def _generate_wireguard_rule (node_config):
+	ports = []
+
+	try:
+		for iface, wg_cfg in node_config['wireguard']['tunnels'].items ():
+			if wg_cfg['mode'] == 'server':
+				ports.append (wg_cfg['port'])
+	except KeyError:
+		return None
+
+	if not ports:
+		return None
+
+	if len (ports) > 1:
+		ports = "{ %s }" % ", ".join (map (str, ports))
+	else:
+		ports = ports[0]
+
+	return "udp dport %s counter accept comment Wireguard" % ports
+
+
 def _active_urpf (iface, iface_config):
 	# Ignore loopbacks
 	if iface == 'lo' or iface_config.get ('link-type', '') == 'dummy':
@@ -172,7 +193,7 @@ def generate_service_rules (fw_config, node_config):
 	}
 
 	#
-	# Add rules based on roles
+	# Add rules based on roles and tunnels
 	#
 
 	# Does this node run a DHCP server?
@@ -186,6 +207,11 @@ def generate_service_rules (fw_config, node_config):
 	# Allow respondd replies to yanic
 	if 'yanic' in roles:
 		rules[6].append ('ip6 saddr fe80::/64 udp sport 1001 counter accept comment "respondd replies to yanic"')
+
+	# Allow Wireguard tunnels
+	wg_rule = _generate_wireguard_rule (node_config)
+	if wg_rule:
+		rules[4].append (wg_rule)
 
 	for af in [ 4, 6 ]:
 		comment = "Generated rules" if rules[af] else "No generated rules"
