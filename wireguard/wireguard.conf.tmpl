@@ -2,7 +2,7 @@
 # Wireguard tunnel to {{ config['peer_fqdn'] }} (Salt managed)
 #
 [Interface]
-PrivateKey = {{ config['local_privkey'] }}
+PrivateKey = {{ privkey }}
 {%- if config['mode'] == 'server' %}
 ListenPort = {{ config['port'] }}
 {%- endif %}

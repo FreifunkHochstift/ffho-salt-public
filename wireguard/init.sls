@@ -1,7 +1,7 @@
 #
 # Wireguard VPNs
 #
-{% set tunnels = salt['pillar.get']('nodes:' ~ grains.id ~ ':wireguard', {}) %}
+{% set wg_cfg = salt['pillar.get']('nodes:' ~ grains.id ~ ':wireguard', {}) %}
 
 
 include:
@@ -24,13 +24,14 @@ Cleanup /etc/wireguard:
     - clean: true
     # Add cleanup action for active tunnels
 
-{% for iface, tunnel_config in tunnels.items () %}
+{% for iface, tunnel_config in wg_cfg.get ('tunnels', {}).items () %}
 /etc/wireguard/{{ iface }}.conf:
   file.managed:
     - source: salt://wireguard/wireguard.conf.tmpl
     - template: jinja
     - context:
       config: {{ tunnel_config }}
+      privkey: {{ wg_cfg.get ('privkey') }}
     - require:
       - file: Create /etc/wireguard
     - require_in:
