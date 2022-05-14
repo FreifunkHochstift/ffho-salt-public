@@ -47,6 +47,9 @@ interface	{{ iface }}	6	1000000000	#   1 Gb/s
  {%- if "batman" in config or "bridge" in config %}
 interface	{{ iface }}	6	500000000	# 500 Mb/s
  {%- endif %}
+ {%- if "wireguard" in config %}
+interface	{{ iface }}	6	300000000	# 300 Mb/s
+ {%- endif %}
 {%- endfor %}
 
 {%- if "fastd" in node_config.get ('roles') %}
