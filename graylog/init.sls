@@ -39,6 +39,19 @@ graylog-server:
     - source: salt://graylog/server.conf.tmpl
     - template: jinja
     - context: 
-      graylog_config: {{graylog_config}}
+      graylog_config: {{ graylog_config }}
     - require:
       - pkg: graylog-server
+
+# Install cronjob and notification script
+/etc/cron.d/graylog-system-notifications:
+  file.managed:
+    - source: salt://graylog/graylog-system-notifications.cron
+
+/usr/local/sbin/graylog-system-notifications:
+  file.managed:
+    - source: salt://graylog/graylog-system-notifications
+    - mode: 700
+    - template: jinja
+    - context:
+      graylog_config: {{ graylog_config }}

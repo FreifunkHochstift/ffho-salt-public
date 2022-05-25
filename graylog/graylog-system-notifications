@@ -1,0 +1,73 @@
+#!/usr/bin/python3
+# graylog system notification script
+# Copyright (C) 2022 Philipp Fromme
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import argparse
+import configparser
+import logging
+import json
+import requests
+
+api_token = '{{ graylog_config['api_token'] }}'
+api_token_password = 'token'
+api_url_base = 'http://127.0.0.1:9000/api'
+headers = {'Content-Type': 'application/json', 'X-Requested-By': 'cli'}
+
+logging.basicConfig(format='%(message)s', datefmt='%b %d %H:%M:%S',
+                    level='WARNING')
+LOGGER = logging.getLogger()
+
+def get_request(url):
+    api_url = '{}/{}'.format(api_url_base, url)
+    response = requests.get(api_url, headers=headers, auth=(api_token, api_token_password))
+    if response.status_code == 200:
+        return json.loads(response.content.decode('utf-8'))
+    else:
+        return None
+
+def get_system_notifications():
+    return get_request('system/notifications')
+
+def get_system():
+    return get_request('system')
+
+def main():
+    parser = argparse.ArgumentParser(description="Get system notifications of a graylog instance")
+    parser.add_argument("--node", "-n", help="Show the affected node id", action="store_true")
+    parser.add_argument("--level", "-l", help="Set the log level", default="WARNING")
+    args = parser.parse_args()
+
+    LOGGER.setLevel(args.level)
+
+    notifications = get_system_notifications()
+    LOGGER.debug(notifications)
+    if notifications['total'] == 0:
+        LOGGER.info('No messages')
+        exit(0)
+    else:
+        for note in notifications['notifications']:
+            output = ''
+            output += 'Severity: {}\n'.format(note['severity'])
+            output += 'Type: {}\n'.format(note['type'])
+            if 'details' in note:
+                output += 'Details: {}\n'.format(note['details'])
+            output += 'Timestamp: {}\n'.format(note['timestamp'])
+            if args.node:
+                output += 'Node ID: {}\n'.format(note['node_id'])
+            LOGGER.warning(output)
+
+if __name__ == "__main__":
+    main()

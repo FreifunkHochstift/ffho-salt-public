@@ -1,0 +1,1 @@
+0 12,20 * * * root /usr/local/sbin/graylog-system-notifications
