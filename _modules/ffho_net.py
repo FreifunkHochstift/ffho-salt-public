@@ -31,7 +31,8 @@ default_bond_config = {
 # if not specified at the interface configuration.
 default_bridge_config = {
 	'bridge-fd' : '0',
-	'bridge-stp' : 'no'
+	'bridge-stp' : 'no',
+	'bridge-ports-condone-regex' : '^[a-zA-Z0-9]+_(v[0-9]{1,4}|eth[0-9])$',
 }
 
 
