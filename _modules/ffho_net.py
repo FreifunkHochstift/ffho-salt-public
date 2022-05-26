@@ -356,9 +356,11 @@ def _update_bridge_config (config):
 
 	for item in list (config.keys ()):
 		value = config.get (item)
-		if item.startswith ('bridge-'):
-			bridge_config[item] = value
-			config.pop (item)
+		if not item.startswith ('bridge-'):
+			continue
+
+		bridge_config[item] = value
+		config.pop (item)
 
 		# Fix any salt mangled string interpretation back to real string.
 		if type (value) == bool:
