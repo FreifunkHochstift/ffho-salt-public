@@ -360,7 +360,7 @@ def _update_bridge_config (config):
 			bridge_config[item] = value
 			config.pop (item)
 
-		# Fix and salt mangled string interpretation back to real string.
+		# Fix any salt mangled string interpretation back to real string.
 		if type (value) == bool:
 			bridge_config[item] = "yes" if value else "no"
 
@@ -368,6 +368,9 @@ def _update_bridge_config (config):
 	# generate a sorted list of interface names as string representation
 	if 'bridge-ports' in bridge_config and type (bridge_config['bridge-ports']) == list:
 		bridge_ports_str = " ".join (sorted (bridge_config['bridge-ports']))
+		if not bridge_ports_str:
+			bridge_ports_str = "none"
+
 		bridge_config['bridge-ports'] = bridge_ports_str
 
 	config['bridge'] = bridge_config
