@@ -113,7 +113,7 @@ object Host "{{ node_id }}" {
 		"{{ service }}" = {
     {%- for entry, value in params.items ()|sort %}
       {%- if value is boolean %}
-			"{{ entry }}" = {{ value }},
+			"{{ entry }}" = {{ value|lower }},
       {%- else %}
 			"{{ entry }}" = "{{ value }}",
       {%- endif %}
