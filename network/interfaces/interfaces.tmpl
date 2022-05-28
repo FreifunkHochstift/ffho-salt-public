@@ -7,6 +7,7 @@
 {%- set sites_config = salt['pillar.get']('sites', {}) %}
 {%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}
 {%- set iface_list = salt['ffho_net.get_interface_list'](ifaces) %}
+{%- set vms = node_config.get ('vms') %}
 
 #source /etc/network/interfaces.d/*
 
@@ -93,3 +94,11 @@ iface {{ interface }}
  # OpenVPN VPNs (if any)
  #}
 {%- include "network/interfaces/openvpn.tmpl" %}
+
+
+{#-
+ # VM interfaces (if any)
+ #}
+{%- if vms %}
+  {%- include "network/interfaces/vm_interfaces.tmpl" with context %}
+{%- endif %}

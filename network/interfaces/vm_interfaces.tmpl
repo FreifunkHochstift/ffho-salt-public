@@ -1,0 +1,10 @@
+{%- for vm_fqdn, vm_cfg in vms.items ()|sort %}
+  {%- set vm_name = vm_fqdn.split ('.')[0].split ('-')[0] %}
+  {%- for vm_iface, iface_cfg in vm_cfg['ifaces'].items ()|sort %}
+    {%- if iface_cfg.get ('vlan-mode') == 'tagged' and iface_cfg.get ('tagged_vlans') %}
+      {%- set host_iface = "%s_%s" % (vm_name, vm_iface.replace ('vlan', 'v')) %}
+iface {{ host_iface }}
+	bridge-vids {{ iface_cfg.get ('tagged_vlans')|join (' ') }}
+    {%- endif %}
+  {%- endfor %}
+{%- endfor %}
