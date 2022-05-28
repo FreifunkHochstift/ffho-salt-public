@@ -375,6 +375,22 @@ def _update_bridge_config (config):
 
 		bridge_config['bridge-ports'] = bridge_ports_str
 
+	if config.get ('vlan-mode') == 'tagged':
+		bridge_config['bridge-vlan-aware'] = 'yes'
+
+		if config.get ('tagged_vlans'):
+			bridge_config['bridge-vids'] = " ".join (map (str, config['tagged_vlans']))
+
+	config['bridge'] = bridge_config
+
+
+# Generate config options for vlan-aware-bridge member interfaces
+def _update_bridge_member_config (config):
+	bridge_config = {}
+
+	if config['tagged_vlans']:
+                        bridge_config['bridge-vids'] = " ".join (map (str, config['tagged_vlans']))
+
 	config['bridge'] = bridge_config
 
 
@@ -950,6 +966,9 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 		if 'bridge-ports' in config or interface.startswith ('br-'):
 			_update_bridge_config (config)
 
+		if 'bridge-member' in config:
+			_update_bridge_member_config (config)
+
 		if 'vlan-raw-device' in config or 'vlan-id' in config:
 			_update_vlan_config (config)
 			_set_mtu_to_iface_and_upper (ifaces, interface, 0)
@@ -976,7 +995,7 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 			# or set the default, when no automtu is present.
 			config['mtu'] = config.get ('automtu', MTU['default'])
 
-		for key in [ 'automtu', 'enabled', 'batman_connect_sites', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans' ]:
+		for key in [ 'automtu', 'enabled', 'batman_connect_sites', 'bridge-member', 'has_gateway', 'ospf', 'site', 'type', 'tagged_vlans', 'vlan-mode' ]:
 			if key in config:
 				config.pop (key)
 
