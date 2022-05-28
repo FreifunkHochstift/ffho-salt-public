@@ -112,7 +112,11 @@ object Host "{{ node_id }}" {
   {%- for service, params in monitoring_config.get ('service_param').items ()|sort %}
 		"{{ service }}" = {
     {%- for entry, value in params.items ()|sort %}
+      {%- if value is boolean %}
+			"{{ entry }}" = {{ value }},
+      {%- else %}
 			"{{ entry }}" = "{{ value }}",
+      {%- endif %}
     {%- endfor %}
 		},
   {%- endfor %}
