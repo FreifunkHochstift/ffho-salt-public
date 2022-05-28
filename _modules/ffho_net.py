@@ -388,7 +388,7 @@ def _update_bridge_config (config):
 def _update_bridge_member_config (config):
 	bridge_config = {}
 
-	if config['tagged_vlans']:
+	if config.get ('tagged_vlans'):
                         bridge_config['bridge-vids'] = " ".join (map (str, config['tagged_vlans']))
 
 	config['bridge'] = bridge_config
