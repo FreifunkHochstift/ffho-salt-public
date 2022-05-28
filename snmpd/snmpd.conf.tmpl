@@ -45,18 +45,21 @@ interface	lo		6	1000000000	#   1 Gb/s
 interface	{{ iface }}	6	1000000000	#   1 Gb/s
  {%- endif %}
  {%- if "batman" in config or "bridge" in config %}
-interface	{{ iface }}	6	500000000	# 500 Mb/s
+interface	{{ iface }}	6	 500000000	# 500 Mb/s
  {%- endif %}
  {%- if "wireguard" in config %}
-interface	{{ iface }}	6	300000000	# 300 Mb/s
+interface	{{ iface }}	6	 300000000	# 300 Mb/s
  {%- endif %}
 {%- endfor %}
 
 {%- if "fastd" in node_config.get ('roles') %}
   {%- for site in node_config.get ('sites') %}
-interface	{{ site }}_intergw	6	500000000	# 500 Mb/s
-interface	{{ site }}_nodes4	6	500000000	# 500 Mb/s
-interface	{{ site }}_nodes6	6	500000000	# 500 Mb/s
+    {%- if loop.first %}
+# Fastd interfaces
+    {%- endif %}
+interface	{{ site }}_intergw	6	 500000000	# 500 Mb/s
+interface	{{ site }}_nodes4	6	 500000000	# 500 Mb/s
+interface	{{ site }}_nodes6	6	 500000000	# 500 Mb/s
   {%- endfor %}
 {%- endif %}
 
@@ -71,7 +74,26 @@ interface	{{ site }}_nodes6	6	500000000	# 500 Mb/s
   {%- set host_config = host_stanza.get ('config', {}) %}
   {%- set interface = host_config.get ('interface', network_config.get ('interface')) %}
   {%- if loop.first %}
-# OpenVPN interfaces
+# OpenVPN tunnels
   {%- endif %}
-interface	{{ interface }}	6	100000000	# 100 Mb/s
+interface	{{ interface }}	6	 100000000	# 100 Mb/s
+{%- endfor %}
+
+{%- set vm_ifaces = [] %}
+{%- for vm_fqdn, vm_cfg in node_config.get ('vms', {}).items ()|sort %}
+  {%- set vm_name = vm_fqdn.split ('.')[0].split ('-')[0] %}
+  {%- for vm_iface, iface_cfg in vm_cfg['ifaces'].items ()|sort %}
+    {%- if iface_cfg.get ('untagged_vlan') %}
+      {%- set host_iface = "%s_v%s" % (vm_name, iface_cfg.get ('untagged_vlan')) %}
+    {%- else %}
+      {%- set host_iface = "%s_%s" % (vm_name, vm_iface.replace ('vlan', 'v')) %}
+    {%- endif %}
+    {%- do vm_ifaces.append (host_iface) %}
+  {%- endfor %}
+{%- endfor %}
+{%- for iface in vm_ifaces|sort %}
+  {%- if loop.first %}
+# VM interfaces
+  {%- endif %}
+interface	{{ iface }}	6	1000000000	#   1 Gb/s
 {%- endfor %}
