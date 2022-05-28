@@ -112,12 +112,13 @@ def _generate_service_rules (services, acls, af):
 def _generate_wireguard_rule (node_config):
 	ports = []
 
-	try:
-		for iface, wg_cfg in node_config['wireguard']['tunnels'].items ():
-			if wg_cfg['mode'] == 'server':
-				ports.append (wg_cfg['port'])
-	except KeyError:
+	wg = node_config.get ('wireguard')
+	if not wg or not  'tunnels' in wg:
 		return None
+
+	for iface, wg_cfg in node_config['wireguard']['tunnels'].items ():
+		if wg_cfg['mode'] == 'server':
+			ports.append (wg_cfg['port'])
 
 	if not ports:
 		return None
