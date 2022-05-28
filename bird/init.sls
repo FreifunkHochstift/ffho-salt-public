@@ -180,7 +180,7 @@ bird6-configure:
   file.managed:
     - source: salt://bird/ibgp.conf
     - template: jinja
-      proto: v4
+      family: "4"
     - watch_in:
       - cmd: bird-configure
     - require:
@@ -192,7 +192,7 @@ bird6-configure:
   file.managed:
     - source: salt://bird/ibgp.conf
     - template: jinja
-      proto: v6
+      family: "6"
     - watch_in:
       - cmd: bird6-configure
     - require:
