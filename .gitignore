@@ -1,0 +1,6 @@
+#
+# .gitignore
+#
+
+*.pyc
+_modules/__pycache__/
