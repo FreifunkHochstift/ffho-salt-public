@@ -11,5 +11,6 @@ ftp: root
 abuse: root
 noc: root
 security: root
+www-data: root
 
 root: {{ root_mail_address }}
