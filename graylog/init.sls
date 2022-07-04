@@ -12,7 +12,7 @@ graylog-repo:
 # add Graylog Repo
   pkgrepo.managed:
     - humanname: Graylog Repo
-    - name: deb https://packages.graylog2.org/repo/debian/ stable 4.2
+    - name: deb https://packages.graylog2.org/repo/debian/ stable 4.3
     - file: /etc/apt/sources.list.d/graylog.list
     - key_url: https://packages.graylog2.org/repo/debian/keyring.gpg
 
