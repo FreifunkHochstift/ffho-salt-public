@@ -14,6 +14,7 @@ base:
     - network
     - ntp
     - postfix
+    - prometheus-exporters
     - rsyslog
     - salt-minion
     - screen
