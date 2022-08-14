@@ -35,4 +35,8 @@ options {
 		127.0.0.0/8;
 		::1/128;
 	};
+
+	version "Freifunk Hochstift DNS";
+	use-v4-udp-ports { range 1024 65535; };
+	use-v6-udp-ports { range 1024 65535; };
 };

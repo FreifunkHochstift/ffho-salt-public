@@ -27,7 +27,6 @@ options {
 	// this seems to be our only chance for now :-(
 	dnssec-validation no;
 
-
 	auth-nxdomain no;    # conform to RFC1035
 	listen-on-v6 { any; };
 
@@ -43,4 +42,8 @@ options {
 
 	// Disable notifies on non-master DNS
 	notify no;
+
+	version "Freifunk Hochstift DNS";
+	use-v4-udp-ports { range 1024 65535; };
+	use-v6-udp-ports { range 1024 65535; };
 };
