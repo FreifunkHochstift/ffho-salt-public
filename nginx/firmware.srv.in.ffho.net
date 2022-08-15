@@ -50,7 +50,7 @@ server {
 
 	# opkg mirror
 	location ~^/openwrt/(?<file>.+)$ {
-		return 302 http://ftp.stw-bonn.de/pub/openwrt/$file;
+		return 302 http://downloads.openwrt.org/releases/$file;
 	}
 
 	# lede mirror
