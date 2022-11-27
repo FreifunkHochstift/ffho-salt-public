@@ -1,0 +1,145 @@
+#!/usr/bin/python3
+# graylog group mapping script
+# Copyright (C) 2022 Philipp Fromme
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import argparse
+import configparser
+import logging
+import json
+import requests
+import ldap
+
+general_config_path = "/etc/graylog-api-scripts.conf"
+general_config = configparser.ConfigParser()
+general_config.read(general_config_path)
+api_token = general_config['DEFAULTS']['token']
+api_token_password = "token"
+api_url_base = "http://127.0.0.1:9000/api/"
+headers = {"Content-Type": "application/json", "X-Requested-By": "cli"}
+
+server_uri = general_config['LDAP']['server_uri']
+bind_dn = general_config['LDAP']['bind_dn']
+bind_passwd = general_config['LDAP']['bind_passwd']
+search_base_dn = general_config['LDAP']['search_base_dn']
+ldap_group_search = general_config['LDAP']['ldap_group_search']
+search_attribute = general_config['LDAP']['search_attribute']
+
+logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%b %d %H:%M:%S',
+                    level='WARNING')
+LOGGER = logging.getLogger()
+
+def connect_to_ldap(server_uri):
+    try:
+        conn = ldap.initialize(server_uri)
+        conn.protocol_version = ldap.VERSION3
+        conn.set_option(ldap.OPT_REFERRALS, 0)
+        conn.set_option(ldap.OPT_DEBUG_LEVEL, 255)
+        conn.simple_bind_s(bind_dn, bind_passwd)
+        return conn
+    except ldap.LDAPError as e:
+        raise Exception("Failed to connet to server {}: {}".format(server_uri, e))
+
+def get_ldap_groups(conn):
+    ldap_result_id = conn.search(search_base_dn, ldap.SCOPE_SUBTREE, ldap_group_search, [search_attribute])
+    result_type, result_data = conn.result(ldap_result_id, 1)
+    return result_data
+
+def get_users():
+    api_url = '{}users'.format(api_url_base)
+    response = requests.get(api_url, headers=headers, auth=(api_token, api_token_password))
+    if response.status_code == 200:
+        return json.loads(response.content.decode('utf-8'))
+    else:
+        return None
+
+def change_user_roles(user_id, roles):
+    api_url = '{}users/{}'.format(api_url_base, user_id)
+    json_data = {"roles": roles}
+    response = requests.put(api_url, json=json_data, headers=headers, auth=(api_token, api_token_password))
+    if response.status_code == 204:
+        return True
+    else:
+        return False
+
+def delete_user(user_id):
+    api_url = '{}users/id/{}'.format(api_url_base, user_id)
+    response = requests.delete(api_url, headers=headers, auth=(api_token, api_token_password))
+    if response.status_code == 204:
+        return True
+    else:
+        return False
+
+def main():
+    parser = argparse.ArgumentParser(description="Map LDAP Groups to Graylog Groups")
+    parser.add_argument("--level", "-l", help="Set the log level", default="WARNING")
+    args = parser.parse_args()
+
+    LOGGER.setLevel(args.level)
+
+    config_path = "/etc/graylog-group-mapping.conf"
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    default_role = config['DEFAULTS']['default-role']
+    role_mapping = {}
+    # create a mapping from the config file to later give users their new_roles
+    for mapping in config['GROUP-MAPPING']:
+        role_mapping[mapping] = config['GROUP-MAPPING'][mapping]
+    groupMembers = {}
+    conn = connect_to_ldap(server_uri)
+    groups = get_ldap_groups(conn)
+    # sort what we found in ldap by throwing away everything
+    # besides groups and who is a member in them
+    for group in groups:
+        name = group[0].split(",")[0].split("=")[1]
+        members = group[1]
+        groupMembers[name] = []
+        if search_attribute in members:
+            members = members[search_attribute]
+            for member in members:
+                groupMembers[name].append(member.decode().split(",")[0].split("=")[1])
+    # get users in graylog and iterate over them
+    user_list = get_users()
+    if user_list is not None:
+        for user in user_list['users']:
+            if user['external'] == False:
+                continue
+            user_id = user['id']
+            username = user['username']
+            roles = user['roles']
+            # check first if user is member of any specified group
+            in_config_group = False
+            for group in groupMembers:
+                if username in groupMembers[group]:
+                    in_config_group = True
+                    break
+            if in_config_group:
+                new_roles = [default_role]
+                for group in role_mapping:
+                    if username in groupMembers[group]:
+                        new_roles.append(role_mapping[group])
+                new_roles = set(new_roles)
+                if new_roles != set(roles):
+                    new_roles = list(new_roles)
+                    LOGGER.warning("%s has roles %s and gets new roles %s", username, roles, new_roles)
+                    change_user_roles(user_id, new_roles)
+                else:
+                    LOGGER.info("%s: nothing changed", username)
+            else:
+                LOGGER.warning("%s not in any config group, therefore deleting this graylog user", username)
+                delete_user(user_id)
+
+if __name__ == "__main__":
+    main()

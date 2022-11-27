@@ -1,0 +1,10 @@
+[DEFAULTS]
+token={{ graylog_config['api_token'] }}
+
+[LDAP]
+server_uri={{ graylog_config['server_uri'] }}
+bind_dn={{ graylog_config['bind_dn'] }}
+bind_passwd={{ graylog_config['bind_passwd'] }}
+search_base_dn={{ graylog_config['search_base_dn'] }}
+ldap_group_search={{ graylog_config['ldap_group_search'] }}
+search_attribute={{ graylog_config['search_attribute'] }}

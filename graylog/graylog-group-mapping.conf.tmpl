@@ -1,0 +1,8 @@
+[DEFAULTS]
+default-role={{ graylog_config['default_role'] }}
+
+[GROUP-MAPPING]
+{%- for key, value in graylog_config['role_mapping'].items() %}
+{{ key }}={{ value }}
+{%- endfor %}
+

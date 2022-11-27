@@ -21,7 +21,7 @@ graylog-server:
   pkg.installed:
     - pkgs:
       - graylog-server
-      - graylog-enterprise-plugins
+      - python3-ldap
     - require:
       - pkgrepo: graylog-repo
       - service: mongodb
@@ -43,6 +43,15 @@ graylog-server:
     - require:
       - pkg: graylog-server
 
+# Default connection config for graylog api scripts
+/etc/graylog-api-scripts.conf:
+  file.managed:
+    - source: salt://graylog/graylog-api-scripts.conf.tmpl
+    - mode: 600
+    - template: jinja
+    - context:
+      graylog_config: {{ graylog_config }}
+
 # Install cronjob and notification script
 /etc/cron.d/graylog-system-notifications:
   file.managed:
@@ -51,6 +60,27 @@ graylog-server:
 /usr/local/sbin/graylog-system-notifications:
   file.managed:
     - source: salt://graylog/graylog-system-notifications
+    - mode: 700
+    - template: jinja
+    - context:
+      graylog_config: {{ graylog_config }}
+
+# Install cronjob, group mapping script and config files
+/etc/graylog-group-mapping.conf:
+  file.managed:
+    - source: salt://graylog/graylog-group-mapping.conf.tmpl
+    - mode: 600
+    - template: jinja
+    - context:
+      graylog_config: {{ graylog_config }}
+
+/etc/cron.d/graylog-group-mapping:
+  file.managed:
+    - source: salt://graylog/graylog-group-mapping.cron
+
+/usr/local/sbin/graylog-group-mapping:
+  file.managed:
+    - source: salt://graylog/graylog-group-mapping
     - mode: 700
     - template: jinja
     - context:
