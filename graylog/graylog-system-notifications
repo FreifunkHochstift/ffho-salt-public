@@ -21,7 +21,10 @@ import logging
 import json
 import requests
 
-api_token = '{{ graylog_config['api_token'] }}'
+general_config_path = "/etc/graylog-api-scripts.conf"
+general_config = configparser.ConfigParser()
+general_config.read(general_config_path)
+api_token = general_config['DEFAULTS']['token']
 api_token_password = 'token'
 api_url_base = 'http://127.0.0.1:9000/api'
 headers = {'Content-Type': 'application/json', 'X-Requested-By': 'cli'}
