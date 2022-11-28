@@ -1,0 +1,7 @@
+[icingaweb2]
+user_class = "{{ icingaweb2_config['authentication']['user_class'] }}"
+filter = "{{ icingaweb2_config['authentication']['filter'] }}"
+user_name_attribute = "{{ icingaweb2_config['authentication']['user_name_attribute'] }}"
+backend = "ldap"
+base_dn = "{{ icingaweb2_config['authentication']['base_dn'] }}"
+resource = "ffho_ldap"

@@ -1,0 +1,9 @@
+{% for menu in icingaweb2_config['menu'] -%}
+[{{ menu['title'] }}]
+type = "menu-item"
+target = "_main"
+url = "{{ menu['url'] }}"
+owner = "{{ menu['owner'] }}"
+groups = "{{ menu['groups'] }}"
+
+{% endfor %}

@@ -1,0 +1,7 @@
+{%- for title, nested_dict in icingaweb2_config['resources'].items() -%}
+[{{ title }}]
+{%- for key, value in nested_dict.items() %}
+{{ key }} = "{{ value }}"
+{%- endfor %}
+
+{% endfor %}

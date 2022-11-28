@@ -1,0 +1,9 @@
+[icingaweb2]
+resource = "ffho_ldap"
+user_backend = "icingaweb2"
+group_class = "{{ icingaweb2_config['groups']['group_class'] }}"
+group_filter = "{{ icingaweb2_config['groups']['group_filter'] }}"
+group_name_attribute = "{{ icingaweb2_config['groups']['group_name_attribute'] }}"
+group_member_attribute = "{{ icingaweb2_config['groups']['group_member_attribute'] }}"
+base_dn = "{{ icingaweb2_config['groups']['base_dn'] }}"
+backend = "ldap"

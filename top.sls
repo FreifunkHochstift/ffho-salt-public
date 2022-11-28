@@ -93,6 +93,11 @@ base:
     - match: pillar
     - graylog
 
+  # icingaweb2
+  nodes:{{ grains['id'] }}:roles:icinga2server:
+    - match: pillar
+    - icingaweb2
+
   # KVM hosts
   nodes:{{ grains['id'] }}:roles:kvm:
     - match: pillar
