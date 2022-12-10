@@ -23,6 +23,7 @@ base:
     - sysctl
     - systemd
     - timezone
+    - users
     - vim
     - unattended-upgrades
     - utils
