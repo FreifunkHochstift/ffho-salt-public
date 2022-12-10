@@ -274,6 +274,43 @@ def generate_forward_policy (fw_config, node_config):
 	return fp
 
 
+def generate_mgmt_config (fw_config, node_config):
+	# If this box is not a router, it will not be responsible for providing
+	# access to any management network, so there's nothing to do here.
+	roles = node_config.get ('roles', [])
+	if 'router' not in roles:
+		return None
+
+	# Get management prefixes from firewall configuration.
+	# If there are no prefixes defined, there's nothing we can do here.
+	mgmt_prefixes = fw_config.get ('acls', {}).get ('Management networks', {})
+	if not mgmt_prefixes:
+		return None
+
+	# We only care for IPv4 prefixes for now.
+	if 4 not in mgmt_prefixes:
+		return None
+
+	config = {
+		'ifaces': [],
+		'prefixes': mgmt_prefixes,
+	}
+
+	mgmt_interfaces = []
+	interfaces = node_config['ifaces']
+	for iface in interfaces.keys ():
+		match = vlan_re.match (iface)
+		if match:
+			vlan_id = int (match.group (1))
+			if vlan_id >= 3000 and vlan_id < 3099:
+				config['ifaces'].append (iface)
+
+	if len (config['ifaces']) == 0:
+		return None
+
+	return config
+
+
 def generate_nat_policy (node_config):
 	roles = node_config.get ('roles', [])
 	nf_cc = node_config.get ('nftables', {})
