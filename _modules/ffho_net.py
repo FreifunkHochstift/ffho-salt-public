@@ -1476,14 +1476,13 @@ def generate_DNS_entries (nodes_config, sites_config):
 
 # Convert the CIDR network from the given prefix into a dotted netmask
 def cidr_to_dotted_mask (prefix):
-	from ipcalc import Network
-
-	return str (Network (prefix).netmask ())
+	return str (ipaddress.ip_network (prefix, strict = False).netmask)
 
 def is_subprefix (prefix, subprefix):
-	from ipcalc import Network
+	p = ipaddress.ip_network (prefix, strict = False)
+	s = ipaddress.ip_network (subprefix, strict = False)
 
-	return subprefix in Network(prefix)
+	return s.subnet_of (p)
 
 # Return the network address of the given prefix
 def get_network_address (prefix, with_prefixlen = False):
