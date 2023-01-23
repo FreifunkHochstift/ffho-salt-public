@@ -3,9 +3,10 @@
 #
 
 {% set graylog_config = salt['pillar.get']('logging:graylog') %}
+{% set mongodb_version = '4.2' %}
+{% include '../mongodb/init.sls' %}
 
 include:
-  - mongodb
   - elasticsearch
 
 graylog-repo:

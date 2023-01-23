@@ -2,12 +2,18 @@
 # mongodb
 #
 
-mongodb-repo-4.2:
+mongodb-repo:
   pkgrepo.managed:
     - humanname: MongoDB Repo
+    - file: /etc/apt/sources.list.d/mongodb-org.list
+    - key_url: https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc
+    {% if mongodb_version == '4.2' %}
     - name: deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main
-    - file: /etc/apt/sources.list.d/mongodb-org-4.2.list
-    - key_url: https://www.mongodb.org/static/pgp/server-4.2.asc
+    {% elif mongodb_version == '4.4' %}
+    - name: deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main
+    {% elif mongodb_version == '5.0' %}
+    - name: deb http://repo.mongodb.org/apt/debian {{ grains.oscodename }}/mongodb-org/5.0 main
+    {% endif %}
 
 mongodb:
   pkg.installed:
