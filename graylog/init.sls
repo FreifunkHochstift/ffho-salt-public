@@ -3,7 +3,7 @@
 #
 
 {% set graylog_config = salt['pillar.get']('logging:graylog') %}
-{% set mongodb_version = '4.2' %}
+{% set mongodb_version = '5.0' %}
 {% include '../mongodb/init.sls' %}
 
 include:
@@ -13,7 +13,7 @@ graylog-repo:
 # add Graylog Repo
   pkgrepo.managed:
     - humanname: Graylog Repo
-    - name: deb https://packages.graylog2.org/repo/debian/ stable 4.3
+    - name: deb https://packages.graylog2.org/repo/debian/ stable 5.0
     - file: /etc/apt/sources.list.d/graylog.list
     - key_url: https://packages.graylog2.org/repo/debian/keyring.gpg
 
