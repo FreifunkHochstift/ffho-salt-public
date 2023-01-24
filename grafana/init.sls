@@ -4,18 +4,23 @@
 
 {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
 
+
 grafana:
 # add Grafana Repo
-  pkgrepo.managed:
-    - humanname: Grafana Repo
-    - name: deb https://packages.grafana.com/oss/deb stable main
-    - file: /etc/apt/sources.list.d/grafana.list
-    - key_url: https://packages.grafana.com/gpg.key 
+  file.managed:
+    - names:
+      - /usr/share/keyrings/grafana.key:
+        - source: salt://grafana/grafana.key
+      - /etc/apt/sources.list.d/grafana.list:
+        - source: salt://grafana/grafana.list.tmpl
+        - template: jinja
+        - require:
+          - file: /usr/share/keyrings/grafana.key
 # install grafana
   pkg.installed:
     - name: grafana
     - require:
-      - pkgrepo: grafana
+      - file: /etc/apt/sources.list.d/grafana.list
 #      - pkgrepo: grafana-src
   service.running:
     - name: grafana-server
