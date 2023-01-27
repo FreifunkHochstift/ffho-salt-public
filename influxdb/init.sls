@@ -39,7 +39,7 @@ influxdb:
   file.managed:
     - source: salt://influxdb/backup.sh
     - mode: 700
-    - owner: influxdb
+    - user: influxdb
 
 /etc/cron.d/backup-influx:
   file.managed:
