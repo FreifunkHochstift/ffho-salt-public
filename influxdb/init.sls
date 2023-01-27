@@ -2,16 +2,19 @@
 # influxdb
 #
 influxdb:
-  pkgrepo.managed:
-    - humanname: InfluxDB-Repo
-    - name: deb https://repos.influxdata.com/debian buster stable
-    - key_url:  https://repos.influxdata.com/influxdb.key
-    - dist: buster
-    - file: /etc/apt/sources.list.d/influxdb.list
+  file.managed:
+    - names:
+      - /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg:
+        - source: salt://influxdb/influxdata-archive_compat.gpg
+      - /etc/apt/sources.list.d/influxdb.list:
+        - source: salt://influxdb/influxdb.list.tmpl
+        - template: jinja
+        - require:
+          - file: /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg
   pkg.installed:
     - name: influxdb
     - require:
-      - pkgrepo: influxdb
+      - file: /etc/apt/sources.list.d/influxdb.list
   service.running:
     - name: influxdb
     - enable: True
