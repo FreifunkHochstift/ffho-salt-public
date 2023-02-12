@@ -1246,27 +1246,32 @@ def get_router_id (node_config, node_id):
 # 100 Mbit/s  |   1000
 #    VPN      |  10000
 #
-def get_ospf_interface_config (node_config, grains_id):
-	ospf_node_config = node_config.get ('ospf', {})
-
-	ospf_interfaces = {}
+def get_ospf_config (node_config, grains_id):
+	ospf_config = {
+		# <area> : {
+		#	<iface> : {
+		#		config ...
+		#	}
+		# }
+	}
 
 	for iface, iface_config in node_config.get ('ifaces', {}).items ():
 		# By default we don't speak OSPF on interfaces
 		ospf_on = False
+		area = 0
 
 		# Defaults for OSPF interfaces
-		ospf_config = {
+		ospf_iface_cfg = {
 			'stub' : True,			# Active/Passive interface
 			'cost' : 12345,
 			# 'type' 			# Area type
 		}
 
 		# OSPF configuration for interface present?
-		ospf_config_pillar = iface_config.get ('ospf', {})
+		ospf_iface_cfg_pillar = iface_config.get ('ospf', {})
 
 		# Should be completely ignore this interface?
-		if ospf_config_pillar.get ('ignore', False):
+		if ospf_iface_cfg_pillar.get ('ignore', False):
 			continue
 
 		# Ignore interfaces without any IPs configured
@@ -1276,80 +1281,87 @@ def get_ospf_interface_config (node_config, grains_id):
 		# Wireless Local Links (WLL)
 		if re.search (r'^vlan90\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = True
-			ospf_config['cost'] = 10
-			ospf_config['desc'] = "Wireless Local Link (WLL)"
+			ospf_iface_cfg['stub'] = True
+			ospf_iface_cfg['cost'] = 10
+			ospf_iface_cfg['desc'] = "Wireless Local Link (WLL)"
 
 		# Local Gigabit Ethernet based connections (PTP or L2 subnets), cost 10
 		elif re.search (r'^(br-?|br\d+\.|vlan)10\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 100
-			ospf_config['desc'] = "Wired Gigabit connection"
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 100
+			ospf_iface_cfg['desc'] = "Wired Gigabit connection"
 
 		# 10/20 Gbit/s Dark Fiber connection
 		elif re.search (r'^vlan12\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 10
-			ospf_config['desc'] = "Wired 10Gb/s connection"
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 10
+			ospf_iface_cfg['desc'] = "Wired 10Gb/s connection"
 
 		# VLL connection
 		elif re.search (r'^vlan15\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 200
-			ospf_config['desc'] = "VLL connection"
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 200
+			ospf_iface_cfg['desc'] = "VLL connection"
 
 		# WBBL connection
 		elif re.search (r'^vlan20\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 1000
-			ospf_config['desc'] = "WBBL connection"
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 1000
+			ospf_iface_cfg['desc'] = "WBBL connection"
 
 		# Legacy WBBL connection
 		elif re.search (r'^vlan22\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 1000
-			ospf_config['desc'] = "WBBL connection"
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 1000
+			ospf_iface_cfg['desc'] = "WBBL connection"
 
 		# Management Vlans
 		elif re.search (r'^vlan30\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = True
-			ospf_config['cost'] = 10
+			ospf_iface_cfg['stub'] = True
+			ospf_iface_cfg['cost'] = 10
+
+		# Management X-Connects
+		elif re.search (r'^vlan32\d\d$', iface):
+			ospf_on = True
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 10
+			area = 51
 
 		# OPS Vlans
 		elif re.search (r'^vlan39\d\d$', iface):
 			ospf_on = True
-			ospf_config['stub'] = True
-			ospf_config['cost'] = 10
+			ospf_iface_cfg['stub'] = True
+			ospf_iface_cfg['cost'] = 10
 
 		# Active OSPF on OpenVPN tunnels, cost 10000
 		elif iface.startswith ('ovpn-'):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 10000
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 10000
 
 			# Inter-Core links should have cost 5000
 			if iface.startswith ('ovpn-cr') and grains_id.startswith ('cr'):
-				ospf_config['cost'] = 5000
+				ospf_iface_cfg['cost'] = 5000
 
 			# OpenVPN tunnels to EdgeRouters
 			elif iface.startswith ('ovpn-er-'):
-				ospf_config['type'] = 'broadcast'
+				ospf_iface_cfg['type'] = 'broadcast'
 
 		# Active OSPF on Wireguard tunnels, cost 10000
 		elif iface.startswith ('wg-'):
 			ospf_on = True
-			ospf_config['stub'] = False
-			ospf_config['cost'] = 10000
+			ospf_iface_cfg['stub'] = False
+			ospf_iface_cfg['cost'] = 10000
 
 			# Inter-Core links should have cost 5000
 			if iface.startswith ('wg-cr') and grains_id.startswith ('cr'):
-				ospf_config['cost'] = 5000
+				ospf_iface_cfg['cost'] = 5000
 
 		# OSPF explicitly enabled for interface
 		elif 'ospf' in iface_config:
@@ -1362,13 +1374,16 @@ def get_ospf_interface_config (node_config, grains_id):
 			continue
 
 		# Explicit OSPF interface configuration parameters take precendence over generated ones
-		for attr, val in ospf_config_pillar.items ():
-			ospf_config[attr] = val
+		for attr, val in ospf_iface_cfg_pillar.items ():
+			ospf_iface_cfg[attr] = val
 
 		# Store interface configuration
-		ospf_interfaces[iface] = ospf_config
+		if area not in ospf_config:
+			ospf_config[area] = {}
 
-	return ospf_interfaces
+		ospf_config[area][iface] = ospf_iface_cfg
+
+	return ospf_config
 
 
 # Return (possibly empty) subset of Traffic Engineering entries from 'te' pillar entry
