@@ -378,11 +378,13 @@ def generate_urpf_policy (node_config):
 def get_ospf_active_interface (node_config):
 	ifaces = []
 
-	ospf_ifaces = ffho_net.get_ospf_interface_config (node_config, "doesnt_matter_here")
+	ospf_config = ffho_net.get_ospf_config (node_config, "doesnt_matter_here")
 
-	for iface in ffho_net.get_interface_list (ospf_ifaces):
-		if not ospf_ifaces[iface].get ('stub', False):
-			ifaces.append (iface)
+	for area in sorted (ospf_config.keys ()):
+		area_ifaces = ospf_config[area]
+		for iface in ffho_net.get_interface_list (area_ifaces):
+			if not area_ifaces[iface].get ('stub', False):
+				ifaces.append (iface)
 
 	return ifaces
 
