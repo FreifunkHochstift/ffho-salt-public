@@ -1331,6 +1331,7 @@ def get_ospf_config (node_config, grains_id):
 			ospf_on = True
 			ospf_iface_cfg['stub'] = False
 			ospf_iface_cfg['cost'] = 10
+			ospf_iface_cfg['AF'] = 4
 			area = 51
 
 		# OPS Vlans

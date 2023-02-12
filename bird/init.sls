@@ -128,7 +128,7 @@ bird6-configure:
   file.managed:
     - source: salt://bird/IGP.conf
     - template: jinja
-      proto: v4
+      AF: 4
     - watch_in:
       - cmd: bird-configure
     - require:
@@ -140,7 +140,7 @@ bird6-configure:
   file.managed:
     - source: salt://bird/IGP.conf
     - template: jinja
-      proto: v6
+      AF: 6
     - watch_in:
       - cmd: bird6-configure
     - require:
