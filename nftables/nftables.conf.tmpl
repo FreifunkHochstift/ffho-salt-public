@@ -9,6 +9,7 @@
 {%- set admin_access = fw_config.get ('admin_access') %}
 {%- set ssh = fw_config.get ('ssh') %}
 
+{%- set prometheus_hosts = salt['pillar.get']('firewall:acls:prometheus') %}
 {%- set icinga2_queriers = salt['pillar.get']('monitoring:icinga2:queriers', []) %}
 {%- set nms_list = salt['pillar.get']('globals:snmp:nms_list', []) %}
 
@@ -110,6 +111,7 @@ table ip filter {
 {%- endif %}
 
 	chain monitoring {
+		ip saddr { {{ prometheus_hosts[4]|join(", ") }} } tcp dport 9100 counter accept comment "prometheus"
 {%- for ip in icinga2_queriers if not ":" in ip %}
 		ip saddr {{ ip }} counter accept comment "Icinga2"
 {%- endfor %}
@@ -238,6 +240,7 @@ table ip6 filter {
 {%- endif %}
 
 	chain monitoring {
+		ip6 saddr { {{ prometheus_hosts[6]|join(", ") }} } tcp dport 9100 counter accept comment "prometheus"
 {%- for ip in icinga2_queriers if ":" in ip %}
 		ip6 saddr {{ ip }} counter accept comment "Icinga2"
 {%- endfor %}
