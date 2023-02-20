@@ -23,6 +23,7 @@ graylog-server:
     - pkgs:
       - graylog-server
       - python3-ldap
+      - ca-certificates-java
     - require:
       - pkgrepo: graylog-repo
       - service: mongodb
@@ -41,6 +42,13 @@ graylog-server:
     - template: jinja
     - context: 
       graylog_config: {{ graylog_config }}
+    - require:
+      - pkg: graylog-server
+
+/etc/default/graylog-server:
+  file.managed:
+    - source: salt://graylog/default-graylog-server
+    - mode: 644
     - require:
       - pkg: graylog-server
 
