@@ -374,3 +374,17 @@ bird6-configure:
     - watch_in:
       - cmd: bird6-configure
 {% endif %}
+
+################################################################################
+#                          Monitoring related stuff                            #
+################################################################################
+
+/etc/bird/ospf_interfaces_down_ok.txt:
+  file.managed:
+    - source: salt://bird/icinga2/ospf_interfaces_down_ok.txt.tmpl
+    - template: jinja
+
+/etc/bird/ibgp_sessions_down_ok.txt:
+  file.managed:
+    - source: salt://bird/icinga2/ibgp_sessions_down_ok.txt.tmpl
+    - template: jinja

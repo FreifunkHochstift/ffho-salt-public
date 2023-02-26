@@ -1,9 +1,0 @@
-#
-# Interfaces which are OK to be down in OSPF (Salt managed)
-#
-{%- set interfaces = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}) %}
-{%- for iface, config in interfaces.items ()|sort %}
-  {%- if config.get ('status', '') in [ 'planned', 'offline' ] %}
-{{ iface }}
-  {%- endif %}
-{%- endfor %}
