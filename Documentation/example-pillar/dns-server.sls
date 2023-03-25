@@ -13,18 +13,20 @@ dns-server:
 
   acls:
     ffho-ops:
-      entries:
+      FFH OPS:
         - <OPS prefixes>
 
-    slaves:
-      entries:
-        - <IPv4 / IPv6 IPs of DNS slaves>
+    replicas:
+      ns1.acme.org:
+        - <IPv4 / IPv6 IPs of DNS replicas>
+      ns1.acme.org:
+        - <IPv4 / IPv6 IPs of DNS replicas>
 
   # Defaults if not specified below
   zone_defaults:
     type: master
     # ACLs defined above
-    allow-transfer: "slaves; localhost; ffho-ops;"
+    allow-transfer: "replicas; localhost; ffho-ops;"
 
   zones:
     # public zones
