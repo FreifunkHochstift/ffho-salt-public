@@ -1,0 +1,9 @@
+#
+# Check definition for service {{ service }}
+#
+{% for check, cfg in service_config.items() %}
+[{{ check }}]
+check_cmd = {{ cfg['check_cmd'] }}
+ip_prefix = {{ cfg['ip_prefix'] }}
+
+{% endfor %}
