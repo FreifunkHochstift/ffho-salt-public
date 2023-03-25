@@ -109,6 +109,12 @@ base:
     - match: pillar
     - dns-server
 
+  # DNS recursor
+  nodes:{{ grains['id'] }}:roles:dns-recursor:
+    - match: pillar
+    - dns-server
+    - anycast-healthchecker
+
   # Webfrontend
   nodes:{{ grains['id'] }}:roles:frontend:
     - match: pillar
