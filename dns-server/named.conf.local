@@ -8,8 +8,11 @@
 
 {% for acl_name, acl_config in salt['pillar.get']('dns-server:acls', {}).items ()|sort %}
 acl {{ acl_name }} {
-  {%- for entry in acl_config['entries'] %}
-	{{ entry }};
+  {%- for entry in acl_config %}
+	// {{ entry }}
+    {%- for IP in acl_config[entry] %}
+	{{ IP }};
+    {%- endfor %}
   {%- endfor %}
 };
 
