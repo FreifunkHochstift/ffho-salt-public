@@ -115,6 +115,12 @@ base:
     - dns-server
     - anycast-healthchecker
 
+  # LDAP replicas
+  nodes:{{ grains['id'] }}:roles:ldap-replica:
+    - match: pillar
+    - slapd
+    - anycast-healthchecker
+
   # Webfrontend
   nodes:{{ grains['id'] }}:roles:frontend:
     - match: pillar
@@ -149,15 +155,3 @@ base:
   nodes:{{ grains['id'] }}:roles:librenms:
     - match: pillar
     - librenms
-#
-# Grains
-#
-  # apu2
-# Disabled for now
-#  productname:apu2:
-#    - match: grain
-#    - apu2
-
-  # Hardware nodes
-  'G@virtual:physical and not G@productname:apu2':
-    - hardware
