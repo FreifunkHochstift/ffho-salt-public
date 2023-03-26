@@ -16,5 +16,5 @@ sudo:
 /etc/sudoers:
   file.managed:
     - source:
-      - salt://sudo/sudores.{{ grains.os }}.{{ grains.oscodename }}
+      - salt://sudo/sudoers.{{ grains.os }}.{{ grains.oscodename }}
       - salt://sudo/sudoers
