@@ -11,6 +11,7 @@ base:
     - mosh
     - motd
     - needrestart
+    - nftables
     - network
     - ntp
     - postfix
@@ -27,13 +28,6 @@ base:
     - vim
     - unattended-upgrades
     - utils
-
-#
-# Tags
-#
-  nodes:{{ grains['id'] }}:tags:nftables:
-    - match: pillar
-    - nftables
 
 #
 # Roles

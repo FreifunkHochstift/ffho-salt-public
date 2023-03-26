@@ -2,6 +2,8 @@
 # nftables state
 #
 
+{% if not 'no-nftables' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':tags', []) %}
+
 nftables:
   pkg.installed:
     - name: nftables
@@ -24,6 +26,8 @@ purge-iptables:
   pkg.purged:
     - pkgs:
       - iptables-persistent
-{%- if not 'docker' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+  {%- if not 'docker' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
       - iptables
-{%- endif %}
+  {%- endif %}
+
+{% endif %}
