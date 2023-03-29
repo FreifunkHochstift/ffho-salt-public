@@ -9,10 +9,10 @@ firmware-pkgs:
       - pandoc
   user.present:
     - name: firmware
+    - gid: firmware
     - shell: /bin/bash
     - home: /home/firmware
     - createhome: True
-    - gid_from_name: True
 
 firmware-git:
   file.directory:

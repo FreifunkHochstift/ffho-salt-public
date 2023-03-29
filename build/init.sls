@@ -18,10 +18,10 @@ build:
       - zlib1g-dev
   user.present:
     - name: build
+    - gid: build
     - shell: /bin/bash
     - home: /home/build
     - createhome: True
-    - gid_from_name: True
     - require:
       - group: build
   group.present:
