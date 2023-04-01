@@ -15,7 +15,6 @@ icingaweb2-pkgs:
   pkg.installed:
     - pkgs:
       - icingaweb2
-      - icingaweb2-module-monitoring
       - icinga2-ido-mysql
     - require:
       - file: /etc/apt/sources.list.d/icinga.list
