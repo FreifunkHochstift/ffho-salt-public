@@ -23,7 +23,7 @@ firmware-git:
     - require:
       - user: firmware
   git.latest:
-    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-website.git
+    - name: gogs@git.srv.in.ffho.net:FreifunkHochstift/ffho-firmware-website.git
     - target: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}
     - user: firmware
     - update_head: False

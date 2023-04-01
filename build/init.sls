@@ -75,7 +75,7 @@ build-git:
     - require:
       - user: build
   git.latest:
-    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-build.git
+    - name: gogs@git.srv.in.ffho.net:FreifunkHochstift/ffho-firmware-build.git
     - target: /srv/build
     - user: build
     - update_head: False
@@ -92,7 +92,7 @@ firmware-git:
     - require:
       - git: build-git
   git.latest:
-    - name: gogs@git.ffho.net:FreifunkHochstift/ffho-firmware-website.git
+    - name: gogs@git.srv.in.ffho.net:FreifunkHochstift/ffho-firmware-website.git
     - target: /srv/build/output
     - branch: signing
     - user: build
