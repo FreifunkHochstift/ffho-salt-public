@@ -153,6 +153,10 @@ def _active_urpf (iface, iface_config):
 	if iface_config.get ('vrf') in ['vrf_external']:
 		return False
 
+	# Default gateway pointing towards this interface?
+	if iface_config.get ('gateway'):
+		return False
+
 	# Ignore interfaces by VLAN
 	match = vlan_re.search (iface)
 	if match:
