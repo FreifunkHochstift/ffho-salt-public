@@ -103,18 +103,6 @@ base:
     - match: pillar
     - dns-server
 
-  # DNS recursor
-  nodes:{{ grains['id'] }}:roles:dns-recursor:
-    - match: pillar
-    - dns-server
-    - anycast-healthchecker
-
-  # LDAP replicas
-  nodes:{{ grains['id'] }}:roles:ldap-replica:
-    - match: pillar
-    - slapd
-    - anycast-healthchecker
-
   # Webfrontend
   nodes:{{ grains['id'] }}:roles:frontend:
     - match: pillar
@@ -149,3 +137,10 @@ base:
   nodes:{{ grains['id'] }}:roles:librenms:
     - match: pillar
     - librenms
+
+  # Anycasted infrastructure services
+  nodes:{{ grains['id'] }}:role:infra-services:
+    - match: pillar
+    - anycast-healthchecker
+    - dns-server
+    - slapd
