@@ -1,0 +1,92 @@
+#!/usr/bin/python3
+#
+# Maximilian Wilhelm <max@rfc2324.org>
+#  --  Sun 17 Feb 2019 09:51:48 PM CET
+#
+
+import argparse
+import netifaces
+import os
+import os.path
+import requests
+import sys
+
+
+key_types = [
+	'ssh_host_ecdsa_key',
+	'ssh_host_ecdsa_key.pub',
+	'ssh_host_ed25519_key',
+	'ssh_host_ed25519_key.pub',
+	'ssh_host_rsa_key',
+	'ssh_host_rsa_key.pub',
+]
+
+def get_active_interface() -> str:
+	try:
+		# netifaces.gateway() will return a dict with multiple keys:
+		# 'default'          -> dict with default route information (AF -> (ip, iface))
+		# netifaces.AF_INET  -> list of IPv4 next-hop tuples (IP, iface, default yes/no)
+		# netifaces.AF_INET6 -> list of IPv6 next-hop tuples (see above)
+		def_gw = netifaces.gateways()['default']
+
+		# The 'default' dict should contain an IPv6 default gw (we need IPv6 to reach NACL),
+		# and if so we care about the interface name
+		return def_gw[netifaces.AF_INET6][1]
+	except KeyError:
+		return None
+
+def get_interface_mac(ifname: str) -> str:
+	iface_addrs = netifaces.ifaddresses(ifname)
+	try:
+		# We care about the MAC of the 1st entry in the AF_LINK addresses (from right to left)
+		return iface_addrs[netifaces.AF_LINK][0]['addr']
+	except KeyError:
+		return None
+	except IndexError:
+		return None
+
+def upload_key(nacl_url: str, key_type: str, mac: str):
+	print (f"Registering key '{key_type}'... ", end = '')
+
+	try:
+		with open (f"/etc/ssh/{key_type}", "r") as key_fh:
+			data = {
+				'key_type' : key_type,
+				'key' : "".join (key_fh.readlines ()),
+			}
+
+		if mac is not None:
+			data['mac'] = mac
+
+		res = requests.post (f"{nacl_url}/node/register_ssh_key", data = data)
+		if res.status_code == 200:
+			print("already registered.")
+		elif res.status_code == 201:
+			print("done.")
+		else:
+			print(f"FAILED: {res.text}", file=sys.stderr)
+			sys.exit(3)
+	except Exception as e:
+		print(f"FAILED: {str(e)}", file=sys.stderr)
+		sys.exit(4)
+
+
+parser = argparse.ArgumentParser(description = 'NACL SSH key registration tool')
+parser.add_argument('--mac', '-m', help = 'Use MAC address from gateway interface rather than IP address to identify ourselves', action = 'store_true', default = False)
+parser.add_argument('--url', help = "URL to reach NACL service, e.g http://nacl:2342", default = os.environ.get('NACL_URL', 'http://nacl'))
+args = parser.parse_args()
+
+mac = None
+if args.mac:
+	uplink_ifname = get_active_interface()
+	if uplink_ifname is None:
+		print("Failed to identify uplink interface!", file=sys.stderr)
+		sys.exit(1)
+
+	mac = get_interface_mac(uplink_ifname)
+	if mac is None:
+		print(f"Failed to get MAC address of uplink interface {uplink_ifname}!", file=sys.stderr)
+		sys.exit(2)
+
+for key_type in key_types:
+	upload_key(args.url, key_type, mac)

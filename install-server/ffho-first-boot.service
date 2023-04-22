@@ -1,0 +1,15 @@
+[Unit]
+Description=FFHO first boot service
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/freifunk/late-command-OK
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+SyslogIdentifier=ffho-first-boot
+ExecStart=/opt/ffho/sbin/ffho-first-boot.sh
+
+[Install]
+WantedBy=multi-user.target
+

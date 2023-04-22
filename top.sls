@@ -144,3 +144,5 @@ base:
     - anycast-healthchecker
     - dns-server
     - slapd
+    - nginx
+    - install-server
