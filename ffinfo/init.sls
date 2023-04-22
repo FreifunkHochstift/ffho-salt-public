@@ -1,7 +1,6 @@
 #
-# Basic Freifunk related information
+# Basic system related information
 #
-
 
 /etc/freifunk:
   file.directory:
@@ -10,6 +9,10 @@
     - mode: 755
     - makedirs: True
 
+# Generate /etc/freifunk/role file with main role the node has configured in NetBox
+/etc/freifunk/role:
+  file.managed:
+    - contents: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':role', "") }}
 
 # Generate /etc/freifunk/roles file with all roles configured on the node,
 # one on each line.
@@ -19,7 +22,6 @@
     - template: jinja
       list: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) }}
 
-
 # Generate /etc/freifunk/sites file with all sites configured on the node,
 # one on each line. Empty if no sites configured.
 /etc/freifunk/sites:
@@ -27,7 +29,6 @@
     - source: salt://ffinfo/list.tmpl
     - template: jinja
       list: {{ salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) }}
-
 
 # Generate /etc/freifunk/status file with the status of this node
 {% set status = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':status', 'active') %}
