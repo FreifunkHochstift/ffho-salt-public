@@ -22,11 +22,16 @@ nftables:
    - watch_in:
      - service: nftables
 
+
+{% set no_purge_roles = ['docker', 'kvm'] %}
+{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', [])%}
+{% set not_purge_iptables = salt['ffho.any_item_in_list'](no_purge_roles, roles) %}
+
 purge-iptables:
   pkg.purged:
     - pkgs:
       - iptables-persistent
-  {%- if not 'docker' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+  {%- if not not_purge_iptables %}
       - iptables
   {%- endif %}
 
