@@ -14,6 +14,9 @@ vrf_info = {
 		'table' : 1023,
 		'fwmark' : [ '0x1', '0x1023' ],
 	},
+	'vrf_mgmt' : {
+		'table' : 1042,
+	},
 }
 
 #
