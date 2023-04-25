@@ -1281,6 +1281,10 @@ def get_ospf_config (node_config, grains_id):
 		if not iface_config.get ('prefixes'):
 			continue
 
+		# If this interface is within a (non-default) VRF, don't OSPF here
+		if iface_config.get ('vrf'):
+			continue
+
 		# Wireless Local Links (WLL)
 		if re.search (r'^vlan90\d$', iface):
 			ospf_on = True
