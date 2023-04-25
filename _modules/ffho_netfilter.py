@@ -9,7 +9,7 @@ import ffho_net
 
 
 # Prepare regex to match VLAN intefaces / extract IDs
-vlan_re = re.compile (r'^vlan(\d+)$')
+vlan_re = re.compile (r'^(vlan|br0\.)(\d+)$')
 
 ################################################################################
 #                          Internal helper functions                           #
@@ -160,7 +160,7 @@ def _active_urpf (iface, iface_config):
 	# Ignore interfaces by VLAN
 	match = vlan_re.search (iface)
 	if match:
-		vid = int (match.group (1))
+		vid = int (match.group (2))
 
 		# Magic
 		if 900 <= vid <= 999:
@@ -305,7 +305,7 @@ def generate_mgmt_config (fw_config, node_config):
 	for iface in interfaces.keys ():
 		match = vlan_re.match (iface)
 		if match:
-			vlan_id = int (match.group (1))
+			vlan_id = int (match.group (2))
 			if vlan_id >= 3000 and vlan_id < 3099:
 				config['ifaces'].append (iface)
 
