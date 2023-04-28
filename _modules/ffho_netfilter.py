@@ -402,3 +402,56 @@ def get_vxlan_interfaces (interfaces):
 			vxlan_ifaces.append (iface)
 
 	return vxlan_ifaces
+
+#
+# Generate rules to allow access for/from monitoring systems
+def generate_monitoring_rules (nodes, monitoring_cfg):
+	rules = {
+		4 : [],
+		6 : [],
+	}
+
+	systems = {}
+
+	# Prepare systems dict with configuration from pillar
+	for sysname, cfg in monitoring_cfg.items ():
+		if 'role' not in cfg:
+			continue
+
+		systems[sysname] = {
+			'role' : cfg['role'],
+			'nftables_rule_spec' : cfg.get ('nftables_rule_spec', ''),
+			'nodes' : {
+				4 : [],
+				6 : [],
+			},
+		}
+
+	# Gather information about monitoring systems from node configurations
+	for node, node_config in nodes.items ():
+		for system, syscfg in systems.items ():
+			ips = node_config.get('primary_ips', {})
+
+			if syscfg['role'] in node_config.get ('roles', []):
+				for af in [4, 6]:
+					ip = ips.get (str (af), "").split ('/')[0]
+					if ip:
+						syscfg['nodes'][af].append (ip)
+
+	# Generate rules for all configured and found systems
+	for sysname in sorted (systems.keys ()):
+		syscfg = systems[sysname]
+
+		for af in [4, 6]:
+			if not syscfg['nodes'][af]:
+				continue
+
+			rule = "ip" if af == 4 else "ip6"
+			rule += " saddr { "
+			rule += ", ".join (sorted (syscfg['nodes'][af]))
+			rule += " } "
+			rule += syscfg['nftables_rule_spec']
+			rule += f" counter accept comment \"{sysname.capitalize()}\""
+			rules[af].append (rule)
+
+	return rules
