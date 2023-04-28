@@ -1,0 +1,2 @@
+# Set the command-line arguments to pass to the server.
+ARGS="--storage.tsdb.path=/srv/prometheus/metrics2/ --storage.tsdb.retention.time=30d"

@@ -138,6 +138,11 @@ base:
     - match: pillar
     - librenms
 
+  # Promtheus
+  nodes:{{ grains['id'] }}:roles:prometheus:
+    - match: pillar
+    - prometheus-server
+
   # Anycasted infrastructure services
   nodes:{{ grains['id'] }}:role:infra-services:
     - match: pillar
