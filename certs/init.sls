@@ -55,7 +55,8 @@ generate-dhparam:
   {% endif %}
 
   {% if pillar_name != None %}
-    {% do certs.update ({ cn : pillar_name }) %}
+    {% do cert_config.update ({ "pillar_name" : pillar_name }) %}
+    {% do certs.update ({ cn : cert_config }) %}
   {% endif %}
 {% endfor %}
 
@@ -63,17 +64,22 @@ generate-dhparam:
 {% set node_roles = node_config.get ('roles', []) %}
 {% for cn, cert_config in salt['pillar.get']('cert', {}).items () %}
   {% if grains['id'] in cert_config.get ('apply', {}).get ('node', []) %}
-    {% do certs.update ({ cn : 'cert:' ~ cn }) %}
+    {% do certs.update ({ cn : { 'pillar_name' : 'cert:' ~ cn }}) %}
   {% endif %}
+
   {% for role in cert_config.get ('apply', {}).get ('roles', []) %}
     {% if role in node_roles %}
-      {% do certs.update ({ cn : 'cert:' ~ cn }) %}
+    {% do certs.update ({ cn : { 'pillar_name' : 'cert:' ~ cn }}) %}
     {% endif %}
   {% endfor %}
 {% endfor %}
 
 # Install found certificates
-{% for cn, pillar_name in certs.items () %}
+{% for cn, cert_config in certs.items () %}
+  {% set pillar_name = cert_config['pillar_name'] %}
+  {% set user = cert_config.get ('user', 'root') %}
+  {% set install_dir = cert_config.get ('install_dir') %}
+
 /etc/ssl/certs/{{ cn }}.cert.pem:
   file.managed:
     {% if salt['pillar.get'](pillar_name ~ ':cert') == "file" %}
@@ -81,15 +87,21 @@ generate-dhparam:
     {% else %}
     - contents_pillar: {{ pillar_name }}:cert
     {% endif %}
-    - user: root
-    - group: root
+    {% if install_dir %}
+    - name: {{ install_dir }}/{{ cn }}.cert.pem
+    {% endif %}
+    - user: {{ user }}
+    - group: {{ cert_config.get ('group', 'root') }}
     - mode: 644
 
 /etc/ssl/private/{{ cn }}.key.pem:
   file.managed:
     - contents_pillar: {{ pillar_name }}:privkey
-    - user: root
-    - group: ssl-cert
+    {% if install_dir %}
+    - name: {{ install_dir }}/{{ cn }}.key.pem
+    {% endif %}
+    - user: {{ user }}
+    - group: {{ cert_config.get ('group', 'ssl-cert') }}
     - mode: 440
     - require:
       - pkg: ssl-cert
