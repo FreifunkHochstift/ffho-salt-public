@@ -61,17 +61,17 @@ echo "${domain_xml}" | xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'co
 	vlan_id=$(echo ${iface} | grep -o '_v[0-9]\{1,4\}$' | cut -c3-)
 
 	# If vlan filtering is activated and we found a vlan id, kindly do the needful.
-	if [ "${vlan_filtering}" -a "${vlan_id}" ]; then
+	if [ "${vlan_filtering}" = 1 -a "${vlan_id}" ]; then
 		# Remove association with vlan 1 and add association with
 		# vlan $vlan_id with packages being sent out untagged and
 		# untagged ingress packets get tagged accordingly.
 		bridge vlan del vid 1 dev "${iface}"
 		bridge vlan add vid "${vlan_id}" dev "${iface}" pvid untagged
-		logger -t "${my_name}" "Configured untagged pvid ${vlan_id} for ${iface} in bridge ${bridge}."
+		logger -t "${my_name}" "Configured untagged VLAN ${vlan_id} for ${iface} in bridge ${bridge}."
 
 	# If vlan filtering isn't activated or supported but we found a vlan id,
 	# this probably is an error!
-	elif [ ! "${vlan_filtering}" -a "${vlan_id}" ]; then
+	elif [ "${vlan_filtering}" = 0 -a "${vlan_id}" ]; then
 		logger -t "${my_name}" -p user.error "ERROR: Should configure untagged pvid ${vlan_id} for ${iface} in bridge ${bridge}, but bridge does not support vlan filtering!"
 	fi
 
@@ -87,10 +87,13 @@ echo "${domain_xml}" | xmlstarlet sel -t -m '//interface[@type="bridge"]' -v 'co
 	# for this interfaces, we try to get it up and running. Proceed
 	# with fingers crossed.
 	if grep -q "^iface\s\+${iface}" /etc/network/interfaces; then
-		if ifup $iface; then
-			logger -t "${my_name}" "ifup'ed ${iface}."
-		else
-			logger -t "${my_name}" -p user.error "ifup ${iface} FAILED."
+		vids=$(/etc/libvirt/hooks/get-bridge-vids "${iface}")
+		if [ "${vids}" ]; then
+			bridge vlan del vid 1 dev "${iface}"
+			for vid in ${vids}; do
+				bridge vlan add vid ${vid} dev "${iface}"
+			done
+	                logger -t "${my_name}" "Configured tagged VLANs ${vids} for ${iface} in bridge ${bridge}."
 		fi
 	fi
 done

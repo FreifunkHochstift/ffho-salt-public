@@ -1,0 +1,37 @@
+#!/usr/bin/python3
+#
+# Maximilian Wilhelm <max@sdn.clinic>
+#  --  Fri 28 Apr 2023 08:41:13 PM CEST
+#
+
+import re
+import sys
+
+if len (sys.argv) != 2:
+    print("Usage: get-bridge-vids IFACE", file=sys.stderr)
+    sys.exit(1)
+
+ifname = sys.argv[1]
+
+ifstanza_re = re.compile(rf"^iface {ifname}")
+bridge_vid_re = re.compile(r"bridge-vids (.*)$")
+
+interfaces_fh = open("/etc/network/interfaces", "r")
+iface_found = False
+
+for line in interfaces_fh.readlines():
+    line = line.strip()
+
+    if line.startswith('#'):
+        continue
+
+    if iface_found:
+        match = bridge_vid_re.search(line)
+        if match:
+            print (match.group(1))
+
+        continue
+
+    match = ifstanza_re.search(line)
+    if match:
+        iface_found = True
