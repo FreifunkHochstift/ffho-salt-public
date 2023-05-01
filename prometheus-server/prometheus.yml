@@ -1,3 +1,4 @@
+{%- set nodes = salt['pillar.get']('nodes').items()|sort -%}
 #
 # /etc/prometheus/prometheus.yaml (Salt managed)
 #
@@ -30,15 +31,24 @@ scrape_configs:
   - job_name: node
     static_configs:
       - targets:
-{%- for node, node_config in salt['pillar.get']('nodes').items()|sort %}
+{%- for node, node_config in nodes %}
         - {{ node }}:9100
 {%- endfor %}
 
   - job_name: bind
     static_configs:
       - targets:
-{%- for node, node_config in salt['pillar.get']('nodes').items()|sort %}
+{%- for node, node_config in nodes %}
   {%- if salt['ffho.any_item_in_list'](['dns-auth', 'dns-recursor'], node_config.get('roles', [])) %}
         - {{ node }}:9119
+  {%- endif %}
+{%- endfor %}
+
+  - job_name: bird
+    static_configs:
+      - targets:
+{%- for node, node_config in nodes %}
+  {%- if 'router' in node_config.get('roles', []) %}
+        - {{ node }}:9324
   {%- endif %}
 {%- endfor %}
