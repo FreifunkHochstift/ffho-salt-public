@@ -12,6 +12,15 @@
 include:
   - elasticsearch
 
+mongouser:
+  mongodb_user.present:
+  - name: {{ graylog_config['mongodb_username'] }}
+  - passwd: {{ graylog_config['mongodb_password'] }}
+  - database: graylog
+  - roles: {{ graylog_config['mongodb_roles'] }}
+  - user: {{ mongodb_admin_username }}
+  - password: {{ mongodb_admin_password }}
+
 graylog-repo:
 # add Graylog Repo
   pkgrepo.managed:
