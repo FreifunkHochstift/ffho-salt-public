@@ -37,6 +37,7 @@ object Host "{{ node_id }}" {
 
 	vars.os = "Linux"
 
+	vars.role = "{{ node_config.get('role', '') }}"
 	vars.roles = [
 {%- for role in roles %}
 		"{{ role }}",
