@@ -438,11 +438,13 @@ def generate_monitoring_rules (nodes, local_node_name, monitoring_cfg):
 		if node_roles_filter and not ffho.any_item_in_list (node_roles_filter, local_node_roles):
 			continue
 
+		sys_role = syscfg['role']
+
 		for node, node_config in nodes.items ():
 			ips = node_config.get ('primary_ips', {})
 
 			# Carry on if the node doesn't match the monitoring system role
-			if syscfg['role'] not in node_config.get ('roles', []):
+			if sys_role != node_config.get ('role') and sys_role not in node_config.get ('roles', []):
 				continue
 
 			for af in [4, 6]:
