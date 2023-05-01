@@ -4,6 +4,9 @@
 
 {% set graylog_config = salt['pillar.get']('logging:graylog') %}
 {% set mongodb_version = '5.0' %}
+{% set mongodb_admin_username = graylog_config['mongodb_admin_username'] %}
+{% set mongodb_admin_password = graylog_config['mongodb_admin_password'] %}
+{% set mongodb_admin_roles = graylog_config['mongodb_admin_roles'] %}
 {% include '../mongodb/init.sls' %}
 
 include:

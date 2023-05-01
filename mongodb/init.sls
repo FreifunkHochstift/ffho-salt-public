@@ -17,12 +17,34 @@ mongodb-repo:
 
 mongodb:
   pkg.installed:
-    - name: mongodb-org
+    - pkgs:
+      - mongodb-org
+      - python3-pymongo
   service.running:
     - name: mongod
     - enable: True
+    - require:
+      - pkg: mongodb
+    - watch:
+      - file: /etc/mongod.conf
 
-# Install cronjob, backup script and corresponding config file
+# Create mongodb admin user
+mongoadmin:
+  mongodb_user.present:
+  - name: {{ mongodb_admin_username }}
+  - passwd: {{ mongodb_admin_password }}
+  - database: admin
+  - roles: {{ mongodb_admin_roles }}
+  - user: {{ mongodb_admin_username }}
+  - password: {{ mongodb_admin_password }}
+
+# Install mongod config, cronjob, backup script and corresponding config file
+/etc/mongod.conf:
+  file.managed:
+    - source: salt://mongodb/mongod.conf
+    - require:
+      - mongodb_user: mongoadmin
+
 /etc/cron.d/mongodb_backup:
   file.managed:
     - source: salt://mongodb/mongodb_backup.cron
