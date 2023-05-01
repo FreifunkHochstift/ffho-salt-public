@@ -40,3 +40,8 @@ options {
 	use-v4-udp-ports { range 1024 65535; };
 	use-v6-udp-ports { range 1024 65535; };
 };
+
+// Allow scraping by bind-exporter
+statistics-channels {
+	inet 127.0.0.1 port 8053 allow { 127.0.0.1; };
+};
