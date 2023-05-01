@@ -5,6 +5,7 @@
 import ipaddress
 import re
 
+import ffho
 import ffho_net
 
 
@@ -405,7 +406,7 @@ def get_vxlan_interfaces (interfaces):
 
 #
 # Generate rules to allow access for/from monitoring systems
-def generate_monitoring_rules (nodes, monitoring_cfg):
+def generate_monitoring_rules (nodes, local_node_name, monitoring_cfg):
 	rules = {
 		4 : [],
 		6 : [],
@@ -420,6 +421,7 @@ def generate_monitoring_rules (nodes, monitoring_cfg):
 
 		systems[sysname] = {
 			'role' : cfg['role'],
+			'node_roles' : cfg.get ('node_roles'),
 			'nftables_rule_spec' : cfg.get ('nftables_rule_spec', ''),
 			'nodes' : {
 				4 : [],
@@ -427,16 +429,26 @@ def generate_monitoring_rules (nodes, monitoring_cfg):
 			},
 		}
 
-	# Gather information about monitoring systems from node configurations
-	for node, node_config in nodes.items ():
-		for system, syscfg in systems.items ():
-			ips = node_config.get('primary_ips', {})
+	local_node_roles = nodes.get (local_node_name, {}).get ('roles', [])
 
-			if syscfg['role'] in node_config.get ('roles', []):
-				for af in [4, 6]:
-					ip = ips.get (str (af), "").split ('/')[0]
-					if ip:
-						syscfg['nodes'][af].append (ip)
+	# Gather information about monitoring systems from node configurations
+	for system, syscfg in systems.items ():
+		# Carry on if there's a node roles filter which doesn't match
+		node_roles_filter = syscfg.get ('node_roles')
+		if node_roles_filter and not ffho.any_item_in_list (node_roles_filter, local_node_roles):
+			continue
+
+		for node, node_config in nodes.items ():
+			ips = node_config.get ('primary_ips', {})
+
+			# Carry on if the node doesn't match the monitoring system role
+			if syscfg['role'] not in node_config.get ('roles', []):
+				continue
+
+			for af in [4, 6]:
+				ip = ips.get (str (af), "").split ('/')[0]
+				if ip:
+					syscfg['nodes'][af].append (ip)
 
 	# Generate rules for all configured and found systems
 	for sysname in sorted (systems.keys ()):

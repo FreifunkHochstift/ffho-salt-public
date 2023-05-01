@@ -10,7 +10,7 @@
 {%- set admin_access = fw_config.get ('admin_access') %}
 {%- set ssh = fw_config.get ('ssh') %}
 {%- set monitoring_cfg = salt['pillar.get']('monitoring') %}
-{%- set monitoring_rules = salt['ffho_netfilter.generate_monitoring_rules'](nodes, monitoring_cfg) %}
+{%- set monitoring_rules = salt['ffho_netfilter.generate_monitoring_rules'](nodes, grains['id'], monitoring_cfg) %}
 {%- set services = salt['ffho_netfilter.generate_service_rules'](fw_config, node_config) %}
 {%- set forward = salt['ffho_netfilter.generate_forward_policy'](fw_config, node_config) %}
 {%- set nat_policy = salt['ffho_netfilter.generate_nat_policy'](node_config) %}
