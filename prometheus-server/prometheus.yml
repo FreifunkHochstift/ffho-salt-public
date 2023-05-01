@@ -33,3 +33,12 @@ scrape_configs:
 {%- for node, node_config in salt['pillar.get']('nodes').items()|sort %}
         - {{ node }}:9100
 {%- endfor %}
+
+  - job_name: bind
+    static_configs:
+      - targets:
+{%- for node, node_config in salt['pillar.get']('nodes').items()|sort %}
+  {%- if salt['ffho.any_item_in_list'](['dns-auth', 'dns-recursor'], node_config.get('roles', [])) %}
+        - {{ node }}:9119
+  {%- endif %}
+{%- endfor %}
