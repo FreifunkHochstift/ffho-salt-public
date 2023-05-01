@@ -33,3 +33,13 @@ prometheus-bind-exporter:
     - enable: true
     - reload: true
 {% endif %}
+
+# Routers
+{% if 'router' in roles %}
+prometheus-bird-exporter:
+  pkg.installed:
+    - name: prometheus-bird-exporter
+  service.running:
+    - enable: true
+    - reload: true
+{% endif %}
