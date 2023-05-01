@@ -4,3 +4,4 @@
 
 *.pyc
 _modules/__pycache__/
+.*.swp
