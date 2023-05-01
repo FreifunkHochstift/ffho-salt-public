@@ -17,3 +17,19 @@ prometheus-node-exporter:
       - pkg: prometheus-node-exporter
     - watch_in:
       - service: prometheus-node-exporter
+
+
+#
+# Role specific exporters
+#
+{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+
+# DNS server
+{% if 'dns-recursor' in roles or 'dns-auth' in roles %}
+prometheus-bind-exporter:
+  pkg.installed:
+    - name: prometheus-bind-exporter
+  service.running:
+    - enable: true
+    - reload: true
+{% endif %}
