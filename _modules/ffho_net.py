@@ -959,6 +959,11 @@ def get_interface_config (node_config, sites_config, node_id = ""):
 			del ifaces[interface]
 			continue
 
+		# Ignore interfaces used for PPPoE
+		if 'pppoe' in config.get ('tags', []):
+			del ifaces[interface]
+			continue
+
 		if 'batman-ifaces' in config or iface_type.startswith ('batman'):
 			_update_batman_config (node_config, interface, sites_config)
 
