@@ -16,6 +16,21 @@ vlan_re = re.compile (r'^(vlan|br0\.)(\d+)$')
 #                          Internal helper functions                           #
 ################################################################################
 
+def get_nodeconfig_section (section: str) -> {}:
+	fqdn = __grains__["id"]
+	node_config = __pillar__.get("nodes", {}).get(fqdn)
+
+	if node_config is None:
+		return {}
+
+	ret = node_config
+
+	for entry in section.split(":"):
+		ret = ret.get(entry, {})
+
+	return ret
+
+
 #
 # Check if at least one of the node roles are supposed to run DHCP
 def _allow_dhcp (fw_policy, roles):
@@ -392,6 +407,30 @@ def get_ospf_active_interface (node_config):
 				ifaces.append (iface)
 
 	return ifaces
+
+#
+# Get a dict of all configured BGP peers per AF
+def get_bgp_peers ():
+	peers = {
+		4: {
+			# IP -> peer name
+		},
+		6: {},
+	}
+
+	bgp_cfg = get_nodeconfig_section("routing:bgp")
+	if bgp_cfg is None:
+		return peers
+
+	ibgp_peers = bgp_cfg.get('internal', {}).get('peers', {})
+	if ibgp_peers is None:
+		return peers
+
+	for af in [4, 6]:
+		for peer_cfg in ibgp_peers[str(af)]:
+			peers[af][peer_cfg["ip"]] = peer_cfg["node"]
+
+	return peers
 
 #
 # Get a list of interfaces to allow VXLAN encapsulated traffic on

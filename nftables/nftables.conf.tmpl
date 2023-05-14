@@ -18,18 +18,21 @@
 {%- set urpf = salt['ffho_netfilter.generate_urpf_policy'](node_config) %}
 {%- set ospf_ifaces = salt['ffho_netfilter.get_ospf_active_interface'](node_config) %}
 {%- set vxlan_ifaces = salt['ffho_netfilter.get_vxlan_interfaces'](node_config['ifaces']) %}
+{%- set bgp_peers = salt['ffho_netfilter.get_bgp_peers']() %}
 
 flush ruleset
 
 table ip filter {
+{%- if bgp_peers[4]|length > 0 %}
 	set ibgp-peers {
 		type ipv4_addr
 		elements = {
-			10.132.255.1,	# cr01.in.ffho.net
-			10.132.255.2,	# cr02.in.ffho.net
-			10.132.255.3,	# cr03.in.ffho.net
+  {%- for ip, name in bgp_peers[4].items () %}
+			{{ ip }},	# {{ name }}
+  {%- endfor %}
 		}
 	}
+{%- endif %}
 
 	chain input {
 		type filter hook input priority 0; policy drop;
@@ -51,7 +54,7 @@ table ip filter {
 		{#- ifname sets are introduced in nftables 2.11 #}
 		meta l4proto ospf iifname { {{ ospf_ifaces|join(', ') }} } counter accept
 {%- endif %}
-{%- if 'router' in roles %}
+{%- if bgp_peers[4]|length > 0  %}
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept
@@ -160,14 +163,16 @@ table ip filter {
 }
 
 table ip6 filter {
+{%- if bgp_peers[6]|length > 0 %}
 	set ibgp-peers {
 		type ipv6_addr
 		elements = {
-			2a03:2260:2342:ffff::1,	# cr01.in.ffho.net
-			2a03:2260:2342:ffff::2,	# cr02.in.ffho.net
-			2a03:2260:2342:ffff::3,	# cr03.in.ffho.net
+  {%- for ip, name in bgp_peers[6].items () %}
+			{{ ip }},	# {{ name }}
+  {%- endfor %}
 		}
 	}
+{%- endif %}
 
 	chain input {
 		type filter hook input priority 0; policy drop;
@@ -188,7 +193,7 @@ table ip6 filter {
 		{#- ifname sets are introduced in nftables 2.11 #}
 		meta l4proto ospf iifname { {{ ospf_ifaces|join(', ') }} } counter accept
 {%- endif %}
-{%- if 'router' in roles %}
+{%- if bgp_peers[6]|length > 0  %}
 		tcp dport 179 counter jump bgp
 {%- endif %}
 		ct state related,established counter accept
