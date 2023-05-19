@@ -21,7 +21,7 @@ ssl_skip_verify = false
 # root_ca_cert = /path/to/certificate.crt
 
 # Search user bind dn
-bind_dn = "uid=grafana,ou=Services,dc=ffho,dc=net"
+bind_dn = "{{ config.bind_dn }}"
 # Search user bind password
 # If the password contains # or ; you have to wrap it with trippel quotes. Ex """#password;"""
 bind_password = "{{ config.bind_password }}"

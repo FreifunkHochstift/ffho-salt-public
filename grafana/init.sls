@@ -2,6 +2,8 @@
 # grafana
 #
 
+{% set grafana_cfg = salt['pillar.get']('grafana') %}
+
 {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
 
 
@@ -16,12 +18,13 @@ grafana:
         - template: jinja
         - require:
           - file: /usr/share/keyrings/grafana.key
+
 # install grafana
   pkg.installed:
     - name: grafana
     - require:
       - file: /etc/apt/sources.list.d/grafana.list
-#      - pkgrepo: grafana-src
+
   service.running:
     - name: grafana-server
     - enable: True
@@ -33,6 +36,7 @@ grafana:
     - watch:
       - file: /etc/grafana/grafana.ini
       - file: /etc/grafana/ldap.toml
+
 # add user 'grafana' to group 'ssl-cert' to access ssl-key file
   user.present:
     - name: grafana
@@ -42,30 +46,21 @@ grafana:
     - require:
       - pkg: grafana
 
-# add Grafana src-Repo
-#grafana-src:
-#  pkgrepo.managed:
-#    - humanname: Grafana Repo
-#    - name: deb-src https://packages.grafana.com/oss/deb stable main
-#    - file: /etc/apt/sources.list.d/grafana.list
-#    - key_url: https://packages.grafana.com/gpg.key 
-
-# copy custom config
 /etc/grafana/grafana.ini:
   file.managed:
     - source: salt://grafana/grafana.ini.tmpl
     - template: jinja
-      config: {{node_config.grafana}}
+      config: {{ grafana_cfg }}
     - require:
       - pkg: grafana
 
-# copy LDAP config
+
 /etc/grafana/ldap.toml:
-{% if 'ldap' in node_config.grafana %}
+{% if 'ldap' in grafana_cfg %}
   file.managed:
     - source: salt://grafana/ldap.toml.tmpl
     - template: jinja
-      config: {{node_config.grafana.ldap}}
+      config: {{ grafana_cfg.ldap }}
 {% else %}
   file.absent:
 {% endif %}
@@ -114,5 +109,3 @@ grafana-imagerenderer:
       - service: grafana
     - require:
       - pkg: grafana-imagerenderer-deps
-
-
