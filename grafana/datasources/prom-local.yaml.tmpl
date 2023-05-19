@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+ - name: {{ grains.id }}
+   isDefault: true
+   type: prometheus
+   url: http://localhost:9090
+   jsonData:
+     httpMethod: POST
+     manageAlerts: false
+     prometheusType: Prometheus
