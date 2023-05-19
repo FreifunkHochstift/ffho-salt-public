@@ -141,6 +141,7 @@ base:
   # Promtheus
   nodes:{{ grains['id'] }}:role:prometheus-server:
     - match: pillar
+    - grafana
     - prometheus-server
     - nginx
 
