@@ -41,6 +41,9 @@ rocommunity	{{ ro_community }}	{{ entry }}
 interface	lo		6	1000000000	#   1 Gb/s
 {%- for iface in ifaces|sort %}
  {%- set config = ifaces.get (iface) %}
+ {%- if "vlan" in config or "vxlan" in config %}
+   {%- continue %}
+ {%- endif %}
  {%- if "batman" in config or "bridge" in config %}
 interface	{{ iface }}	6	 500000000	# 500 Mb/s
  {%- endif %}
