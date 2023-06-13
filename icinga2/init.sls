@@ -275,9 +275,7 @@ Create /etc/icinga2/ffho-conf.d/net/wbbl/:
 Cleanup /etc/icinga2/ffho-conf.d/net/wbbl/:
   file.directory:
     - name: /etc/icinga2/ffho-conf.d/net/wbbl/
-    - makedirs: true
-    - require:
-      - pkg: icinga2
+    - clean: true
     - watch_in:
       - service: icinga2
 
