@@ -17,6 +17,9 @@ nagios  ALL=NOPASSWD:	/usr/local/sbin/dhcpd-pool
 # Mail
 nagios	ALL=NOPASSWD:	/usr/lib/nagios/plugins/check_mailq
 
+# LVM
+nagios  ALL=NOPASSWD:	/usr/local/share/monitoring-plugins/check_lv_snap
+
 # Needrestart
 nagios	ALL=NOPASSWD:	/usr/sbin/needrestart -p -k
 nagios	ALL=NOPASSWD:	/usr/sbin/needrestart -p -l

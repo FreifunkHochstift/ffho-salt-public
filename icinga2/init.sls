@@ -40,6 +40,7 @@ monitoring-plugin-pkgs:
       - curl
       - lsof
       - python3-dnspython
+      - python3-tz
     - watch_in:
       - service: icinga2
 

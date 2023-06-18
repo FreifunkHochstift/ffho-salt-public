@@ -1,0 +1,105 @@
+#!/usr/bin/python3
+# Copyright (C) 2023 Philipp Fromme
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import argparse
+import pytz
+import re
+import subprocess
+import sys
+from enum import Enum
+from datetime import datetime, timedelta
+
+class State(Enum):
+    OK = 0
+    WARNING = 1
+    CRITICAL = 2
+    UNKNOWN = 3
+    def set_state(self, state):
+        if state.value > self.value:
+            return state
+        return self
+
+def main():
+	parser = argparse.ArgumentParser(description="Check for LVM snapshots overdue for deletion")
+	parser.add_argument("-w", "--warning", help="Warning threshold, default "
+	                   "604800 seconds (one week)", nargs="?", type=int,
+	                   default=604800)
+	parser.add_argument("-c", "--critical", help="Critical threshold, default 1209600 seconds (two weeks)",
+	                   nargs="?", type=int, default=1209600)
+	parser.add_argument("-z", "--tz", help="Set timezone, default Europe/Berlin",
+	                   nargs="?", type=str, default='Europe/Berlin')
+	parser.add_argument("-r", "--regex", help="Only show LVs with names matching regex, "
+	                   "matches all snapshots by default", nargs='+', default=[None])
+	parser.add_argument("-d", "--delete", help="Only show snapshots to be deleted",
+	                   action="store_true")
+	args = parser.parse_args()
+
+	if args.critical < args.warning:
+		sys.exit(f"Critical seconds {args.critical} is less than warning seconds {args.warning}")
+	cmd = ['/sbin/lvs', '-o', 'lv_name,lv_time', '--separator=|', '--noheadings', '-S', 'lv_attr=~[^s.*]']
+	snapshots = subprocess.check_output(cmd)
+	snapshots = snapshots.decode().strip().split('\n')
+	dt_now = datetime.now(pytz.timezone(args.tz))
+	state = State.OK
+	output = ""
+	for line in snapshots:
+		if not line:
+			continue
+		line = line.strip()
+		elements = line.split('|')
+		lv_name = elements[0]
+		for pattern in args.regex:
+			if pattern is None:
+				break
+			regex = re.compile(pattern)
+			if regex.match(lv_name):
+				break
+		else:
+			continue
+		lv_time = elements[1]
+		dt_lv_time = datetime.strptime(lv_time, '%Y-%m-%d %H:%M:%S %z')
+		dt_warning = dt_lv_time + timedelta(0,args.warning)
+		dt_critical = dt_lv_time + timedelta(0,args.critical)
+		if dt_warning > dt_now and args.delete:
+			continue
+		output = (f"{output}\n"
+			 f"{lv_name}:\n"
+			 f"  Creation Date: {lv_time}\n"
+			 f"  Deletion Date: {dt_warning}")
+		dt_delta = None
+		if dt_critical < dt_now:
+			state = state.set_state(State.CRITICAL)
+		elif dt_warning < dt_now:
+			state = state.set_state(State.WARNING)
+		else:
+			continue
+		dt_delta = dt_now - dt_warning
+		output = (f"{output}\n"
+			  f"  Deletion Overdue: {dt_delta}")
+	if state == State.OK:
+		output = ("OK: keine zu loeschenden Snapshots gefunden\n"
+			 f"{output}")
+	elif state == State.WARNING:
+		output = ("WARNING: folgende Snapshots muessen geloescht werden!\n"
+			 f"{output}")
+	elif state == State.CRITICAL:
+		output = ("CRITICAL: einige Snapshots sind bereits DEUTLICH ueber dem Loeschdatum!\n"
+			 f"{output}")
+	print(output)
+	sys.exit(state.value)
+
+if __name__ == "__main__":
+    main()
