@@ -37,7 +37,7 @@ Unattended-Upgrade::Origins-Pattern {
 	"origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
 
 	// Icigna2
-	"o=debian icinga-buster,a=icinga-${distro_codename}";
+	"o=debian icinga-${distro_codename},a=icinga-${distro_codename}";
 
 	// SaltStack
 	"o=SaltStack,a=stable,n=${distro_codename}";
