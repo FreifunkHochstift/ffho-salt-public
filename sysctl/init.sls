@@ -37,10 +37,3 @@ reload-sysctl:
 /etc/sysctl.d/router.conf:
   file.absent
 {% endif %}
-
-
-{# Remove old files #}
-{% for file in ['20-arp_caches.conf', '21-ip_forward.conf', '22-kernel.conf', 'NAT.conf', 'nf-ignore-bridge.conf'] %}
-/etc/sysctl.d/{{ file }}:
-  file.absent
-{% endfor %}
