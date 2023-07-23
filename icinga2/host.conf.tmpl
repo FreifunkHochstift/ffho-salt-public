@@ -10,7 +10,7 @@
 {%- set location = node_config.get ('location', {}) %}
 {%- set status = node_config.get ('status', 'active') %}
 
-{%- if 'icinga2server' not in roles %}
+{%- if 'icinga2server' not in roles and node_config.get('platform') == 'linux' %}
 object Endpoint "{{ node_id }}" {
         host = "{{ node_id }}"
 }
@@ -35,7 +35,7 @@ object Host "{{ node_id }}" {
 	enable_notifications = false
 {%- endif %}
 
-	vars.os = "Linux"
+	vars.os = "{{ node_config.get('platform') or "" }}"
 
 	vars.role = "{{ node_config.get('role', '') }}"
 	vars.roles = [
