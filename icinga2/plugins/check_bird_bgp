@@ -159,6 +159,8 @@ except Exception as e:
 #   Input filter:   ibgp_in
 #   Output filter:  ibgp_out
 #   Routes:         38 imported, 3 exported, 1 preferred
+# OR
+#   Routes:         1 imported, 0 filtered, 1 exported, 0 preferred
 #   Route change stats:     received   rejected   filtered    ignored   accepted
 #     Import updates:          16779          0          0         72      16707
 #     Import withdraws:        18012          0        ---       1355      16657
@@ -187,12 +189,12 @@ simple_fields = [ 'Preference', 'Input filter', 'Output filter', 'BGP state', 'N
 # More "complex" fields
 fields = {
 	'Routes' : {
-		're' : re.compile (r'Routes:\s+(\d+) imported, (\d+) exported, (\d+) preferred'),
-		'groups' : [ 1, 2, 3 ],
+		're' : re.compile (r'Routes:\s+(\d+) imported, ((\d+) filtered, )?(\d+) exported, (\d+) preferred'),
+		'groups' : [ 1, 4, 5 ],
 		'mangle_dict' : {
 			'Routes imported' : 1,
-			'Routes exported' : 2,
-			'Routes preferred' : 3,
+			'Routes exported' : 4,
+			'Routes preferred' : 5,
 		}
 	},
 
