@@ -36,6 +36,18 @@ bird6-configure:
     - watch: []
 
 
+# Create local config knobs (e.g. drain switches)
+/etc/bird/local.conf:
+  file.managed:
+    - source: salt://bird/local.conf
+    - replace: False # Create only, then no touchy!
+    - watch_in:
+      - cmd: bird-configure
+      - cmd: bird6-configure
+    - require_in:
+      - service: bird
+
+
 /etc/bird:
   file.directory:
     - mode: 750
@@ -59,8 +71,6 @@ bird6-configure:
     - source: salt://bird/bird.conf
     - template: jinja
       proto: v4
-    - require:
-      - file: /etc/bird/bird.d
     - require_in:
       - service: bird
     - watch_in:
@@ -84,8 +94,6 @@ bird6-configure:
     - source: salt://bird/bird.conf
     - template: jinja
       proto: v6
-    - require:
-      - file: /etc/bird/bird6.d
     - watch_in:
       - cmd: bird6-configure
     - mode: 644
