@@ -49,10 +49,10 @@ base:
     - batman
     - respondd
 
-  # Batman gateway
-  nodes:{{ grains['id'] }}:roles:batman_gw:
-    - match: pillar
-    - dhcp-server
+#  # Batman gateway
+#  nodes:{{ grains['id'] }}:roles:batman_gw:
+#    - match: pillar
+#    - dhcp-server
 
   # Build-Server
   nodes:{{ grains['id'] }}:roles:build:
