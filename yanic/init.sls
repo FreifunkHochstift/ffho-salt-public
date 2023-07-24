@@ -24,9 +24,6 @@ yanic:
     - require:
       - file: yanic
 
-# the internal webserver should be enabled
-{% set webserver = "false" %}
-
 # get loopback IPv6 for binding the webserver to it
 {% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
 {% set bind_ip = salt['ffho_net.get_primary_ip'](node_config, 'v6').ip %}
@@ -47,11 +44,9 @@ yanic:
     - defaults:
       iface: "br-{{site}}"
       site: "{{site}}"
-      webserver: "{{webserver}}"
+      webserver: "{{ "true" if loop.first else "false" }}"
       bind_ip: {{bind_ip}}
       influxdb: {{node_config.yanic.influxdb}}
-  # the webserver should only be enabled once
-  {% set webserver = "false" %}
     - require:
       - file: /srv/yanic/data/{{site}}
 
