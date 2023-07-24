@@ -70,10 +70,10 @@ rndc-reload:
       - cmd: rndc-reload
 
 
-# Copy generated zone files
-/etc/bind/zones/generated:
+# Install hybrid zone templates
+/etc/bind/zones/hybrid:
   file.recurse:
-    - source: salt://dns-server/zones/generated/
+    - source: salt://dns-server/zones/hybrid/
     - file_mode: 644
     - dir_mode: 755
     - user: root
@@ -83,3 +83,27 @@ rndc-reload:
       - file: /etc/bind/zones/
     - watch_in:
       - cmd: rndc-reload
+
+# Generate node/interface/PTR entries from NetBox
+{% set nodes_config = salt['pillar.get'] ('nodes', {}) %}
+{% set sites_config = salt['pillar.get'] ('sites', {}) %}
+{% set zones = salt['ffho_dns.generate_DNS_entries'] (nodes_config, sites_config) %}
+
+{% for zone, entries in zones.items () %}
+/etc/bind/zones/generated/gen{{ zone }}.zone:
+  file.managed:
+    - source: salt://dns-server/zone.gen.tmpl
+    - template: jinja
+    - context:
+      zone: {{ zone }}
+      entries: {{ entries }}
+    - require_in:
+      - file: Clean /etc/bind/zones/generated
+    - watch_in:
+      - cmd: rndc-reload
+{% endfor %}
+
+Clean /etc/bind/zones/generated:
+  file.directory:
+    - name: /etc/bind/zones/generated
+    - clean: True
