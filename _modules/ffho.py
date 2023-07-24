@@ -11,3 +11,14 @@ def is_bool (value):
 
 def any_item_in_list (items, list):
 	return len(set(items).intersection(set(list))) != 0
+
+def cmp (x, y):
+	"""
+	Most generic comparator
+	"""
+	if x < y:
+		return -1
+	elif x == y:
+		return 0
+	else:
+		return 1
