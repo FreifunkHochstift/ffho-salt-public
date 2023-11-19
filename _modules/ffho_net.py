@@ -105,6 +105,15 @@ MTU = {
 	# +    8	UDP Header
 	# +   20	IPv4 Header
 	'vxlan_underlay_iface'  : 1610,
+
+	# VXLAN underlay device, probably a VLAN within $POP or between two BBRs.
+	#
+	#   1560
+	# +   14	Inner Ethernet Frame
+	# +    8	VXLAN Header
+	# +    8	UDP Header
+	# +   40	IPv6 Header
+	'vxlan_underlay_iface_ipv6'  : 1630,
 }
 
 
@@ -712,7 +721,11 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 
 		# Set the MTU of this (probably) VLAN device to the MTU required for a VXLAN underlay
 		# device, where B.A.T.M.A.N. adv. is to be expected within the VXLAN overlay.
-		_set_mtu_to_iface_and_upper (ifaces, iface, MTU['vxlan_underlay_iface'])
+		underlay_mtu = MTU['vxlan_underlay_iface']
+		if iface.startswith('vlan14'):
+			underlay_mtu = MTU['vxlan_underlay_iface_ipv6']
+
+		_set_mtu_to_iface_and_upper (ifaces, iface, underlay_mtu)
 
 		# If the string 'all' is part of the list, blindly use all sites configured for this node
 		if 'all' in batman_connect_sites:
