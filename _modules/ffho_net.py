@@ -722,8 +722,10 @@ def _generate_vxlan_interface_config (node_config, ifaces, sites_config):
 
 		# Set the MTU of this (probably) VLAN device to the MTU required for a VXLAN underlay
 		# device, where B.A.T.M.A.N. adv. is to be expected within the VXLAN overlay.
+		# If there are NO IPs configured on this interface, it means we will be using IPv6 LLAs
+		# to set up VXLAN tunnel endpoints, so we need more headroom header-wise.
 		underlay_mtu = MTU['vxlan_underlay_iface']
-		if iface.startswith('vlan14'):
+		if not iface_has_prefixes:
 			underlay_mtu = MTU['vxlan_underlay_iface_ipv6']
 
 		_set_mtu_to_iface_and_upper (ifaces, iface, underlay_mtu)
