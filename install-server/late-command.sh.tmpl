@@ -7,7 +7,11 @@ export NACL_URL="{{ nacl_url }}"
 SCRIPT_DIR="/opt/ffho/sbin"
 export PATH="${PATH}:${SCRIPT_DIR}"
 
-apt install python3-netifaces
+apt install -y \
+	python3-netifaces \
+	salt-minion \
+	screen \
+	vim
 echo
 
 # Download scripts
