@@ -60,8 +60,9 @@ batman_role_evaluation_order = [ 'bbr', 'batman_gw', 'bras' ]
 # link plus a wifi backup link.
 default_batman_iface_penalty_by_role = {
 	'default'     :   0,
-	'WBBL'        :   5,
-	'WBBL_backup' :  10,
+	'DCI'         :   5,
+	'WBBL'        :  10,
+	'WBBL_backup' :  15,
 	'VPN_intergw' :  80,
 	'VPN_node'    : 100,
 }
@@ -1113,6 +1114,9 @@ def gen_bat_hosts (nodes_config, sites_config):
 def get_batman_iface_penalty (iface):
 	if iface.startswith ('vlan'):
 		vid = int (re.sub ('vlan', '', iface))
+		if 1400 <= vid < 1500:
+			return default_batman_iface_penalty_by_role.get ('DCI')
+
 		if 2000 <= vid < 2100:
 			return default_batman_iface_penalty_by_role.get ('WBBL')
 
