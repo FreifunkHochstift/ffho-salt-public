@@ -26,7 +26,7 @@ fi
 #
 # If there is no DHCP server running here, we should not be an
 # active gateway.
-if ! systemctl status isc-dhcp-server >/dev/null; then
+if ! systemctl status isc-dhcp-server >/dev/null 2>&1; then
 	force_offline="true"
 fi
 
