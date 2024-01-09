@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # Maximilian Wilhelm <max@rfc2324.org>
 #  --  Tue 20 Jun 2017 06:40:18 PM CEST
@@ -23,8 +23,8 @@ for file_path in args.files:
 	try:
 		with open (file_path, 'rb') as fh:
 			nodes = json.load (fh)
-	except IOError as (errno, strerror):
-		print "Error while reading file '%s': %s" % (file_path, strerror)
+	except IOError as e:
+		print (f"Error while reading file '{file_path}': {str(e)}")
 		sys.exit (1)
 
 	for node in nodes['nodes']:
@@ -50,7 +50,7 @@ for file_path in args.files:
 		if key != 'nodes':
 			uberdict[key] = nodes[key]
 
-uberdict['nodes'] = all_nodes.values ()
+uberdict['nodes'] = list(all_nodes.values ())
 
 # Print merged nodes.json's to stdout
 if args.pretty_print:
