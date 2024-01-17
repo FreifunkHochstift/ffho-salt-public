@@ -1,0 +1,2 @@
+deb	http://apt.ffho.net bookworm contrib non-free main
+deb-src	http://apt.ffho.net bookworm contrib non-free main
