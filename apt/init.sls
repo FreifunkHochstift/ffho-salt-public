@@ -24,10 +24,9 @@
 # Salt APT
 /usr/share/keyrings/salt-archive-keyring.gpg:
   file.managed:
-    - source: salt://apt/salt.gpg
-
-/etc/apt/trusted.gpg.d/salt.gpg:
-  file.absent
+    - source:
+      - salt://apt/salt.gpg.{{ grains.os }}.{{ grains.oscodename }}
+      - salt://apt/salt.gpg
 
 /etc/apt/sources.list.d/salt.list:
   file.managed:
