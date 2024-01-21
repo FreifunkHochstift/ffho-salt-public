@@ -31,14 +31,14 @@ scrape_configs:
   - job_name: node
     static_configs:
       - targets:
-{%- for node, node_config in nodes if node_config.get('platform') == 'linux' %}
+{%- for node, node_config in nodes if node_config.get('platform') == 'linux' and node_config.get('status') == 'active' %}
         - {{ node }}:9100
 {%- endfor %}
 
   - job_name: bind
     static_configs:
       - targets:
-{%- for node, node_config in nodes %}
+{%- for node, node_config in nodes if node_config.get('status') == 'active' %}
   {%- if salt['ffho.any_item_in_list'](['dns-auth', 'dns-recursor'], node_config.get('roles', [])) %}
         - {{ node }}:9119
   {%- endif %}
@@ -47,7 +47,7 @@ scrape_configs:
   - job_name: bird
     static_configs:
       - targets:
-{%- for node, node_config in nodes %}
+{%- for node, node_config in nodes if node_config.get('status') == 'active'%}
   {%- if 'router' in node_config.get('roles', []) %}
         - {{ node }}:9324
   {%- endif %}
