@@ -15,6 +15,7 @@
  * The constants.conf defines global constants.
  */
 include "constants.conf"
+include "secrets.conf"
 
 /**
  * The zones.conf defines zones for a cluster setup.

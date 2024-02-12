@@ -83,6 +83,15 @@ ffho-plugins:
     - watch_in:
       - service: icinga2
 
+/etc/icinga2/secrets.conf:
+  file.managed:
+    - source: salt://icinga2/secrets.conf.tmpl
+    - template: jinja
+    - mode: 600
+    - require:
+      - pkg: icinga2
+    - watch_in:
+      - service: icinga2
 
 # Connect "master" and client zones
 /etc/icinga2/zones.conf:
