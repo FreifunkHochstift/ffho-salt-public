@@ -83,6 +83,7 @@ ffho-plugins:
     - watch_in:
       - service: icinga2
 
+{% if grains['id'] in ["icinga2.in.ffho.net"] %}
 /etc/icinga2/secrets.conf:
   file.managed:
     - source: salt://icinga2/secrets.conf.tmpl
@@ -92,6 +93,7 @@ ffho-plugins:
       - pkg: icinga2
     - watch_in:
       - service: icinga2
+{% endif %}
 
 # Connect "master" and client zones
 /etc/icinga2/zones.conf:
