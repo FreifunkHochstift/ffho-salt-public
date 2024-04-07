@@ -11,14 +11,16 @@
     - require:
       - file: /srv/provision
 
-/srv/provision/preseed/apu-bullseye.txt:
+{% for osrelease in ['bullseye', 'bookworm'] %}
+/srv/provision/preseed/apu-{{ osrelease }}.txt:
   file.managed:
-    - source: salt://install-server/preseed/apu-bullseye.txt
+    - source: salt://install-server/preseed/apu-{{ osrelease }}.txt
     - template: jinja
     - context:
       provision_fqdn: {{ salt['pillar.get']('globals:provision:webserver_fqdn') }}
     - require:
       - file: /srv/provision/preseed
+{% endfor %}
 
 # Conveniece symlink for short http URL
 /srv/provision/apu.txt:
