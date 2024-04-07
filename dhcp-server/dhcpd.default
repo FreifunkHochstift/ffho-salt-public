@@ -1,4 +1,4 @@
-{%- set dhcp_interfaces = salt['pillar.get']("nodes:" ~ grains["id"] ~ ":dhcp:server:ifaces", []) %}
+{%- set dhcp_interfaces = salt['pillar.get']("nodes:" ~ grains["id"] ~ ":dhcp:server:ifaces", []) -%}
 # Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server) (Salt managed)
 
 # Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
