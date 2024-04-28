@@ -56,7 +56,6 @@ template Notification "telegram-service-notification" {
 	period = "24x7"
 	interval = 0
 }
-				  
 
 
 ################################################################################
@@ -69,7 +68,7 @@ apply Notification "notify_host_ffho_ops_by_telegram" to Host {
 	users = [ "ffho-ops" ]
 	period = "24x7"
 	
-	times.begin = 2m
+	times.begin = 3m
 
 	assign where host.address
 }
@@ -80,7 +79,7 @@ apply Notification "notify_service_ffho_ops_telegram" to Service {
 	users = [ "ffho-ops" ]
 	period = "24x7"
 
-	times.begin = 2m
+	times.begin = 3m
 
 	assign where host.address
 	ignore where service.name == "apt-Updates"
@@ -95,8 +94,8 @@ apply Notification "notify_host_ffho_dek_by_telegram" to Host {
 
 	users = [ "ffho-dek" ]
 	period = "24x7"
-	
-	times.begin = 2m
+
+	times.begin = 3m
 
 	assign where host.vars.location.region.code == "ffho_dek"
 }
@@ -107,7 +106,7 @@ apply Notification "notify_service_ffho_dek_telegram" to Service {
 	users = [ "ffho-dek" ]
 	period = "24x7"
 
-	times.begin = 2m
+	times.begin = 3m
 
 	assign where host.vars.location.region.code == "ffho_dek"
 	ignore where service.name == "apt-Updates"
