@@ -2,7 +2,7 @@
 # /etc/network/interfaces (Salt managed)
 #
 
-{%- set node_config = salt['pillar.get']('nodes:' ~ grains['id'], {}) %}
+{%- set node_config = salt['pillar.get']('node', {}) %}
 {%- set node_id = grains['id'] %}
 {%- set sites_config = salt['pillar.get']('sites', {}) %}
 {%- set ifaces = salt['ffho_net.get_interface_config'](node_config, sites_config) %}

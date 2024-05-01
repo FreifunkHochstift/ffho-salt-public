@@ -30,7 +30,7 @@ build:
 
 /home/build/.ssh/id_rsa:
   file.managed:
-    - contents_pillar: nodes:{{grains.id}}:ssh:build:privkey
+    - contents_pillar: node:ssh:build:privkey
     - mode: 600
     - user: build
     - makedirs: True
@@ -39,7 +39,7 @@ build:
 
 /home/build/.ssh/id_rsa.pub:
   file.managed:
-    - contents_pillar: nodes:{{grains.id}}:ssh:build:privkey
+    - contents_pillar: node:ssh:build:privkey
     - makedirs: True
     - require:
       - user: build

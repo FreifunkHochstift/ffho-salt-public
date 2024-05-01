@@ -1,7 +1,7 @@
 #
 # Icinga2
 #
-{% set roles = salt['pillar.get']('nodes:' ~ grains.id ~ ':roles', []) %}
+{% set roles = salt['pillar.get']('node:roles', []) %}
 
 include:
   - apt
@@ -125,7 +125,7 @@ ffho-plugins:
     - watch_in:
       - sevice: icinga2
 
-{% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ grains['id'] %}
+{% set pillar_name = 'node:certs:' ~ grains['id'] %}
 /var/lib/icinga2/certs/{{ grains['id'] }}.crt:
   file.managed:
     - contents_pillar: {{ pillar_name }}:cert

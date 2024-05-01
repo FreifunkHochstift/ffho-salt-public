@@ -8,7 +8,7 @@ server {
 	listen 80;
 	listen [::]:80;
 
-	root {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}};
+	root {{ salt['pillar.get']('node:path:firmware') }};
 
 	server_name ~^firmware\.((srv\.)?in|im)\.ffho\.net$;
 	fancyindex on;

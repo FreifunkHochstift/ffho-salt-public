@@ -41,13 +41,13 @@ generate-dhparam:
 {% set certs = {} %}
 
 # Are there any certificates defined or referenced in the node pillar?
-{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{% set node_config = salt['pillar.get']('node') %}
 {% for cn, cert_config in node_config.get ('certs', {}).items () %}
   {% set pillar_name = None %}
 
   {# "cert" and "privkey" provided in node config? #}
   {% if 'cert' in cert_config and 'privkey' in cert_config %}
-    {% set pillar_name = 'nodes:' ~ grains['id'] ~ ':certs:' ~ cn %}
+    {% set pillar_name = 'node:certs:' ~ cn %}
 
   {# <cn> only referenced in node config and cert/privkey stored in "cert" pillar? #}
   {% elif cert_config.get ('install', False) == True %}

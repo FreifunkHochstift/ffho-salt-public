@@ -22,7 +22,7 @@ prometheus-node-exporter:
 #
 # Role specific exporters
 #
-{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% set roles = salt['pillar.get']('node:roles', []) %}
 
 # DNS server
 {% if 'dns-recursor' in roles or 'dns-auth' in roles %}

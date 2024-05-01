@@ -2,7 +2,7 @@
 # FFHO DNS Server configuration (authoritive / recursive)
 #
 
-{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% set roles = salt['pillar.get']('node:roles', []) %}
 
 bind9:
   pkg.installed:

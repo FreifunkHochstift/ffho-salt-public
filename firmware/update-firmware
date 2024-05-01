@@ -2,7 +2,7 @@
 # (c) 2016 Freifunk Hochstift <kontakt@hochstift.freifunk.net>
 #
 
-DEFAULT_DIR="{{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}"
+DEFAULT_DIR="{{ salt['pillar.get']('node:path:firmware') }}"
 DEFAULT_BRANCHES="stable testing experimental"
 
 getCurrentVersion() {

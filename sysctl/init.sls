@@ -1,7 +1,7 @@
 #
 # sysctl
 #
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{%- set roles = salt['pillar.get']('node:roles', []) %}
 
 # Define command to reload sysctl settings here without dependencies
 # and define inverse dependencies where useful (see sysctl.conf)

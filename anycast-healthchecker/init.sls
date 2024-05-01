@@ -2,7 +2,7 @@
 # Anycast Healthchecker
 #
 
-{% set node_roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% set node_roles = salt['pillar.get']('node:roles', []) %}
 {% set config = salt['pillar.get']('anycast-healtchecker', {}) %}
 
 include:

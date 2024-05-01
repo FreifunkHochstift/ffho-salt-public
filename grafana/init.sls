@@ -4,7 +4,7 @@
 
 {% set grafana_cfg = salt['pillar.get']('grafana') %}
 
-{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{% set node_config = salt['pillar.get']('node') %}
 {% if node_config.get('role') == "prometheus-server" %}
 include:
   - .prometheus

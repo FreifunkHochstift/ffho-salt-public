@@ -2,7 +2,7 @@
 # gogs
 #
 
-{% set config = salt['pillar.get']('nodes:' ~ grains.id ~ ':gogs', {}) %}
+{% set config = salt['pillar.get']('node:gogs', {}) %}
 
 gogs-repo:
   pkgrepo.managed:

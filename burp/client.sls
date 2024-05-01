@@ -18,4 +18,4 @@ burp-client:
     - source: salt://burp/client/burp.conf.tmpl
     - template: jinja
       burp_server_name: {{ salt['pillar.get']('burp:server:fqdn') }}
-      burp_password: {{ salt['pillar.get']('nodes:' ~ grains.id ~ ':burp:password') }}
+      burp_password: {{ salt['pillar.get']('node:burp:password') }}

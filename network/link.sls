@@ -3,7 +3,7 @@
 #
 
 # Write an systemd link file for every interface with a MAC
-  {% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items ()|sort %}
+  {% for iface, iface_config in salt['pillar.get']('node:ifaces', {}).items ()|sort %}
     {% if 'mac' in iface_config %}
 /etc/systemd/network/42-{{ iface }}.link:
   file.managed:

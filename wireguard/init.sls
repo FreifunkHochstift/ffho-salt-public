@@ -1,7 +1,7 @@
 #
 # Wireguard VPNs
 #
-{% set wg_cfg = salt['pillar.get']('nodes:' ~ grains.id ~ ':wireguard', {}) %}
+{% set wg_cfg = salt['pillar.get']('node:wireguard', {}) %}
 
 
 include:

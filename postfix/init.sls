@@ -57,7 +57,7 @@ newaliases:
 
 
 # Set mailname to node_id if not specified otherwise in node pillar.
-{% set mailname = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':mailname', grains['id']) %}
+{% set mailname = salt['pillar.get']('node:mailname', grains['id']) %}
 /etc/mailname:
   file.managed:
     - contents: "{{ mailname }}"
@@ -66,7 +66,7 @@ newaliases:
 #
 # Manage virtual domains and aliases on MX nodes
 #
-{% if 'mx' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{% if 'mx' in salt['pillar.get']('node:roles', []) %}
 /etc/postfix/virtual-domains:
   file.managed:
     - source: salt://postfix/virtual-domains

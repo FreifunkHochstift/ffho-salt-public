@@ -1,7 +1,7 @@
 #
 # Interfaces which are OK to be down in OSPF (Salt managed)
 #
-{%- set interfaces = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':routing:ospf:ifaces_down_ok', []) %}
+{%- set interfaces = salt['pillar.get']('node:routing:ospf:ifaces_down_ok', []) %}
 {%- for iface in interfaces %}
 {{ iface }}
 {%- endfor %}

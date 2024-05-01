@@ -25,11 +25,11 @@ yanic:
       - file: yanic
 
 # get loopback IPv6 for binding the webserver to it
-{% set node_config = salt['pillar.get']('nodes:' ~ grains['id']) %}
+{% set node_config = salt['pillar.get']('node') %}
 {% set bind_ip = salt['ffho_net.get_primary_ip'](node_config, 'v6').ip %}
 
 # for each site
-{% for site in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':sites', []) %}
+{% for site in node_config.get('sites', []) %}
 # add webserver directory
 /srv/yanic/data/{{site}}:
   file.directory:

@@ -2,7 +2,7 @@
 # BGP sessions which are OK to be down (Salt managed)
 #
 {#- Gather information for iBGP sessions #}
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
+{%- set roles = salt['pillar.get']('node:roles', []) %}
 {%- set inactive_peers = [] %}
 {%- for node in salt['pillar.get']('nodes', [])|sort if node != grains['id'] %}
   {%- set peer_node_config = salt['pillar.get']('nodes:' ~ node) %}

@@ -11,7 +11,7 @@
 # MUST CHANGE: Uncomment the following line, replacing the user@provider.net
 # by the DSL user name given to your by your DSL provider.
 # (There should be a matching entry in /etc/ppp/pap-secrets with the password.)
-{%- set user = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':pppoe:user', 'WRONG USER') %}
+{%- set user = salt['pillar.get']('node:pppoe:user', 'WRONG USER') %}
 user "{{ user }}"
 
 # Use the pppoe program to send the ppp packets over the Ethernet link
@@ -19,7 +19,7 @@ user "{{ user }}"
 # the Internet through this DSL connection. This is the right line to use
 # for most people.
 {%- set default_iface = 'eth2' %}
-{%- set iface = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':pppoe:iface', default_iface) %}
+{%- set iface = salt['pillar.get']('node:pppoe:iface', default_iface) %}
 pty "/usr/sbin/pppoe -I {{ iface }} -T 80 -m 1452"
 
 # An even more conservative version of the previous line, if things

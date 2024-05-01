@@ -2,7 +2,7 @@
 # SSH configuration
 #
 
-{% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
+{% set node_config = salt['pillar.get']('node') %}
 
 # Install ssh server
 ssh:
@@ -72,7 +72,7 @@ ssh-{{ user }}:
 {# Add SSH-Keys for user #}
 {{ path }}/.ssh/id_rsa:
   file.managed:
-    - contents_pillar: nodes:{{ grains.id }}:ssh:{{ user }}:privkey
+    - contents_pillar: node:ssh:{{ user }}:privkey
     - user: {{ user }}
     - group: {{ user }}
     - mode: 600
@@ -81,7 +81,7 @@ ssh-{{ user }}:
 
 {{ path }}/.ssh/id_rsa.pub:
   file.managed:
-    - contents_pillar: nodes:{{ grains.id }}:ssh:{{ user }}:pubkey
+    - contents_pillar: node:ssh:{{ user }}:pubkey
     - user: {{ user }}
     - group: {{ user }}
     - mode: 644
@@ -94,14 +94,14 @@ ssh-{{ user }}:
 {% for key in node_config.get('ssh', {}).get('host', {}) if key in ['dsa', 'ecdsa', 'ed25519', 'rsa'] %}
 /etc/ssh/ssh_host_{{ key }}_key:
   file.managed:
-    - contents_pillar: nodes:{{ grains.id }}:ssh:host:{{ key }}:privkey
+    - contents_pillar: node:ssh:host:{{ key }}:privkey
     - mode: 600
     - watch_in:
       - service: ssh
 
 /etc/ssh/ssh_host_{{ key }}_key.pub:
   file.managed:
-    - contents_pillar: nodes:{{ grains.id }}:ssh:host:{{ key }}:pubkey
+    - contents_pillar: node:ssh:host:{{ key }}:pubkey
     - mode: 644
     - watch_in:
       - service: ssh

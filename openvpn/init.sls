@@ -147,7 +147,7 @@ Cleanup /etc/openvpn/{{ netname }}:
 #
 # OPS VPN?
 #
-{% if 'ops-vpn' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', [])  %}
+{% if 'ops-vpn' in salt['pillar.get']('node:roles', [])  %}
 libpam-ldap:
   pkg.installed
 

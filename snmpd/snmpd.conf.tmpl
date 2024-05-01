@@ -1,7 +1,7 @@
-{%- set node_config = salt['pillar.get'] ('nodes:' ~ grains['id']) %}
+{%- set node_config = salt['pillar.get'] ('node') %}
 {%- set ro_community = salt['pillar.get'] ('globals:snmp:ro_community', "Configure globals:snmp:ro_community in pillar...") %}
 {%- set sys_contact = salt['pillar.get'] ('globals:ops_mail', "Configure globals:ops_mail in pillar...") %}
-{%- set sys_location = salt['pillar.get'] ('nodes:' ~ grains['id'] ~ 'location:site:code', node_config.get ('sysLocation', "Please fix sysLocation...")) %}
+{%- set sys_location = salt['pillar.get'] ('node:location:site:code', node_config.get ('sysLocation', "Please fix sysLocation...")) %}
 {%- set nms_list = salt['pillar.get'] ('globals:snmp:nms_list', []) %}
 {%- set sites_config = salt['pillar.get'] ('sites', {}) %}
 {%- set ifaces = salt['ffho_net.get_interface_config'] (node_config, sites_config) %}

@@ -2,7 +2,7 @@
 # Rsyslog configuration
 #
 
-{% set roles = salt['pillar.get'] ('nodes:' ~ grains['id'] ~ ':roles') %}
+{% set roles = salt['pillar.get'] ('node:roles') %}
 {% set logserver = salt['pillar.get'] ('logging:syslog:logserver') %}
 {% set graylog_uri = salt['pillar.get'] ('logging:graylog:syslog_uri') %}
 

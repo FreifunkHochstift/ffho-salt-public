@@ -5,7 +5,7 @@
 include:
  - systemd
 
-{% set node_config = salt['pillar.get']('nodes:' ~ grains.id) %}
+{% set node_config = salt['pillar.get']('node') %}
 {% set nginx_pkg = node_config.get('nginx:pkg', 'nginx') %}
 {% set acme_thumbprint = salt['pillar.get']('acme:thumbprint') %}
 

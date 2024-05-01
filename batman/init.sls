@@ -6,7 +6,7 @@
 # Only set up batman and load batman_adv kernel module if the role »batman«
 # has been configured for this node.
 #
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id']  ~ ':roles', []) %}
+{%- set roles = salt['pillar.get']('node:roles', []) %}
 
 {%- if 'batman' in roles %}
 batctl:

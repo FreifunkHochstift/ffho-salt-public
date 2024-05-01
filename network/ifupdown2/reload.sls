@@ -16,7 +16,7 @@ ifreload:
 # The fix script will be called every minute by cron and after ifreload
 # was called to try to minimize any downtime.
 {% set vrf = [False] %}
-{% for iface, iface_config in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':ifaces', {}).items() %}
+{% for iface, iface_config in salt['pillar.get']('node:ifaces', {}).items() %}
   {% if iface_config.get ('vrf', '') == 'vrf_external' %}
     {% do vrf.append (True) %}
     {% break %}

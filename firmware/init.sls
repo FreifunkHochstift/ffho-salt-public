@@ -1,6 +1,7 @@
 #
 # firmware
 #
+{% set firmware_path = salt['pillar.get']('node:path:firmware')
 
 firmware-pkgs:
   pkg.installed:
@@ -16,7 +17,7 @@ firmware-pkgs:
 
 firmware-git:
   file.directory:
-    - name: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}
+    - name: {{ firmware_path }}
     - user: firmware
     - group: firmware
     - mode: 755
@@ -24,7 +25,7 @@ firmware-git:
       - user: firmware
   git.latest:
     - name: gogs@git.srv.in.ffho.net:FreifunkHochstift/ffho-firmware-website.git
-    - target: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}
+    - target: {{ firmware_path }}
     - user: firmware
     - update_head: False
     - require:
@@ -35,7 +36,7 @@ firmware-git:
 firmware-changelog:
   cmd.run:
     - name: FORCE=1 /usr/local/sbin/update-firmware
-    - creates: {{salt['pillar.get']('nodes:' ~ grains['id'] ~ ':path:firmware', [])}}/stable/Changelog.html
+    - creates: {{ firmware_path }}/stable/Changelog.html
     - user: firmware
     - group: firmware
     - watch:

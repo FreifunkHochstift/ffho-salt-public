@@ -2,7 +2,7 @@
 # nftables state
 #
 
-{% if not 'no-nftables' in salt['pillar.get']('nodes:' ~ grains['id'] ~ ':tags', []) %}
+{% if not 'no-nftables' in salt['pillar.get']('node:tags', []) %}
 
 nftables:
   pkg.installed:
@@ -24,7 +24,7 @@ nftables:
 
 
 {% set no_purge_roles = ['docker', 'kvm'] %}
-{% set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', [])%}
+{% set roles = salt['pillar.get']('node:roles', [])%}
 {% set not_purge_iptables = salt['ffho.any_item_in_list'](no_purge_roles, roles) %}
 
 purge-iptables:

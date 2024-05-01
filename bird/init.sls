@@ -2,8 +2,8 @@
 # Bird routing daemon
 #
 
-{%- set roles = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':roles', []) %}
-{%- set status = salt['pillar.get']('nodes:' ~ grains['id'] ~ ':status', 'active') %}
+{%- set roles = salt['pillar.get']('node:roles', []) %}
+{%- set status = salt['pillar.get']('node:status', 'active') %}
 
 include:
   - network.interfaces

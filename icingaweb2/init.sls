@@ -1,7 +1,7 @@
 #
 # Icingaweb2
 #
-{% set roles = salt['pillar.get']('nodes:' ~ grains.id ~ ':roles', []) %}
+{% set roles = salt['pillar.get']('node:roles', []) %}
 {% set icingaweb2_config = salt['pillar.get']('monitoring:icingaweb2') %}
 
 include:
