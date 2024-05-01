@@ -1,29 +1,8 @@
 #
 # BGP sessions which are OK to be down (Salt managed)
 #
-{#- Gather information for iBGP sessions #}
-{%- set roles = salt['pillar.get']('node:roles', []) %}
-{%- set inactive_peers = [] %}
-{%- for node in salt['pillar.get']('nodes', [])|sort if node != grains['id'] %}
-  {%- set peer_node_config = salt['pillar.get']('nodes:' ~ node) %}
-  {%- set peer_roles = peer_node_config.get ('roles', []) %}
-
-  {#- Skip peer if it ain't no router #}
-  {%- if 'router' not in peer_roles %}
-    {%- continue %}
-  {%- endif %}
-
-  {#- Skip peer if neither we nor him are a RR #}
-  {%- if 'routereflector' not in roles and 'routereflector' not in peer_roles %}
-    {%- continue %}
-  {%- endif %}
-
-  {%- if peer_node_config.get ('status', '') not in [ '', 'active' ] %}
-    {#- save peers node name, mangle . and - to _ to make bird happy #}
-    {%- set peer_name = salt['ffho.re_replace']('[.-]', '_', node) %}
-    {%- do inactive_peers.append (peer_name) %}
-  {%- endif %}
-{%- endfor %}
-{% for peer in inactive_peers %}
-{{ peer }}
+{%- for peer in salt['pillar.get']('node:routing:bgp:internal:peers:down_OK') %}
+{#-   save peers node name, mangle . and - to _ to make bird happy #}
+{%-   set peer_name = salt['ffho.re_replace']('[.-]', '_', peer) %}
+{{ peer_name }}
 {%- endfor %}
