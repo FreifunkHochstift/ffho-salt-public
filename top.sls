@@ -34,119 +34,119 @@ base:
 #
 
   # Router
-  nodes:{{ grains['id'] }}:roles:router:
+  node:roles:router:
     - match: pillar
     - bird
 
   # acme
-  nodes:{{ grains['id'] }}:roles:acme:
+  node:roles:acme:
     - match: pillar
     - acme
 
   # Batman node
-  nodes:{{ grains['id'] }}:roles:batman:
+  node:roles:batman:
     - match: pillar
     - batman
     - respondd
 
 #  # Batman gateway
-#  nodes:{{ grains['id'] }}:roles:batman_gw:
+#  node:roles:batman_gw:
 #    - match: pillar
 #    - dhcp-server
 
   # Build-Server
-  nodes:{{ grains['id'] }}:roles:build:
+  node:roles:build:
     - match: pillar
     - build
 
   # burp client/server
-  nodes:{{ grains['id'] }}:tags:backup:
+  node:tags:backup:
     - match: pillar
     - burp.client
 
-  nodes:{{ grains['id'] }}:roles:burp.server:
+  node:roles:burp.server:
     - match: pillar
     - burp.server
 
   # Fastd
-  nodes:{{ grains['id'] }}:roles:fastd:
+  node:roles:fastd:
     - match: pillar
     - fastd
 
   # Grafana
-  nodes:{{ grains['id'] }}:roles:grafana:
+  node:roles:grafana:
     - match: pillar
     - grafana
 
   # gogs
-  nodes:{{ grains['id'] }}:roles:gogs:
+  node:roles:gogs:
     - match: pillar
     - gogs
 
   # graylog
-  nodes:{{ grains['id'] }}:roles:graylog:
+  node:roles:graylog:
     - match: pillar
     - graylog
 
   # icingaweb2
-  nodes:{{ grains['id'] }}:roles:icinga2server:
+  node:roles:icinga2server:
     - match: pillar
     - icingaweb2
 
   # KVM hosts
-  nodes:{{ grains['id'] }}:roles:kvm:
+  node:roles:kvm:
     - match: pillar
     - kvm
 
   # (Authoritive?) DNS server
-  nodes:{{ grains['id'] }}:roles:dns-server:
+  node:roles:dns-server:
     - match: pillar
     - dns-server
 
   # Webfrontend
-  nodes:{{ grains['id'] }}:roles:frontend:
+  node:roles:frontend:
     - match: pillar
     - nginx
 
   # DSL / PPPoE
-  nodes:{{ grains['id'] }}:roles:pppoe:
+  node:roles:pppoe:
     - match: pillar
     - pppoe
 
   # InfluxDB
-  nodes:{{ grains['id'] }}:roles:influxdb:
+  node:roles:influxdb:
     - match: pillar
     - influxdb
 
   # webserver
-  nodes:{{ grains['id'] }}:roles:webserver:
+  node:roles:webserver:
     - match: pillar
     - nginx
 
   # yanic
-  nodes:{{ grains['id'] }}:roles:yanic:
+  node:roles:yanic:
     - match: pillar
     - yanic
 
   # Docker
-  nodes:{{ grains['id'] }}:roles:docker:
+  node:roles:docker:
     - match: pillar
     - docker
 
   # LibreNMS
-  nodes:{{ grains['id'] }}:roles:librenms:
+  node:roles:librenms:
     - match: pillar
     - librenms
 
   # Promtheus
-  nodes:{{ grains['id'] }}:role:prometheus-server:
+  node:role:prometheus-server:
     - match: pillar
     - grafana
     - prometheus-server
     - nginx
 
   # Anycasted infrastructure services
-  nodes:{{ grains['id'] }}:role:infra-services:
+  node:role:infra-services:
     - match: pillar
     - anycast-healthchecker
     - dns-server
