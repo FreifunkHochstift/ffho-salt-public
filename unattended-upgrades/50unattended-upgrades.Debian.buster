@@ -46,12 +46,7 @@ Unattended-Upgrade::Origins-Pattern {
 
 // List of packages to not update
 Unattended-Upgrade::Package-Blacklist {
-	"libc6";
-	"libc6-dev";
-	"libc6-i686";
 	"bird";
-	"fastd";
-	"batman-adv-dkms";
 	"ifupdown2";
 };
 
