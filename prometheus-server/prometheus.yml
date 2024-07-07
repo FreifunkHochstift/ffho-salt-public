@@ -47,8 +47,26 @@ scrape_configs:
   - job_name: bird
     static_configs:
       - targets:
-{%- for node, node_config in nodes if node_config.get('status') == 'active'%}
+{%- for node, node_config in nodes if node_config.get('status') == 'active' %}
   {%- if 'router' in node_config.get('roles', []) %}
         - {{ node }}:9324
+  {%- endif %}
+{%- endfor %}
+
+  - job_name: postgres
+    static_configs:
+      - targets:
+{%- for node, node_config in nodes if node_config.get('status') == 'active' %}
+  {%- if 'postgres' in node_config.get('roles', []) %}
+        - {{ node }}:9187
+  {%- endif %}
+{%- endfor %}
+
+  - job_name: mariadb
+    static_configs:
+      - targets:
+{%- for node, node_config in nodes if node_config.get('status') == 'active' %}
+  {%- if 'mariadb' in node_config.get('roles', []) %}
+        - {{ node }}:9104
   {%- endif %}
 {%- endfor %}
