@@ -4,6 +4,7 @@
 
 import ipaddress
 import re
+from typing import Optional
 
 import ffho
 import ffho_net
@@ -16,17 +17,19 @@ vlan_re = re.compile (r'^(vlan|br0\.)(\d+)$')
 #                          Internal helper functions                           #
 ################################################################################
 
-def get_nodeconfig_section (section: str) -> {}:
+def get_nodeconfig_section (section: str) -> Optional[dict]:
 	fqdn = __grains__["id"]
-	node_config = __pillar__.get("nodes", {}).get(fqdn)
+	node_config = __pillar__.get("node")
 
 	if node_config is None:
-		return {}
+		return None
 
 	ret = node_config
 
 	for entry in section.split(":"):
-		ret = ret.get(entry, {})
+		ret = ret.get(entry)
+		if ret is None:
+			return None
 
 	return ret
 
@@ -409,7 +412,7 @@ def get_ospf_active_interface (node_config):
 	return ifaces
 
 #
-# Get a dict of all configured BGP peers per AF
+# Get a dict of all configured BGP peers per AF, if any
 def get_bgp_peers ():
 	peers = {
 		4: {
