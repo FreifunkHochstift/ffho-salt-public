@@ -833,29 +833,31 @@ def _generate_vrfs (ifaces):
 	for iface in list (ifaces.keys ()):
 		iface_config = ifaces.get (iface)
 		vrf = iface_config.get ('vrf', None)
-		if vrf and vrf not in ifaces:
-			conf = vrf_info.get (vrf, {})
-			table = conf.get ('table', 1234)
-			fwmark = conf.get ('fwmark', None)
+		if vrf is None or vrf in ifaces:
+			continue
 
-			ifaces[vrf] = {
-				'vrf-table' : table,
-			}
+		conf = vrf_info.get (vrf, {})
+		table = conf.get ('table', 1234)
+		fwmark = conf.get ('fwmark', None)
 
-			# Create ip rule's for any fwmarks defined
-			if fwmark:
-				up = []
+		ifaces[vrf] = {
+			'vrf-table' : table,
+		}
 
-				# Make sure we are dealing with a list even if there is only one mark to be set up
-				if type (fwmark) in (str, int):
-					fwmark = [ fwmark ]
+		# Create ip rule's for any fwmarks defined
+		if fwmark:
+			up = []
 
-				# Create ip rule entries for IPv4 and IPv6 for every fwmark
-				for mark in fwmark:
-					up.append ("ip    rule add fwmark %s table %s" % (mark, table))
-					up.append ("ip -6 rule add fwmark %s table %s" % (mark, table))
+			# Make sure we are dealing with a list even if there is only one mark to be set up
+			if type (fwmark) in (str, int):
+				fwmark = [ fwmark ]
 
-				ifaces[vrf]['up'] = up
+			# Create ip rule entries for IPv4 and IPv6 for every fwmark
+			for mark in fwmark:
+				up.append ("ip    rule add fwmark %s table %s" % (mark, table))
+				up.append ("ip -6 rule add fwmark %s table %s" % (mark, table))
+
+			ifaces[vrf]['up'] = up
 
 
 def _generate_ffrl_gre_tunnels (ifaces):
