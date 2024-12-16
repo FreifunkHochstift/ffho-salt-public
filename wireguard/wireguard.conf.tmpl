@@ -6,7 +6,7 @@ PrivateKey = {{ privkey }}
 {%- if config['mode'] == 'server' %}
 ListenPort = {{ config['port'] }}
 {%- endif %}
-FwMark = 0x1023
+FwMark = {{ config['fwmark'] }}
 
 [Peer]
 {%- if config['mode'] == 'client' %}

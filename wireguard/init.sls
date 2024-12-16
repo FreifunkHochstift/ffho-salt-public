@@ -5,7 +5,7 @@
 
 
 include:
- - sysctl	# Make sure udp_l3mdev_accept is set
+  - sysctl # Make sure udp_l3mdev_accept is set
 
 # Install wireguard-tools (from backports currently)
 wireguard-tools:
