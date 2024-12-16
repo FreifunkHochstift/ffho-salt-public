@@ -1386,6 +1386,16 @@ def get_ospf_config (node_config, grains_id):
 			if iface.startswith ('wg-cr') and grains_id.startswith ('cr'):
 				ospf_iface_cfg['cost'] = 5000
 
+		# Passive OSPF on OOBM Wireguard tunnels on server side, cost 10
+		elif iface.startswith ('oob-'):
+			# Only activate OSPF on core router side
+			if not grains_id.startswith ('cr'):
+				continue
+
+			ospf_on = True
+			ospf_iface_cfg['stub'] = True
+			ospf_iface_cfg['cost'] = 10
+
 		# OSPF explicitly enabled for interface
 		elif 'ospf' in iface_config:
 			ospf_on = True
