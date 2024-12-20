@@ -27,7 +27,7 @@ vrf_info = {
 	# Out of band mangement - external uplink
 	'vrf_oobm_ext' : {
 		'table' : 1101,
-		'fwmark' : [ '0x1011' ],
+		'fwmark' : [ '0x1101' ],
 	},
 }
 
