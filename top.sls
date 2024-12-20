@@ -11,8 +11,8 @@ base:
     - mosh
     - motd
     - needrestart
-    - nftables
     - network
+    - nftables
     - ntp
     - postfix
     - prometheus-exporters
