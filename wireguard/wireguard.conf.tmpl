@@ -14,3 +14,6 @@ Endpoint = {{ config['peer_ip'] }}:{{ config['port'] }}
 {%- endif %}
 PublicKey = {{ config['peer_pubkey'] }}
 AllowedIPs = 0.0.0.0/0, ::/0
+{%- if config['mode'] == 'client' %}
+PersistentKeepalive = 25
+{%- endif %}
