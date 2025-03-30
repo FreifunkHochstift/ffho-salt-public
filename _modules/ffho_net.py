@@ -1456,3 +1456,12 @@ def get_network_address (prefix, with_prefixlen = False):
 		network += "/%s" % net_h.prefixlen
 
 	return network
+
+# Return a dict of all VRF names by their table ID
+def get_vrfs_by_id():
+	vrfs = {}
+
+	for vrf_name, cfg in vrf_info.items():
+		vrfs[cfg['table']] = vrf_name
+
+	return vrfs

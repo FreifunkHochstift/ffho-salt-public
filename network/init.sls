@@ -39,3 +39,11 @@ vnstat:
       - salt://network/resolv.conf.H_{{ grains.id }}
       - salt://network/resolv.conf
     - template: jinja
+
+
+/etc/iproute2/rt_tables.d/ffho.conf:
+  file.managed:
+    - source: salt://network/rt_tables.conf.tmpl
+    - template: jinja
+    - require:
+      - pkg: network-pkg
