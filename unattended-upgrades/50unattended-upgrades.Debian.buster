@@ -39,9 +39,6 @@ Unattended-Upgrade::Origins-Pattern {
 
 	// Icigna2
 	"o=debian icinga-buster,a=icinga-buster";
-
-	// SaltStack
-	"o=SaltStack,a=stable,n=buster,l=salt_debian10";
 };
 
 // List of packages to not update

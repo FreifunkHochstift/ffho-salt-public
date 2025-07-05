@@ -38,9 +38,6 @@ Unattended-Upgrade::Origins-Pattern {
 
 	// Icigna2
 	"o=debian icinga-${distro_codename},a=icinga-${distro_codename}";
-
-	// SaltStack
-	"o=SaltStack,a=stable,n=${distro_codename}";
 };
 
 // List of packages to not update
