@@ -1,4 +1,4 @@
-{%- set vrfs_by_id = salt['ffho_net.get_vrfs_by_id']() %}
+{%- set vrfs_by_id = salt['ffho_net.get_vrfs_by_id']() -%}
 # FFHO routing tables (Salt managed)
 {%- for tid, name in vrfs_by_id.items()|sort %}
 {{ tid }} {{ name }}
