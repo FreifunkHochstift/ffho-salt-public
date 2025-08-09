@@ -59,7 +59,8 @@ Cleanup /etc/anycast-healthchecker/check.d:
 /var/lib/anycast-healthchecker/anycast-prefixes-v4.conf:
   file.managed:
     - user: bird
-    - replace: False	# Don't touch file contents when file already is present!
+    # Don't touch file contents when file already is present!
+    - replace: False
     - contents: 'define ANYCAST_ADVERTISE = [{{ config['dummy_ip_prefixes'][4] }}];'
     - require:
       - pkg: anycast-healthchecker
@@ -67,7 +68,8 @@ Cleanup /etc/anycast-healthchecker/check.d:
 /var/lib/anycast-healthchecker/anycast-prefixes-v6.conf:
   file.managed:
     - user: bird
-    - replace: False	# Don't touch file contents when file already is present!
+    # Don't touch file contents when file already is present!
+    - replace: False
     - contents: 'define ANYCAST_ADVERTISE = [{{ config['dummy_ip_prefixes'][6] }}];'
     - require:
       - pkg: anycast-healthchecker
