@@ -281,6 +281,7 @@ def generate_forward_policy (fw_config, node_config):
 		fp['policy'] = 'accept'
 		fp['policy_reason'] = "roles: " + ",".join (accept_roles)
 
+	# If there any per-node rules in its config context, apply them first.
 	try:
 		cust_rules = nf_cc['filter']['forward']
 		for af in [ 4, 6 ]:
@@ -293,6 +294,25 @@ def generate_forward_policy (fw_config, node_config):
 				fp['rules'][af] = cust_rules[af]
 	except KeyError:
 		pass
+
+	# If there are per-roles rules, apply those too, after pre-node rules,
+	# so the latter can overwrite the former.
+	nf_cfg = __pillar__.get("netfilter", {})
+	if "roles" in nf_cfg:
+		for role in [role for role in nf_cfg["roles"] if role in roles]:
+			filter_cfg = nf_cfg['roles'][role].get("filter")
+			if filter_cfg is None:
+				continue
+
+			forward_cfg = filter_cfg.get("forward")
+			if forward_cfg is None:
+				continue
+
+			for af in [ 4, 6 ]:
+				if af not in forward_cfg:
+					continue
+
+				fp['rules'][af].extend(forward_cfg[af])
 
 	return fp
 
@@ -334,6 +354,36 @@ def generate_mgmt_config (fw_config, node_config):
 	return config
 
 
+def generate_nat_policy_ffrl_exit (node_config):
+	# Get NAT IP
+	try:
+		ffrl_ip = node_config['ifaces']['nat']['prefixes'][0].split('/')[0]
+	except Exception:
+		raise Exception("Not IPv4 address defined on 'nat' interface?")
+
+	# Get NAT rules (rules may contain VARIABLEs to be templated)
+	try:
+		pillar_network = __pillar__.get('netfilter')
+		nat_cfg = pillar_network['roles']['ffrl-exit']['nat']
+	except KeyError:
+		raise Exception("netfilter:roles:ffrl-exit:nat pillar not defined?")
+
+	np = {
+		4 : {},
+		6 : {},
+	}
+
+	for chain, afs in nat_cfg.items():
+		for af in [ 4, 6 ]:
+			if af not in afs:
+				continue
+
+			np[af][chain] = []
+			for rule in afs[af]:
+				np[af][chain].append(rule.replace("FFRL_IP", ffrl_ip))
+
+	return np
+
 def generate_nat_policy (node_config):
 	roles = node_config.get ('roles', [])
 	nf_cc = node_config.get ('nftables', {})
@@ -342,6 +392,9 @@ def generate_nat_policy (node_config):
 		4 : {},
 		6 : {},
 	}
+
+	if "ffrl-exit" in roles:
+		return generate_nat_policy_ffrl_exit (node_config)
 
 	# Any custom rules?
 	cc_nat = nf_cc.get ('nat')
