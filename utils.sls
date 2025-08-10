@@ -2,8 +2,10 @@ utils:
   pkg.installed:
     - pkgs:
       # System
-      - sysstat
+      - bc
       - htop
+      - sysstat
+      - zstd
       # dig
       - dnsutils
       # networking
