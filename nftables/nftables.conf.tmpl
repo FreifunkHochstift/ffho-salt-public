@@ -73,7 +73,7 @@ table ip filter {
 {%- if mgmt_config and mgmt_config['prefixes'][4] %}
 		ip daddr { {{ mgmt_config['prefixes'][4]|join(', ') }} } oifname { {{ mgmt_config['ifaces']|join(', ') }} } jump mgmt
 {%- endif %}
-{%- for rule in forward['rules'].get ('4', []) %}
+{%- for rule in forward['rules'].get (4, []) %}
 		{{ rule }}
 {%- endfor %}
 
@@ -208,7 +208,7 @@ table ip6 filter {
 {%- if urpf %}
 		jump urpf
 {%- endif %}
-{%- for rule in forward['rules'].get ('6', []) %}
+{%- for rule in forward['rules'].get (6, []) %}
 		{{ rule }}
 {%- endfor %}
 
@@ -296,6 +296,7 @@ table ip6 filter {
 {%- for af in [ 4, 6 ] %}
   {%- if nat_policy[af] %}
     {%- set af_name = "ip" if af == 4 else "ip6" %}
+
 table {{ af_name }} nat {
     {%- for chain in ['output', 'prerouting', 'postrouting'] if chain in nat_policy[af] %}
 	chain {{ chain }} {
