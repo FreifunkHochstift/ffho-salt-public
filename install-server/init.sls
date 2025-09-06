@@ -11,7 +11,7 @@
     - require:
       - file: /srv/provision
 
-{% for osrelease in ['bullseye', 'bookworm'] %}
+{% for osrelease in ['bookworm'] %}
 /srv/provision/preseed/apu-{{ osrelease }}.txt:
   file.managed:
     - source: salt://install-server/preseed/apu-{{ osrelease }}.txt
@@ -25,9 +25,9 @@
 # Conveniece symlink for short http URL
 /srv/provision/apu.txt:
   file.symlink:
-    - target: /srv/provision/preseed/apu-bullseye.txt
+    - target: /srv/provision/preseed/apu-bookworm.txt
     - require:
-      - file: /srv/provision/preseed/apu-bullseye.txt
+      - file: /srv/provision/preseed/apu-bookworm.txt
 
 
 # Late command downloaded into and run from preseed

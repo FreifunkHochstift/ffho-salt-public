@@ -376,7 +376,7 @@ tasksel tasksel/first multiselect standard
 #d-i pkgsel/run_tasksel boolean false
 
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server vim wget python3-requests salt-minion screen
+d-i pkgsel/include string openssh-server vim wget python3-requests screen
 # Whether to upgrade packages after debootstrap.
 # Allowed values: none, safe-upgrade, full-upgrade
 #d-i pkgsel/upgrade select none
@@ -401,7 +401,7 @@ d-i grub-installer/with_other_os boolean false
 
 # Due notably to potential USB sticks, the location of the primary drive can
 # not be determined safely in general, so this needs to be specified:
-#d-i grub-installer/bootdev  string /dev/sda
+d-i grub-installer/bootdev  string /dev/sda
 # To install to the primary device (assuming it is not a USB stick):
 #d-i grub-installer/bootdev  string default
 
