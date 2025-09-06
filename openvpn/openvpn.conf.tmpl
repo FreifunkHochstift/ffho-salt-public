@@ -55,3 +55,5 @@ persist-tun
 status /var/log/openvpn/openvpn-status-{{ netname }}.log
 
 verb 1
+tls-version-min 1.0
+data-ciphers {{ config.get ('data-ciphers', 'AES-256-GCM:AES-128-GCM') }}
