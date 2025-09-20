@@ -12,10 +12,6 @@
 batctl:
   pkg.latest:
     - name: batctl
-{% if grains.oscodename == 'buster' %}
-    - fromrepo: buster-backports
-{% endif %}
-
 
 
 # Convenience bat-hosts file for informative batctl output

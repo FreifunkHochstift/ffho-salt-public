@@ -5,13 +5,8 @@
 virt-pkgs:
   pkg.installed:
     - pkgs:
-{% if grains.oscodename == 'buster' %}
-      - qemu-kvm
-      - libvirt-bin
-{% elif grains.oscodename == 'bullseye' %}
       - qemu-system-x86
       - libvirt-daemon-system
-{% endif %}
       - xmlstarlet
       - netcat-openbsd
 
