@@ -57,7 +57,7 @@ def check_zone (zone):
 	if args.check_mode == 'serial':
 		try:
 			# Query reference NS
-			reference = reference_res.query (zone, 'SOA')
+			reference = reference_res.resolve (zone, 'SOA')
 
 			# Check is answer is authoritive
 			if not 'AA' in to_text (reference.response.flags):
@@ -70,7 +70,7 @@ def check_zone (zone):
 
 		try:
 			# Query replica NS
-			replica = replica_res.query (zone, 'SOA')
+			replica = replica_res.resolve (zone, 'SOA')
 
 			# Check is answer is authoritive
 			if not 'AA' in to_text (replica.response.flags):
