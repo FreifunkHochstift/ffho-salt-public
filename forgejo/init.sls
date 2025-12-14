@@ -53,3 +53,12 @@ forgejo:
       - postgres_database: forgejo
       - postgres_user: forgejo
 
+/etc/forgejo/app.ini:
+  file.managed:
+    - source: salt://forgejo/app.ini.tmpl
+    - template: jinja
+    - context:
+      config: {{ config }}
+    - require:
+      - pkg: forgejo
+
