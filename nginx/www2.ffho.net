@@ -5,10 +5,9 @@
 {%- set acme_thumbprint = salt['pillar.get']('acme:thumbprint', False) %}
 
 server {
-	listen 443;
-	listen [::]:443;
+	listen 443 ssl;
+	listen [::]:443 ssl;
 
-	ssl on;
 	ssl_certificate /etc/ssl/certs/www2.ffho.net.cert.pem;
 	ssl_certificate_key /etc/ssl/private/www2.ffho.net.key.pem;
 
