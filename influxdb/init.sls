@@ -4,13 +4,13 @@
 influxdb:
   file.managed:
     - names:
-      - /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg:
-        - source: salt://influxdb/influxdata-archive_compat.gpg
+      - /etc/apt/trusted.gpg.d/influxdata-archive.gpg:
+        - source: salt://influxdb/influxdata-archive.gpg
       - /etc/apt/sources.list.d/influxdb.list:
         - source: salt://influxdb/influxdb.list.tmpl
         - template: jinja
         - require:
-          - file: /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg
+          - file: /etc/apt/trusted.gpg.d/influxdata-archive.gpg
   pkg.installed:
     - name: influxdb
     - require:
