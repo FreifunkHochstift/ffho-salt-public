@@ -1,0 +1,9 @@
+cluster.name: graylog
+node.name: {{grains['id']}}
+path.data: /var/lib/opensearch
+path.logs: /var/log/opensearch
+discovery.type: single-node
+network.host: 127.0.0.1
+action.auto_create_index: false
+plugins.security.disabled: true
+indices.query.bool.max_clause_count: 32768

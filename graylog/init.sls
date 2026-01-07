@@ -3,14 +3,13 @@
 #
 
 {% set graylog_config = salt['pillar.get']('logging:graylog') %}
-{% set mongodb_version = '5.0' %}
+{% set opensearch_version = '2.19.3' %}
+{% set mongodb_version = '7.0' %}
 {% set mongodb_admin_username = graylog_config['mongodb_admin_username'] %}
 {% set mongodb_admin_password = graylog_config['mongodb_admin_password'] %}
 {% set mongodb_admin_roles = graylog_config['mongodb_admin_roles'] %}
 {% include '../mongodb/init.sls' %}
-
-include:
-  - elasticsearch
+{% include '../opensearch/init.sls' %}
 
 mongouser:
   mongodb_user.present:
@@ -25,7 +24,7 @@ graylog-repo:
 # add Graylog Repo
   pkgrepo.managed:
     - humanname: Graylog Repo
-    - name: deb https://packages.graylog2.org/repo/debian/ stable 5.0
+    - name: deb https://packages.graylog2.org/repo/debian/ stable 7.0
     - file: /etc/apt/sources.list.d/graylog.list
     - key_url: https://packages.graylog2.org/repo/debian/keyring.gpg
 
@@ -39,7 +38,7 @@ graylog-server:
     - require:
       - pkgrepo: graylog-repo
       - service: mongodb
-      - service: elasticsearch
+      - service: opensearch
   service.running:
     - enable: True
     - require:
