@@ -11,14 +11,14 @@
 {% include '../mongodb/init.sls' %}
 {% include '../opensearch/init.sls' %}
 
-mongouser:
-  mongodb_user.present:
-  - name: {{ graylog_config['mongodb_username'] }}
-  - passwd: {{ graylog_config['mongodb_password'] }}
-  - database: graylog
-  - roles: {{ graylog_config['mongodb_roles'] }}
-  - user: {{ mongodb_admin_username }}
-  - password: {{ mongodb_admin_password }}
+#mongouser:
+#  mongodb_user.present:
+#  - name: {{ graylog_config['mongodb_username'] }}
+#  - passwd: {{ graylog_config['mongodb_password'] }}
+#  - database: graylog
+#  - roles: {{ graylog_config['mongodb_roles'] }}
+#  - user: {{ mongodb_admin_username }}
+#  - password: {{ mongodb_admin_password }}
 
 graylog-repo:
 # add Graylog Repo

@@ -22,22 +22,22 @@ mongodb:
     - watch:
       - file: /etc/mongod.conf
 
-# Create mongodb admin user
-mongoadmin:
-  mongodb_user.present:
-  - name: {{ mongodb_admin_username }}
-  - passwd: {{ mongodb_admin_password }}
-  - database: admin
-  - roles: {{ mongodb_admin_roles }}
-  - user: {{ mongodb_admin_username }}
-  - password: {{ mongodb_admin_password }}
-
+## Create mongodb admin user
+#mongoadmin:
+#  mongodb_user.present:
+#  - name: {{ mongodb_admin_username }}
+#  - passwd: {{ mongodb_admin_password }}
+#  - database: admin
+#  - roles: {{ mongodb_admin_roles }}
+#  - user: {{ mongodb_admin_username }}
+#  - password: {{ mongodb_admin_password }}
+#
 # Install mongod config, cronjob, backup script and corresponding config file
 /etc/mongod.conf:
   file.managed:
     - source: salt://mongodb/mongod.conf
-    - require:
-      - mongodb_user: mongoadmin
+#    - require:
+#      - mongodb_user: mongoadmin
 
 /etc/cron.d/mongodb_backup:
   file.managed:
